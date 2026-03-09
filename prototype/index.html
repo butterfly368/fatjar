@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PiggyCoin — Bitcoin Piggy Bank on L1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============ THEME TOKENS ============ */
+  :root {
+    --orange: #F7931A;
+    --orange-hover: #E8850F;
+    --amber: #FBBF24;
+    --green: #4ADE80;
+    --pill: 9999px;
+    --radius: 16px;
+    --radius-sm: 12px;
+    --transition: 0.3s cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  /* DARK THEME */
+  [data-theme="dark"] {
+    --bg: #0D0D14;
+    --bg-elevated: #14141E;
+    --surface: rgba(255, 255, 255, 0.04);
+    --surface-hover: rgba(255, 255, 255, 0.07);
+    --surface-border: rgba(255, 255, 255, 0.07);
+    --surface-border-hover: rgba(255, 255, 255, 0.14);
+    --text: #EDE9E3;
+    --text-secondary: rgba(237, 233, 227, 0.55);
+    --text-muted: rgba(237, 233, 227, 0.3);
+    --nav-bg: rgba(13, 13, 20, 0.85);
+    --input-bg: rgba(0, 0, 0, 0.25);
+    --glow-orange: rgba(247, 147, 26, 0.35);
+    --glow-bg: rgba(247, 147, 26, 0.06);
+    --bar-track: rgba(255, 255, 255, 0.06);
+    --bar-shadow: 0 0 10px rgba(247, 147, 26, 0.3);
+    --card-shadow: none;
+    --btn-text: #0D0D14;
+    --toggle-bg: rgba(255,255,255,0.08);
+    --toggle-knob: var(--orange);
+    --grid-line: rgba(255,255,255,0.025);
+    --hero-glow: rgba(247, 147, 26, 0.1);
+  }
+
+  /* LIGHT THEME */
+  [data-theme="light"] {
+    --bg: #FAFAF8;
+    --bg-elevated: #FFFFFF;
+    --surface: rgba(0, 0, 0, 0.025);
+    --surface-hover: rgba(0, 0, 0, 0.04);
+    --surface-border: rgba(0, 0, 0, 0.08);
+    --surface-border-hover: rgba(0, 0, 0, 0.15);
+    --text: #1A1A1A;
+    --text-secondary: rgba(26, 26, 26, 0.55);
+    --text-muted: rgba(26, 26, 26, 0.35);
+    --nav-bg: rgba(250, 250, 248, 0.9);
+    --input-bg: #FFFFFF;
+    --glow-orange: rgba(247, 147, 26, 0.2);
+    --glow-bg: rgba(247, 147, 26, 0.04);
+    --bar-track: rgba(0, 0, 0, 0.06);
+    --bar-shadow: 0 0 8px rgba(247, 147, 26, 0.2);
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    --btn-text: #FFFFFF;
+    --toggle-bg: rgba(0,0,0,0.06);
+    --toggle-knob: var(--orange);
+    --grid-line: rgba(0,0,0,0.03);
+    --hero-glow: rgba(247, 147, 26, 0.06);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    transition: background var(--transition), color var(--transition);
+  }
+
+  /* Background effects */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% 0%, var(--hero-glow), transparent),
+      radial-gradient(ellipse 40% 40% at 80% 80%, var(--glow-bg), transparent);
+    pointer-events: none;
+    z-index: 0;
+    transition: background 0.5s;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 70% 50% at 50% 20%, black 10%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    transition: background 0.5s;
+  }
+
+  /* ============ NAV ============ */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 64px;
+    z-index: 100;
+    padding: 0 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--nav-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid var(--surface-border);
+    transition: background var(--transition), border-color var(--transition);
+  }
+
+  @media (min-width: 768px) { nav { padding: 0 40px; } }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: var(--orange);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-icon svg { width: 20px; height: 20px; }
+
+  .logo-text {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 19px;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    transition: color var(--transition);
+  }
+
+  .logo-text span { color: var(--orange); }
+
+  .nav-mid {
+    display: none;
+    gap: 2px;
+  }
+
+  @media (min-width: 768px) { .nav-mid { display: flex; } }
+
+  .nav-mid a {
+    padding: 7px 15px;
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: var(--pill);
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+  .nav-mid a:hover { color: var(--text-secondary); }
+  .nav-mid a.active { color: var(--text); background: var(--surface); }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Theme toggle */
+  .theme-toggle {
+    width: 44px;
+    height: 24px;
+    background: var(--toggle-bg);
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    transition: background var(--transition);
+    flex-shrink: 0;
+  }
+
+  .theme-toggle::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: var(--orange);
+    border-radius: 50%;
+    top: 3px;
+    left: 3px;
+    transition: transform var(--transition);
+    box-shadow: 0 0 8px rgba(247, 147, 26, 0.4);
+  }
+
+  [data-theme="light"] .theme-toggle::after {
+    transform: translateX(20px);
+  }
+
+  .btn-wallet {
+    padding: 8px 18px;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--pill);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    transition: all 0.25s;
+  }
+
+  .btn-wallet:hover {
+    background: var(--surface-hover);
+    border-color: var(--surface-border-hover);
+  }
+
+  /* ============ BUTTONS ============ */
+  .btn-glow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 32px;
+    background: var(--orange);
+    color: var(--btn-text);
+    border: none;
+    border-radius: var(--pill);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    transition: all 0.3s;
+    position: relative;
+    text-decoration: none;
+  }
+
+  .btn-glow::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: var(--pill);
+    background: var(--orange);
+    filter: blur(14px);
+    opacity: 0.3;
+    z-index: -1;
+    transition: opacity 0.3s;
+  }
+
+  .btn-glow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px var(--glow-orange);
+  }
+
+  .btn-glow:hover::before { opacity: 0.5; }
+
+  [data-theme="light"] .btn-glow { color: white; }
+  [data-theme="light"] .btn-glow::before { opacity: 0.15; }
+  [data-theme="light"] .btn-glow:hover::before { opacity: 0.25; }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 32px;
+    background: transparent;
+    color: var(--text);
+    border: 1.5px solid var(--surface-border);
+    border-radius: var(--pill);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    transition: all 0.3s;
+  }
+
+  .btn-ghost:hover {
+    background: var(--surface);
+    border-color: var(--surface-border-hover);
+    transform: translateY(-1px);
+  }
+
+  .btn-sm {
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .btn-contribute {
+    padding: 7px 18px;
+    background: var(--orange);
+    color: white;
+    border: none;
+    border-radius: var(--pill);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .btn-contribute:hover {
+    box-shadow: 0 4px 14px var(--glow-orange);
+    transform: translateY(-1px);
+  }
+
+  /* ============ PAGES ============ */
+  .page { display: none; padding-top: 64px; min-height: 100vh; position: relative; z-index: 1; }
+  .page.active { display: block; animation: fadeUp 0.5s cubic-bezier(0.05, 0.7, 0.1, 1); }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ============ GLASS CARD ============ */
+  .glass {
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius);
+    backdrop-filter: blur(12px);
+    box-shadow: var(--card-shadow);
+    transition: all var(--transition);
+  }
+
+  .glass:hover {
+    border-color: var(--surface-border-hover);
+    background: var(--surface-hover);
+  }
+
+  /* ============ HOME ============ */
+  .hero {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 100px 24px 60px;
+    text-align: center;
+    position: relative;
+  }
+
+  @media (min-width: 768px) { .hero { padding: 130px 40px 80px; } }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    background: rgba(247, 147, 26, 0.1);
+    border: 1px solid rgba(247, 147, 26, 0.15);
+    border-radius: var(--pill);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 28px;
+  }
+
+  .badge .dot {
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s ease infinite;
+  }
+
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+  .hero h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(38px, 6.5vw, 68px);
+    font-weight: 700;
+    line-height: 1.06;
+    letter-spacing: -0.03em;
+    margin-bottom: 22px;
+    color: var(--text);
+    transition: color var(--transition);
+  }
+
+  .grad { background: linear-gradient(135deg, var(--orange), var(--amber)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+  .hero-sub {
+    font-size: 17px;
+    color: var(--text-secondary);
+    max-width: 480px;
+    margin: 0 auto 40px;
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  /* Stats */
+  .stats {
+    max-width: 680px;
+    margin: 64px auto 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    overflow: hidden;
+  }
+
+  .stat {
+    padding: 24px 16px;
+    text-align: center;
+    border-right: 1px solid var(--surface-border);
+    transition: border-color var(--transition);
+  }
+
+  .stat:last-child { border-right: none; }
+
+  .stat-l {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .stat-v {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    transition: color var(--transition);
+  }
+
+  .stat-v .o { color: var(--orange); }
+
+  /* Feed */
+  .feed {
+    max-width: 600px;
+    margin: 48px auto 0;
+  }
+
+  .feed-h {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ldot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 2s ease infinite; }
+
+  .fi {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    transition: background 0.2s;
+    font-size: 14px;
+  }
+
+  .fi:hover { background: var(--surface); }
+  .fi-who { font-weight: 600; color: var(--text); transition: color var(--transition); }
+  .fi-to { color: var(--text-muted); }
+  .fi-r { text-align: right; }
+  .fi-btc { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; color: var(--orange); }
+  .fi-tk { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--green); }
+
+  /* How it works */
+  .how { max-width: 1100px; margin: 0 auto; padding: 100px 24px; }
+  @media (min-width: 768px) { .how { padding: 120px 40px; } }
+
+  .how h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(26px, 4vw, 42px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 44px;
+    line-height: 1.1;
+    color: var(--text);
+    transition: color var(--transition);
+  }
+
+  .steps { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  @media (min-width: 768px) { .steps { grid-template-columns: repeat(3, 1fr); } }
+
+  .step {
+    padding: 32px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .step::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(247,147,26,0.15), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .step:hover { transform: translateY(-3px); }
+  .step:hover::before { opacity: 1; }
+
+  .step-n { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--orange); margin-bottom: 16px; font-weight: 600; }
+
+  .step h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text);
+    transition: color var(--transition);
+  }
+
+  .step p { font-size: 14px; color: var(--text-secondary); line-height: 1.65; font-weight: 300; }
+
+  /* Curve */
+  .curve { max-width: 1100px; margin: 0 auto; padding: 0 24px 100px; }
+  @media (min-width: 768px) { .curve { padding: 0 40px 120px; } }
+
+  .curve-top { padding: 32px 28px; border-bottom: 1px solid var(--surface-border); }
+
+  .curve-top h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(22px, 3vw, 32px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+
+  .curve-top p { color: var(--text-secondary); font-weight: 300; font-size: 14px; max-width: 460px; }
+
+  .curve-body { padding: 28px; display: grid; grid-template-columns: 1fr; gap: 24px; }
+  @media (min-width: 768px) { .curve-body { grid-template-columns: 1fr 1fr; } }
+
+  .chart {
+    aspect-ratio: 4/3;
+    background: var(--input-bg);
+    border-radius: var(--radius-sm);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--surface-border);
+  }
+
+  .chart svg { position: absolute; inset: 18px; width: calc(100% - 36px); height: calc(100% - 36px); }
+
+  .chart-lx {
+    position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
+    font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em;
+  }
+
+  .chart-ly {
+    position: absolute; top: 50%; left: 4px;
+    transform: rotate(-90deg) translateX(-50%); transform-origin: left center;
+    font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap;
+  }
+
+  .cex { display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+
+  .ce {
+    padding: 16px 18px;
+    background: var(--input-bg);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-sm);
+    transition: border-color 0.25s;
+  }
+
+  .ce:hover { border-color: var(--surface-border-hover); }
+  .ce-l { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; }
+  .ce-r { display: flex; justify-content: space-between; align-items: baseline; }
+  .ce .c { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--orange); font-weight: 500; }
+  .ce .e { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--green); font-weight: 500; }
+  .ce-n { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+  /* ============ FUND PAGE ============ */
+  .fp { max-width: 700px; margin: 0 auto; padding: 36px 24px; }
+  @media (min-width: 768px) { .fp { padding: 44px 36px; } }
+
+  .fh { text-align: center; padding: 36px 0; margin-bottom: 28px; border-bottom: 1px solid var(--surface-border); }
+
+  .fh-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 14px; border-radius: var(--pill);
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: 18px;
+    background: rgba(247,147,26,0.1); color: var(--orange); border: 1px solid rgba(247,147,26,0.12);
+  }
+
+  .fh h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(26px, 5vw, 40px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .fh .desc { color: var(--text-secondary); font-size: 15px; font-weight: 300; margin-bottom: 18px; }
+
+  .fh .meta {
+    display: flex; gap: 20px; justify-content: center;
+    font-size: 13px; color: var(--text-muted); flex-wrap: wrap;
+  }
+
+  .fh .meta .v { font-weight: 600; color: var(--text); }
+
+  /* Raised */
+  .raised {
+    padding: 28px;
+    text-align: center;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  [data-theme="dark"] .raised {
+    background: linear-gradient(135deg, rgba(247,147,26,0.06), rgba(247,147,26,0.02)) !important;
+    border-color: rgba(247,147,26,0.1) !important;
+  }
+
+  .raised::before {
+    content: '';
+    position: absolute;
+    top: -40%; right: -15%;
+    width: 240px; height: 240px;
+    background: radial-gradient(circle, var(--glow-orange) 0%, transparent 60%);
+    opacity: 0.2;
+  }
+
+  .raised > * { position: relative; }
+  .r-l { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; }
+
+  .r-a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(26px, 5vw, 38px);
+    font-weight: 600;
+    color: var(--orange);
+  }
+
+  .r-u { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
+
+  .r-bw { margin-top: 18px; background: var(--bar-track); border-radius: 100px; height: 5px; overflow: hidden; }
+
+  .r-b {
+    height: 100%;
+    background: linear-gradient(90deg, var(--orange), var(--amber));
+    border-radius: 100px;
+    transition: width 1.5s cubic-bezier(0.05, 0.7, 0.1, 1);
+    box-shadow: var(--bar-shadow);
+  }
+
+  .r-p { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+  .r-t {
+    margin-top: 14px; padding-top: 14px;
+    border-top: 1px solid var(--surface-border);
+    font-size: 12px; color: var(--text-muted);
+  }
+
+  .r-t .tv { font-family: 'JetBrains Mono', monospace; color: var(--green); font-weight: 500; }
+
+  /* Countdown */
+  .cd { display: flex; justify-content: center; gap: 24px; padding: 22px; margin-bottom: 28px; }
+  .cd-i { text-align: center; }
+  .cd-n { font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 600; color: var(--text); }
+  .cd-u { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-top: 3px; }
+
+  /* Goals */
+  .sh { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 600; margin-bottom: 14px; color: var(--text); letter-spacing: -0.01em; }
+
+  .goal { padding: 20px; margin-bottom: 8px; }
+  .g-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .g-nm { font-size: 14px; font-weight: 600; color: var(--text); }
+  .g-rt { text-align: right; }
+  .g-cur { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; color: var(--orange); }
+  .g-tgt { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); }
+
+  .gb-w { background: var(--bar-track); border-radius: 100px; height: 3px; overflow: hidden; margin-bottom: 12px; }
+  .gb { height: 100%; background: var(--orange); border-radius: 100px; transition: width 1.2s cubic-bezier(0.05, 0.7, 0.1, 1); box-shadow: var(--bar-shadow); }
+  .gb.dn { background: var(--green); box-shadow: 0 0 8px rgba(74,222,128,0.2); }
+
+  .g-bot { display: flex; justify-content: space-between; align-items: center; }
+  .g-avs { display: flex; align-items: center; }
+  .ga { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--bg); margin-left: -4px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: white; transition: border-color var(--transition); }
+  .ga:first-child { margin-left: 0; }
+  .gc { font-size: 11px; color: var(--text-muted); margin-left: 6px; }
+
+  /* Contributors */
+  .ccs { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 36px; }
+  @media (min-width: 480px) { .ccs { grid-template-columns: repeat(2, 1fr); } }
+
+  .cc { display: flex; align-items: center; gap: 10px; padding: 12px 14px; }
+  .cc-a { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; flex-shrink: 0; }
+  .cc-i { flex: 1; min-width: 0; }
+  .cc-n { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cc-d { font-family: 'JetBrains Mono', monospace; font-size: 11px; display: flex; gap: 6px; }
+  .cc-b { color: var(--orange); }
+  .cc-t { color: var(--green); }
+
+  /* ============ CREATE ============ */
+  .cp { max-width: 520px; margin: 0 auto; padding: 36px 24px; }
+  @media (min-width: 768px) { .cp { padding: 44px 36px; } }
+
+  .cp h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(26px, 4vw, 36px); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px; padding-top: 28px; color: var(--text); }
+  .cp .sub { color: var(--text-secondary); margin-bottom: 32px; font-weight: 300; font-size: 15px; }
+
+  .tg { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+  .tc { padding: 22px 14px; cursor: pointer; text-align: center; }
+  .tc.sel { border-color: var(--orange) !important; background: rgba(247,147,26,0.06) !important; }
+  .tc-i { font-size: 26px; margin-bottom: 8px; }
+  .tc-n { font-weight: 600; font-size: 14px; margin-bottom: 2px; color: var(--text); }
+  .tc-d { font-size: 12px; color: var(--text-muted); }
+
+  .fld { margin-bottom: 16px; }
+  .fld label { display: block; font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .fld input, .fld textarea {
+    width: 100%; padding: 11px 16px;
+    border: 1px solid var(--surface-border); border-radius: var(--radius-sm);
+    font-family: 'Outfit', sans-serif; font-size: 14px; color: var(--text);
+    background: var(--input-bg); outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background var(--transition), color var(--transition);
+  }
+  .fld input:focus, .fld textarea:focus { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(247,147,26,0.1); }
+  .fld textarea { resize: vertical; min-height: 68px; }
+  .fld input::placeholder, .fld textarea::placeholder { color: var(--text-muted); }
+
+  .gr { display: flex; gap: 6px; margin-bottom: 6px; }
+  .gr input:first-child { flex: 1; }
+  .gr input:last-child { width: 110px; }
+
+  .btn-add {
+    width: 100%; padding: 9px;
+    background: transparent; border: 1px dashed var(--surface-border);
+    border-radius: var(--radius-sm); color: var(--text-muted);
+    font-size: 12px; cursor: pointer; font-family: 'Outfit', sans-serif;
+    transition: all 0.2s; margin-bottom: 20px;
+  }
+  .btn-add:hover { border-color: var(--orange); color: var(--orange); }
+
+  /* ============ DASHBOARD ============ */
+  .dp { max-width: 820px; margin: 0 auto; padding: 36px 24px; }
+  @media (min-width: 768px) { .dp { padding: 44px 36px; } }
+  .dp h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(26px, 4vw, 36px); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px; padding-top: 28px; color: var(--text); }
+  .dp .sub { color: var(--text-secondary); margin-bottom: 32px; font-weight: 300; }
+
+  .dstats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 28px; }
+  .ds { padding: 22px; text-align: center; }
+  .ds-l { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; }
+  .ds-v { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 600; color: var(--text); }
+  .ds-v .o { color: var(--orange); }
+
+  .fr { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; margin-bottom: 6px; cursor: pointer; }
+  .fr:hover { transform: translateX(4px); }
+  .fr-l { display: flex; align-items: center; gap: 12px; }
+  .fr-i { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; background: rgba(247,147,26,0.08); border: 1px solid rgba(247,147,26,0.1); }
+  .fr-n { font-weight: 600; font-size: 14px; margin-bottom: 2px; color: var(--text); }
+  .fr-m { font-size: 12px; color: var(--text-muted); }
+  .fr-r { text-align: right; }
+  .fr-a { font-family: 'JetBrains Mono', monospace; font-weight: 500; color: var(--orange); font-size: 13px; margin-bottom: 2px; }
+  .fr-p { font-size: 12px; color: var(--green); font-weight: 600; }
+
+  /* ============ FOOTER ============ */
+  footer { text-align: center; padding: 36px 24px; border-top: 1px solid var(--surface-border); margin-top: 60px; transition: border-color var(--transition); }
+  footer p { font-size: 12px; color: var(--text-muted); }
+  footer a { color: var(--orange); text-decoration: none; }
+  .fb { display: inline-flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 3px 8px; background: rgba(247,147,26,0.08); border: 1px solid rgba(247,147,26,0.1); border-radius: 5px; color: var(--orange); margin-top: 8px; }
+
+  @media (max-width: 500px) {
+    .stats { grid-template-columns: 1fr; }
+    .stat { border-right: none; border-bottom: 1px solid var(--surface-border); }
+    .stat:last-child { border-bottom: none; }
+    .tg { grid-template-columns: 1fr; }
+    .cd { gap: 14px; }
+    .dstats { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" onclick="go('home')">
+    <span class="logo-icon">
+      <svg viewBox="0 0 20 20" fill="none"><path d="M10 3C8.5 3 5.5 4.5 5.5 8C5.5 9.5 6.2 10.5 6.2 10.5L5.5 14.5C5.5 15.5 6.5 16.5 7.5 16.5H12.5C13.5 16.5 14.5 15.5 14.5 14.5L13.8 10.5C13.8 10.5 14.5 9.5 14.5 8C14.5 4.5 11.5 3 10 3Z" fill="white" fill-opacity="0.9"/><circle cx="8" cy="8" r="1" fill="rgba(0,0,0,0.3)"/></svg>
+    </span>
+    <span class="logo-text">piggy<span>coin</span></span>
+  </a>
+  <div class="nav-mid">
+    <a onclick="go('home')" class="active" id="n-home">Explore</a>
+    <a onclick="go('create')" id="n-create">Create</a>
+    <a onclick="go('fund')" id="n-fund">Demo</a>
+    <a onclick="go('dash')" id="n-dash">Dashboard</a>
+  </div>
+  <div class="nav-right">
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme"></button>
+    <button class="btn-wallet">Connect Wallet</button>
+  </div>
+</nav>
+
+<!-- HOME -->
+<div class="page active" id="p-home">
+  <div class="hero">
+    <div class="badge"><span class="dot"></span> Live on Bitcoin L1</div>
+    <h1>Your family's<br><span class="grad">piggy bank.</span><br>On Bitcoin.</h1>
+    <p class="hero-sub">Create a savings fund. Family and friends contribute BTC. Early contributors earn more tokens as the network grows.</p>
+    <div class="hero-actions">
+      <button class="btn-glow" onclick="go('create')">Create a piggy bank &rarr;</button>
+      <button class="btn-ghost" onclick="go('fund')">See how it works</button>
+    </div>
+    <div class="stats glass">
+      <div class="stat"><div class="stat-l">Total Value Locked</div><div class="stat-v"><span class="o">4.82</span> BTC</div></div>
+      <div class="stat"><div class="stat-l">Piggy Banks</div><div class="stat-v">47</div></div>
+      <div class="stat"><div class="stat-l">Token Price</div><div class="stat-v">0.000012 <span class="o">BTC</span></div></div>
+    </div>
+    <div class="feed">
+      <div class="feed-h"><span class="ldot"></span> Live contributions</div>
+      <div class="fi"><div><span class="fi-who">Grandma Rose</span> <span class="fi-to">&rarr; Emma's College Fund</span></div><div class="fi-r"><div class="fi-btc">+0.025 BTC</div><div class="fi-tk">+2,083 PIGGY</div></div></div>
+      <div class="fi"><div><span class="fi-who">Uncle Marco</span> <span class="fi-to">&rarr; Wedding Fund</span></div><div class="fi-r"><div class="fi-btc">+0.08 BTC</div><div class="fi-tk">+6,240 PIGGY</div></div></div>
+      <div class="fi"><div><span class="fi-who">Aunt Julia</span> <span class="fi-to">&rarr; Baby Noah</span></div><div class="fi-r"><div class="fi-btc">+0.005 BTC</div><div class="fi-tk">+380 PIGGY</div></div></div>
+    </div>
+  </div>
+  <div class="how">
+    <h2>Three steps to a<br><span class="grad">Bitcoin piggy bank</span></h2>
+    <div class="steps">
+      <div class="step glass"><div class="step-n">01</div><h3>Create a fund</h3><p>For anything — a kid's future, a wedding, a family dream. Set goals and an optional time-lock.</p></div>
+      <div class="step glass"><div class="step-n">02</div><h3>Share the link</h3><p>Anyone can contribute BTC. Every contribution earns PIGGY tokens. Earlier = more tokens.</p></div>
+      <div class="step glass"><div class="step-n">03</div><h3>Grow together</h3><p>Watch it grow. Withdraw anytime or let the time-lock keep it safe. Zero fees.</p></div>
+    </div>
+  </div>
+  <div class="curve">
+    <div class="glass" style="overflow:hidden">
+      <div class="curve-top"><h2>Early givers earn more</h2><p>The bonding curve rewards early contributors. As the network grows, each BTC buys fewer tokens.</p></div>
+      <div class="curve-body">
+        <div class="chart">
+          <span class="chart-ly">Tokens / BTC</span><span class="chart-lx">Total BTC contributed</span>
+          <svg viewBox="0 0 400 300" preserveAspectRatio="none">
+            <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(247,147,26,0.2)"/><stop offset="100%" stop-color="rgba(247,147,26,0)"/></linearGradient></defs>
+            <line x1="0" y1="75" x2="400" y2="75" stroke="var(--grid-line)" stroke-width="1"/>
+            <line x1="0" y1="150" x2="400" y2="150" stroke="var(--grid-line)" stroke-width="1"/>
+            <line x1="0" y1="225" x2="400" y2="225" stroke="var(--grid-line)" stroke-width="1"/>
+            <line x1="100" y1="0" x2="100" y2="300" stroke="var(--grid-line)" stroke-width="1"/>
+            <line x1="200" y1="0" x2="200" y2="300" stroke="var(--grid-line)" stroke-width="1"/>
+            <line x1="300" y1="0" x2="300" y2="300" stroke="var(--grid-line)" stroke-width="1"/>
+            <path d="M 0 20 Q 80 25, 120 60 Q 200 120, 280 200 Q 340 250, 400 280 L 400 300 L 0 300 Z" fill="url(#cg)"/>
+            <path d="M 0 20 Q 80 25, 120 60 Q 200 120, 280 200 Q 340 250, 400 280" fill="none" stroke="#F7931A" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="50" cy="22" r="5" fill="#F7931A" stroke="var(--bg)" stroke-width="2"/>
+            <text x="50" y="12" text-anchor="middle" fill="#F7931A" font-size="9" font-family="JetBrains Mono" font-weight="600">YOU</text>
+          </svg>
+        </div>
+        <div class="cex">
+          <div class="ce"><div class="ce-l">Early (now)</div><div class="ce-r"><span class="c">0.01 BTC</span><span class="e">+1,200 PIGGY</span></div><div class="ce-n">120k tokens/BTC</div></div>
+          <div class="ce"><div class="ce-l">After 10 BTC total</div><div class="ce-r"><span class="c">0.01 BTC</span><span class="e">+680 PIGGY</span></div><div class="ce-n">68k tokens/BTC (-43%)</div></div>
+          <div class="ce"><div class="ce-l">After 100 BTC total</div><div class="ce-r"><span class="c">0.01 BTC</span><span class="e">+210 PIGGY</span></div><div class="ce-n">21k tokens/BTC (-82%)</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer><p>Built for <a href="https://vibecode.finance" target="_blank">vibecode.finance</a> Week 3</p><div class="fb">OPNet &middot; Bitcoin L1</div></footer>
+</div>
+
+<!-- FUND -->
+<div class="page" id="p-fund">
+  <div class="fp">
+    <div class="fh">
+      <div class="fh-pill">Piggy Bank</div>
+      <h1>Emma's College Fund</h1>
+      <p class="desc">Saving for Emma's future, one sat at a time. Unlocks when she turns 18.</p>
+      <div class="meta"><span>by <span class="v">dad.btc</span></span><span><span class="v">12</span> contributors</span><span>unlocks <span class="v">Jan 2044</span></span></div>
+    </div>
+    <div class="raised glass">
+      <div class="r-l">Total Raised</div>
+      <div class="r-a" id="ta">0.347 BTC</div>
+      <div class="r-u">~$27,760</div>
+      <div class="r-bw"><div class="r-b" id="tb" style="width:0%"></div></div>
+      <div class="r-p">69.4% of 0.5 BTC goal</div>
+      <div class="r-t">Tokens distributed: <span class="tv">38,420 PIGGY</span></div>
+    </div>
+    <div class="cd glass">
+      <div class="cd-i"><div class="cd-n">17</div><div class="cd-u">Years</div></div>
+      <div class="cd-i"><div class="cd-n">10</div><div class="cd-u">Months</div></div>
+      <div class="cd-i"><div class="cd-n">04</div><div class="cd-u">Days</div></div>
+      <div class="cd-i"><div class="cd-n">11</div><div class="cd-u">Hours</div></div>
+    </div>
+    <div style="margin-bottom:28px">
+      <h2 class="sh">Goals</h2>
+      <div class="goal glass"><div class="g-top"><div class="g-nm">First Semester Tuition</div><div class="g-rt"><div class="g-cur">0.187 BTC</div><div class="g-tgt">/ 0.25</div></div></div><div class="gb-w"><div class="gb" id="g1" style="width:0%"></div></div><div class="g-bot"><div class="g-avs"><div class="ga" style="background:#E8A838">R</div><div class="ga" style="background:#7DD3E8">M</div><div class="ga" style="background:#9B8EC4">A</div><span class="gc">+5</span></div><button class="btn-contribute">Contribute</button></div></div>
+      <div class="goal glass"><div class="g-top"><div class="g-nm">Laptop for University</div><div class="g-rt"><div class="g-cur">0.02 BTC</div><div class="g-tgt">/ 0.02</div></div></div><div class="gb-w"><div class="gb dn" id="g2" style="width:0%"></div></div><div class="g-bot"><div class="g-avs"><div class="ga" style="background:#6CC8DD">G</div><span class="gc">Grandma Rose</span></div><span style="font-size:11px;color:var(--green);font-weight:600">Complete</span></div></div>
+      <div class="goal glass"><div class="g-top"><div class="g-nm">Textbooks & Supplies</div><div class="g-rt"><div class="g-cur">0.008 BTC</div><div class="g-tgt">/ 0.03</div></div></div><div class="gb-w"><div class="gb" id="g3" style="width:0%"></div></div><div class="g-bot"><div class="g-avs"><div class="ga" style="background:#E080A0">S</div><div class="ga" style="background:#6BB86B">K</div><span class="gc">2</span></div><button class="btn-contribute">Contribute</button></div></div>
+      <div class="goal glass"><div class="g-top"><div class="g-nm">Emergency Fund</div><div class="g-rt"><div class="g-cur">0.132 BTC</div><div class="g-tgt">/ 0.2</div></div></div><div class="gb-w"><div class="gb" id="g4" style="width:0%"></div></div><div class="g-bot"><div class="g-avs"><div class="ga" style="background:#E8A838">R</div><div class="ga" style="background:#7DD3E8">M</div><div class="ga" style="background:#CD9B5A">J</div><span class="gc">+3</span></div><button class="btn-contribute">Contribute</button></div></div>
+    </div>
+    <div style="margin-bottom:36px">
+      <h2 class="sh">Contributors</h2>
+      <div class="ccs">
+        <div class="cc glass"><div class="cc-a" style="background:linear-gradient(135deg,#6CC8DD,#4BA8BD)">R</div><div class="cc-i"><div class="cc-n">Grandma Rose</div><div class="cc-d"><span class="cc-b">0.12</span><span class="cc-t">+14,400</span></div></div></div>
+        <div class="cc glass"><div class="cc-a" style="background:linear-gradient(135deg,#E8A838,#C88820)">M</div><div class="cc-i"><div class="cc-n">Uncle Marco</div><div class="cc-d"><span class="cc-b">0.08</span><span class="cc-t">+9,120</span></div></div></div>
+        <div class="cc glass"><div class="cc-a" style="background:linear-gradient(135deg,#9B8EC4,#7B6EA4)">A</div><div class="cc-i"><div class="cc-n">Alex</div><div class="cc-d"><span class="cc-b">0.045</span><span class="cc-t">+4,860</span></div></div></div>
+        <div class="cc glass"><div class="cc-a" style="background:linear-gradient(135deg,#E080A0,#C06080)">S</div><div class="cc-i"><div class="cc-n">Sophie</div><div class="cc-d"><span class="cc-b">0.012</span><span class="cc-t">+1,260</span></div></div></div>
+      </div>
+    </div>
+    <footer><p>Built for <a href="https://vibecode.finance" target="_blank">vibecode.finance</a> Week 3</p><div class="fb">OPNet &middot; Bitcoin L1</div></footer>
+  </div>
+</div>
+
+<!-- CREATE -->
+<div class="page" id="p-create">
+  <div class="cp">
+    <h1>Create a piggy bank</h1>
+    <p class="sub">Family and friends contribute BTC and earn PIGGY tokens.</p>
+    <div class="tg">
+      <div class="tc glass" onclick="st(this)"><div class="tc-i">&#127873;</div><div class="tc-n">One-time</div><div class="tc-d">Wedding, birthday</div></div>
+      <div class="tc glass sel" onclick="st(this)"><div class="tc-i">&#128055;</div><div class="tc-n">Ongoing</div><div class="tc-d">Kids fund, savings</div></div>
+    </div>
+    <div class="fld"><label>Fund Name</label><input placeholder="Emma's College Fund"/></div>
+    <div class="fld"><label>Description</label><textarea placeholder="A short message..."></textarea></div>
+    <div class="fld"><label>Unlock Date (optional)</label><input type="date"/></div>
+    <div><label style="display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em">Goals</label>
+      <div class="gr"><input placeholder="e.g., Tuition fund"/><input placeholder="0.25 BTC"/></div>
+      <div class="gr"><input placeholder="e.g., Laptop"/><input placeholder="0.02 BTC"/></div>
+      <button class="btn-add">+ Add goal</button>
+    </div>
+    <button class="btn-glow" style="width:100%;justify-content:center" onclick="go('fund')">Create & get link &rarr;</button>
+  </div>
+  <footer><p>Built for <a href="https://vibecode.finance" target="_blank">vibecode.finance</a> Week 3</p><div class="fb">OPNet &middot; Bitcoin L1</div></footer>
+</div>
+
+<!-- DASHBOARD -->
+<div class="page" id="p-dash">
+  <div class="dp">
+    <h1>Your piggy banks</h1>
+    <p class="sub">Manage funds and track contributions.</p>
+    <div class="dstats">
+      <div class="ds glass"><div class="ds-l">Total Raised</div><div class="ds-v"><span class="o">0.547</span> BTC</div></div>
+      <div class="ds glass"><div class="ds-l">Active</div><div class="ds-v">3</div></div>
+      <div class="ds glass"><div class="ds-l">Contributors</div><div class="ds-v">24</div></div>
+    </div>
+    <div class="fr glass" onclick="go('fund')"><div class="fr-l"><div class="fr-i">&#128055;</div><div><div class="fr-n">Emma's College Fund</div><div class="fr-m">Ongoing &middot; Jan 2044 &middot; 12 contributors</div></div></div><div class="fr-r"><div class="fr-a">0.347 BTC</div><div class="fr-p">69.4%</div></div></div>
+    <div class="fr glass"><div class="fr-l"><div class="fr-i">&#127873;</div><div><div class="fr-n">Sarah & Mike's Wedding</div><div class="fr-m">One-time &middot; Jun 2026 &middot; 8</div></div></div><div class="fr-r"><div class="fr-a">0.152 BTC</div><div class="fr-p">76%</div></div></div>
+    <div class="fr glass"><div class="fr-l"><div class="fr-i">&#128055;</div><div><div class="fr-n">Baby Noah's First Year</div><div class="fr-m">Ongoing &middot; 2027 &middot; 4</div></div></div><div class="fr-r"><div class="fr-a">0.048 BTC</div><div class="fr-p">24%</div></div></div>
+  </div>
+  <footer><p>Built for <a href="https://vibecode.finance" target="_blank">vibecode.finance</a> Week 3</p><div class="fb">OPNet &middot; Bitcoin L1</div></footer>
+</div>
+
+<script>
+function go(p) {
+  document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.nav-mid a').forEach(x => x.classList.remove('active'));
+  document.getElementById('p-' + p).classList.add('active');
+  document.getElementById('n-' + p).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  if (p === 'fund') {
+    setTimeout(() => {
+      document.getElementById('tb').style.width = '69.4%';
+      document.getElementById('g1').style.width = '74.8%';
+      document.getElementById('g2').style.width = '100%';
+      document.getElementById('g3').style.width = '26.7%';
+      document.getElementById('g4').style.width = '66%';
+    }, 100);
+    const el = document.getElementById('ta');
+    const s = performance.now();
+    (function u(n) {
+      const t = Math.min((n - s) / 1200, 1);
+      el.textContent = (0.347 * (1 - Math.pow(1 - t, 3))).toFixed(3) + ' BTC';
+      if (t < 1) requestAnimationFrame(u);
+    })(s);
+  }
+}
+
+function st(el) {
+  document.querySelectorAll('.tc').forEach(x => x.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+}
+</script>
+
+</body>
+</html>
