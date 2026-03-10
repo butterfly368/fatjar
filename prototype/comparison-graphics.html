@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FatJar — Direction A Graphics Comparison</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@300;400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: 'Source Sans 3', sans-serif;
+}
+
+/* ============================================================
+   SWITCHER
+   ============================================================ */
+.switcher {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 10px 16px;
+  background: rgba(0,0,0,0.94);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  font-family: 'IBM Plex Mono', monospace;
+  flex-wrap: wrap;
+}
+
+.switcher-label {
+  color: rgba(255,255,255,0.4);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-right: 12px;
+}
+
+.switcher button {
+  padding: 7px 16px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(255,255,255,0.5);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s;
+  letter-spacing: 0.02em;
+}
+
+.switcher button:hover {
+  color: rgba(255,255,255,0.8);
+  border-color: rgba(255,255,255,0.2);
+}
+
+.switcher button.active {
+  background: #F7931A;
+  color: #000;
+  border-color: #F7931A;
+  font-weight: 600;
+}
+
+/* ============================================================
+   SHARED EDITORIAL TOKENS
+   ============================================================ */
+:root {
+  --a-bg: #F5F2ED;
+  --a-bg-alt: #EDEAE4;
+  --a-text: #111111;
+  --a-text-sec: #555555;
+  --a-text-muted: #999999;
+  --a-accent: #F7931A;
+  --a-border: #111111;
+  --a-border-light: #D5D0C8;
+}
+
+.variant {
+  display: none;
+  background: var(--a-bg);
+  color: var(--a-text);
+  min-height: 100vh;
+  padding-top: 48px;
+}
+
+.variant.active { display: block; }
+
+/* ============================================================
+   SHARED NAV
+   ============================================================ */
+.a-nav {
+  position: fixed;
+  top: 48px; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 clamp(24px, 4vw, 64px);
+  height: 60px;
+  background: var(--a-bg);
+  border-bottom: 1px solid var(--a-border-light);
+}
+
+.a-logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: -0.03em;
+  color: var(--a-text);
+  text-decoration: none;
+}
+
+.a-logo span { color: var(--a-accent); }
+
+.a-nav-links {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.a-nav-links a {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--a-text-muted);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 6px 12px;
+  transition: color 0.2s;
+}
+
+.a-nav-links a:hover { color: var(--a-text); }
+
+.a-nav-cta {
+  color: var(--a-text) !important;
+  border: 1.5px solid var(--a-text);
+  padding: 6px 16px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s;
+}
+
+.a-nav-cta:hover {
+  background: var(--a-text);
+  color: var(--a-bg) !important;
+}
+
+/* ============================================================
+   SHARED HERO BASE
+   ============================================================ */
+.a-hero {
+  padding: clamp(80px, 8vw, 120px) clamp(24px, 4vw, 64px) 0;
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 64px;
+  align-items: end;
+}
+
+@media (max-width: 900px) {
+  .a-hero { grid-template-columns: 1fr; gap: 32px; }
+}
+
+.a-hero-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--a-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.a-hero-label .a-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--a-accent);
+  border-radius: 50%;
+}
+
+.a-hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(40px, 5.5vw, 76px);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  color: var(--a-text);
+}
+
+.a-hero h1 .a-highlight { color: var(--a-accent); }
+
+.a-hero h1 .a-serif {
+  font-family: 'Newsreader', serif;
+  font-style: italic;
+  font-weight: 400;
+  text-transform: none;
+}
+
+.a-hero-right {
+  padding-bottom: 8px;
+}
+
+.a-hero-desc {
+  max-width: 420px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--a-text-sec);
+  font-weight: 400;
+  margin-bottom: 28px;
+}
+
+.a-hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.a-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 32px;
+  background: var(--a-text);
+  color: var(--a-bg);
+  border: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.a-btn-primary:hover {
+  background: var(--a-accent);
+  color: var(--a-text);
+}
+
+.a-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 32px;
+  background: transparent;
+  color: var(--a-text);
+  border: 1.5px solid var(--a-border-light);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.a-btn-secondary:hover { border-color: var(--a-text); }
+
+.a-hero-divider {
+  grid-column: 1 / -1;
+  height: 2px;
+  background: var(--a-text);
+  margin-top: 48px;
+}
+
+/* ============================================================
+   SHARED STATS
+   ============================================================ */
+.a-stats {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 clamp(24px, 4vw, 64px);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--a-border-light);
+}
+
+@media (max-width: 768px) {
+  .a-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+.a-stat {
+  padding: 32px 0;
+  border-right: 1px solid var(--a-border-light);
+  padding-right: 24px;
+}
+
+.a-stat:last-child { border-right: none; }
+
+.a-stat-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--a-text-muted);
+  margin-bottom: 8px;
+}
+
+.a-stat-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--a-text);
+  letter-spacing: -0.02em;
+}
+
+.a-stat-value em { color: var(--a-accent); font-style: normal; }
+
+/* ============================================================
+   SHARED ACCORDION (below hero for context)
+   ============================================================ */
+.a-section {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 80px clamp(24px, 4vw, 64px);
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 80px;
+}
+
+@media (max-width: 768px) {
+  .a-section { grid-template-columns: 1fr; gap: 40px; }
+}
+
+.a-section-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--a-text-muted);
+  margin-bottom: 24px;
+}
+
+.a-section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+.a-acc-item {
+  border-bottom: 1px solid var(--a-border-light);
+  cursor: pointer;
+}
+
+.a-acc-item:first-child { border-top: 1px solid var(--a-border-light); }
+
+.a-acc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  transition: all 0.2s;
+}
+
+.a-acc-header:hover { padding-left: 8px; }
+
+.a-acc-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.a-acc-arrow {
+  font-size: 18px;
+  color: var(--a-text-muted);
+  transition: transform 0.3s, color 0.3s;
+}
+
+.a-acc-item.open .a-acc-arrow {
+  transform: rotate(45deg);
+  color: var(--a-accent);
+}
+
+.a-acc-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.a-acc-item.open .a-acc-body { max-height: 200px; }
+
+.a-acc-desc {
+  padding-bottom: 20px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--a-text-sec);
+  max-width: 480px;
+}
+
+.a-acc-meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--a-accent);
+  margin-top: 4px;
+}
+
+/* ============================================================
+   OPTION 1 — ABSTRACT 3D JAR
+   A sculptural jar form using CSS gradients and shapes
+   ============================================================ */
+.v1-jar-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 340px;
+}
+
+.v1-jar {
+  position: relative;
+  width: 200px;
+  height: 280px;
+}
+
+/* Jar body */
+.v1-jar-body {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 180px;
+  height: 220px;
+  background: linear-gradient(165deg, #2A2A2A 0%, #111 60%, #1A1A1A 100%);
+  border-radius: 20px 20px 40px 40px;
+  overflow: hidden;
+  box-shadow:
+    -20px 20px 60px rgba(0,0,0,0.15),
+    inset 0 -40px 60px rgba(247,147,26,0.06);
+}
+
+/* Fill level inside jar */
+.v1-jar-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 55%;
+  background: linear-gradient(0deg, var(--a-accent), rgba(247,147,26,0.7) 60%, rgba(247,147,26,0.1));
+  border-radius: 0 0 38px 38px;
+}
+
+/* Wavey top of fill */
+.v1-jar-fill::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -10%;
+  width: 120%;
+  height: 16px;
+  background: rgba(247,147,26,0.5);
+  border-radius: 50%;
+  filter: blur(4px);
+}
+
+/* Shine */
+.v1-jar-body::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  width: 40px;
+  height: 120px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent);
+  border-radius: 20px;
+  z-index: 2;
+}
+
+/* Jar neck */
+.v1-jar-neck {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 50px;
+  background: linear-gradient(165deg, #333 0%, #111 100%);
+  border-radius: 8px 8px 0 0;
+  border-bottom: 2px solid rgba(255,255,255,0.05);
+}
+
+/* Lid */
+.v1-jar-lid {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 24px;
+  background: linear-gradient(165deg, #444 0%, #222 100%);
+  border-radius: 6px;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+}
+
+/* Background circle */
+.v1-circle-bg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  border: 1px solid var(--a-border-light);
+  opacity: 0.5;
+}
+
+/* Floating label */
+.v1-jar-label {
+  position: absolute;
+  bottom: 20px;
+  right: -40px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--a-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  writing-mode: vertical-rl;
+}
+
+/* ============================================================
+   OPTION 2 — BOLD SVG ICONS
+   Large graphic jar SVG, editorial flat style
+   ============================================================ */
+.v2-hero-visual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 340px;
+  position: relative;
+}
+
+.v2-jar-svg {
+  width: 260px;
+  height: 320px;
+}
+
+/* Feature icons for below the hero */
+.v2-feature-row {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 48px clamp(24px, 4vw, 64px);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border-bottom: 1px solid var(--a-border-light);
+}
+
+.v2-feature {
+  padding: 28px 24px;
+  border-right: 1px solid var(--a-border-light);
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.v2-feature:last-child { border-right: none; }
+
+.v2-feature-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+}
+
+.v2-feature h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.v2-feature p {
+  font-size: 13px;
+  color: var(--a-text-sec);
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .v2-feature-row { grid-template-columns: 1fr; }
+  .v2-feature { border-right: none; border-bottom: 1px solid var(--a-border-light); }
+  .v2-feature:last-child { border-bottom: none; }
+}
+
+/* ============================================================
+   OPTION 3 — CSS GEOMETRIC SHAPES
+   Abstract tension, editorial composition
+   ============================================================ */
+.v3-geo-container {
+  position: relative;
+  min-height: 340px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Large partial circle */
+.v3-circle-large {
+  position: absolute;
+  top: -20px;
+  right: -60px;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  border: 2px solid var(--a-text);
+  opacity: 0.08;
+}
+
+/* Orange filled circle */
+.v3-circle-accent {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: var(--a-accent);
+  position: relative;
+  z-index: 1;
+}
+
+/* Inner detail */
+.v3-circle-accent::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.2);
+}
+
+/* Diagonal line */
+.v3-diagonal {
+  position: absolute;
+  top: 20px;
+  right: 80px;
+  width: 200px;
+  height: 2px;
+  background: var(--a-text);
+  transform: rotate(-35deg);
+  transform-origin: right;
+  opacity: 0.12;
+}
+
+/* Small dots cluster */
+.v3-dots {
+  position: absolute;
+  bottom: 30px;
+  right: 40px;
+  display: grid;
+  grid-template-columns: repeat(4, 8px);
+  gap: 8px;
+}
+
+.v3-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--a-text);
+  opacity: 0.1;
+}
+
+.v3-dot:nth-child(3) { background: var(--a-accent); opacity: 1; }
+.v3-dot:nth-child(7) { background: var(--a-accent); opacity: 0.5; }
+
+/* Arc */
+.v3-arc {
+  position: absolute;
+  top: 60px;
+  left: -20px;
+  width: 100px;
+  height: 100px;
+  border: 2px solid var(--a-accent);
+  border-radius: 50%;
+  clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%);
+  opacity: 0.3;
+}
+
+/* Label */
+.v3-label {
+  position: absolute;
+  bottom: 24px;
+  left: 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--a-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ============================================================
+   OPTION 4 — MIX: Hero jar + typographic rest
+   Distinctive illustrated jar, only in hero
+   ============================================================ */
+.v4-jar-hero {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 340px;
+}
+
+/* Stylized jar with stacked "coins" */
+.v4-jar-wrap {
+  position: relative;
+  width: 220px;
+  height: 300px;
+}
+
+/* Jar outline */
+.v4-jar-outline {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 160px;
+  height: 200px;
+  border: 3px solid var(--a-text);
+  border-radius: 16px 16px 32px 32px;
+  overflow: hidden;
+}
+
+/* Stacked sats inside */
+.v4-sat-stack {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px;
+}
+
+.v4-sat {
+  width: 80%;
+  height: 14px;
+  border-radius: 7px;
+  background: var(--a-accent);
+  opacity: 0.9;
+}
+
+.v4-sat:nth-child(2) { width: 85%; opacity: 0.8; }
+.v4-sat:nth-child(3) { width: 75%; opacity: 0.7; }
+.v4-sat:nth-child(4) { width: 90%; opacity: 0.85; }
+.v4-sat:nth-child(5) { width: 70%; opacity: 0.6; }
+.v4-sat:nth-child(6) { width: 82%; opacity: 0.5; }
+.v4-sat:nth-child(7) { width: 76%; opacity: 0.4; }
+
+/* Jar neck */
+.v4-jar-neck {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90px;
+  height: 35px;
+  border: 3px solid var(--a-text);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+}
+
+/* Lid */
+.v4-jar-lid {
+  position: absolute;
+  top: 42px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 110px;
+  height: 22px;
+  background: var(--a-text);
+  border-radius: 6px;
+}
+
+/* Bitcoin symbol on lid */
+.v4-btc-symbol {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  color: var(--a-bg);
+  letter-spacing: 0.02em;
+}
+
+/* Arrow pointing into jar */
+.v4-arrow {
+  position: absolute;
+  top: 10px;
+  right: -30px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--a-accent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.v4-arrow-line {
+  width: 2px;
+  height: 24px;
+  background: var(--a-accent);
+}
+
+.v4-arrow-head {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--a-accent);
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.variant.active .a-hero {
+  animation: fadeUp 0.5s cubic-bezier(0.05, 0.7, 0.1, 1);
+}
+
+@keyframes floatSoft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.v1-jar { animation: floatSoft 4s ease-in-out infinite; }
+.v4-jar-wrap { animation: floatSoft 5s ease-in-out infinite; }
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@media (max-width: 600px) {
+  .switcher { gap: 3px; }
+  .switcher button { padding: 6px 10px; font-size: 10px; }
+}
+</style>
+</head>
+<body>
+
+<div class="switcher">
+  <span class="switcher-label">A: Graphics</span>
+  <button class="active" onclick="showVar(1)">1: Abstract 3D Jar</button>
+  <button onclick="showVar(2)">2: Bold SVG Icons</button>
+  <button onclick="showVar(3)">3: CSS Geometric</button>
+  <button onclick="showVar(4)">4: Mix (Hero Only)</button>
+</div>
+
+<!-- ============================================================
+     OPTION 1 — ABSTRACT 3D JAR FORM
+     ============================================================ -->
+<div class="variant active" id="v1">
+  <nav class="a-nav">
+    <a class="a-logo" href="#">Fat<span>Jar.</span></a>
+    <div class="a-nav-links">
+      <a href="#">Docs</a>
+      <a href="#">GitHub</a>
+      <a href="#">$FJAR</a>
+      <a class="a-nav-cta" href="#">Launch App</a>
+    </div>
+  </nav>
+
+  <section class="a-hero">
+    <div>
+      <div class="a-hero-label"><span class="a-dot"></span> Bitcoin L1 via OPNet</div>
+      <h1>FILL YOUR<br><span class="a-highlight">FATJAR</span><br><span class="a-serif">with</span> SATS.</h1>
+    </div>
+    <div>
+      <div class="v1-jar-container">
+        <div class="v1-circle-bg"></div>
+        <div class="v1-jar">
+          <div class="v1-jar-lid"></div>
+          <div class="v1-jar-neck"></div>
+          <div class="v1-jar-body">
+            <div class="v1-jar-fill"></div>
+          </div>
+        </div>
+        <span class="v1-jar-label">55% filled</span>
+      </div>
+    </div>
+    <div class="a-hero-divider"></div>
+  </section>
+
+  <div style="max-width:1400px;margin:0 auto;padding:0 clamp(24px,4vw,64px);">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;padding:28px 0;border-bottom:1px solid var(--a-border-light);flex-wrap:wrap;gap:20px;">
+      <p class="a-hero-desc" style="margin-bottom:0;">
+        A social savings protocol on Bitcoin. Create a jar, share with family
+        and friends. Contributors send BTC and earn $FJAR tokens — early
+        givers earn the most. Zero fees. 100% to the fund.
+      </p>
+      <div class="a-hero-actions">
+        <a class="a-btn-primary" href="#">Create a Jar &rarr;</a>
+        <a class="a-btn-secondary" href="#">How it works</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="a-stats">
+    <div class="a-stat"><div class="a-stat-label">Total Value Locked</div><div class="a-stat-value"><em>4.82</em> BTC</div></div>
+    <div class="a-stat"><div class="a-stat-label">Active Jars</div><div class="a-stat-value">47</div></div>
+    <div class="a-stat"><div class="a-stat-label">$FJAR Minted</div><div class="a-stat-value">2.4M</div></div>
+    <div class="a-stat"><div class="a-stat-label">Current Rate</div><div class="a-stat-value"><em>120K</em>/BTC</div></div>
+  </div>
+
+  <section class="a-section">
+    <div>
+      <div class="a-section-label">[01] How It Works</div>
+      <h2 class="a-section-title">A SAVINGS<br>PROTOCOL<br>FOR FAMILIES</h2>
+    </div>
+    <div>
+      <div class="a-acc-item open" onclick="toggleAcc(this)"><div class="a-acc-header"><span class="a-acc-title">Create a Jar</span><span class="a-acc-arrow">+</span></div><div class="a-acc-body"><p class="a-acc-desc">Name it anything — college fund, wedding, emergency. Set an optional time-lock.</p><div class="a-acc-meta">Zero setup fees</div></div></div>
+      <div class="a-acc-item" onclick="toggleAcc(this)"><div class="a-acc-header"><span class="a-acc-title">Share &amp; Contribute BTC</span><span class="a-acc-arrow">+</span></div><div class="a-acc-body"><p class="a-acc-desc">Share the link. Anyone with OPWallet can contribute BTC. Every contribution mints $FJAR.</p><div class="a-acc-meta">100% to the fund</div></div></div>
+      <div class="a-acc-item" onclick="toggleAcc(this)"><div class="a-acc-header"><span class="a-acc-title">Earn $FJAR via Bonding Curve</span><span class="a-acc-arrow">+</span></div><div class="a-acc-body"><p class="a-acc-desc">Earlier contributors earn more tokens. The bonding curve reduces rate as total BTC grows.</p><div class="a-acc-meta">120K tokens/BTC at genesis</div></div></div>
+      <div class="a-acc-item" onclick="toggleAcc(this)"><div class="a-acc-header"><span class="a-acc-title">Withdraw Anytime</span><span class="a-acc-arrow">+</span></div><div class="a-acc-body"><p class="a-acc-desc">Creator withdraws when ready. Or let the time-lock hold it. Bitcoin-native settlement.</p><div class="a-acc-meta">Optional time-lock</div></div></div>
+    </div>
+  </section>
+</div>
+
+<!-- ============================================================
+     OPTION 2 — BOLD SVG ICON SYSTEM
+     ============================================================ -->
+<div class="variant" id="v2">
+  <nav class="a-nav">
+    <a class="a-logo" href="#">Fat<span>Jar.</span></a>
+    <div class="a-nav-links">
+      <a href="#">Docs</a>
+      <a href="#">GitHub</a>
+      <a href="#">$FJAR</a>
+      <a class="a-nav-cta" href="#">Launch App</a>
+    </div>
+  </nav>
+
+  <section class="a-hero">
+    <div>
+      <div class="a-hero-label"><span class="a-dot"></span> Bitcoin L1 via OPNet</div>
+      <h1>FILL YOUR<br><span class="a-highlight">FATJAR</span><br><span class="a-serif">with</span> SATS.</h1>
+    </div>
+    <div>
+      <div class="v2-hero-visual">
+        <!-- Large editorial SVG jar -->
+        <svg class="v2-jar-svg" viewBox="0 0 260 320" fill="none">
+          <!-- Shadow -->
+          <ellipse cx="130" cy="306" rx="80" ry="8" fill="#111" opacity="0.06"/>
+          <!-- Jar body -->
+          <path d="M60 120 L60 250 Q60 290 100 290 L160 290 Q200 290 200 250 L200 120 Z" fill="none" stroke="#111" stroke-width="4"/>
+          <!-- Fill -->
+          <path d="M62 180 L62 250 Q62 288 100 288 L160 288 Q198 288 198 250 L198 180 Z" fill="#F7931A" opacity="0.15"/>
+          <path d="M62 220 L62 250 Q62 288 100 288 L160 288 Q198 288 198 250 L198 220 Z" fill="#F7931A" opacity="0.85"/>
+          <!-- Fill line -->
+          <line x1="62" y1="220" x2="198" y2="220" stroke="#F7931A" stroke-width="2" stroke-dasharray="4 4"/>
+          <!-- Neck -->
+          <path d="M90 80 L90 120 L170 120 L170 80" fill="none" stroke="#111" stroke-width="4"/>
+          <!-- Lid -->
+          <rect x="78" y="66" width="104" height="18" rx="6" fill="#111"/>
+          <!-- BTC symbol on jar -->
+          <text x="130" y="260" text-anchor="middle" font-family="Syne" font-size="28" font-weight="800" fill="#111" opacity="0.12">BTC</text>
+          <!-- Coin entering -->
+          <circle cx="210" cy="50" r="16" fill="#F7931A"/>
+          <text x="210" y="55" text-anchor="middle" font-family="Syne" font-size="14" font-weight="800" fill="#111">$</text>
+          <!-- Arrow -->
+          <path d="M210 68 L210 78 L130 78 L130 66" fill="none" stroke="#F7931A" stroke-width="2" stroke-dasharray="4 3"/>
+          <polygon points="126,70 130,62 134,70" fill="#F7931A"/>
+          <!-- Label -->
+          <text x="212" y="42" text-anchor="start" font-family="IBM Plex Mono" font-size="9" fill="#999" letter-spacing="0.08em">$FJAR</text>
+        </svg>
+      </div>
+    </div>
+    <div class="a-hero-divider"></div>
+  </section>
+
+  <div style="max-width:1400px;margin:0 auto;padding:0 clamp(24px,4vw,64px);">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;padding:28px 0;flex-wrap:wrap;gap:20px;">
+      <p class="a-hero-desc" style="margin-bottom:0;">
+        A social savings protocol on Bitcoin. Create a jar, share with family
+        and friends. Contributors send BTC and earn $FJAR tokens — early
+        givers earn the most. Zero fees. 100% to the fund.
+      </p>
+      <div class="a-hero-actions">
+        <a class="a-btn-primary" href="#">Create a Jar &rarr;</a>
+        <a class="a-btn-secondary" href="#">How it works</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature row with matching SVG icons -->
+  <div class="v2-feature-row">
+    <div class="v2-feature">
+      <svg class="v2-feature-icon" viewBox="0 0 48 48" fill="none">
+        <rect x="12" y="18" width="24" height="22" rx="4" stroke="#111" stroke-width="2.5"/>
+        <path d="M18 12h12v6H18z" stroke="#111" stroke-width="2.5" fill="none"/>
+        <rect x="10" y="10" width="28" height="5" rx="2" fill="#111"/>
+        <rect x="14" y="30" width="20" height="4" rx="2" fill="#F7931A" opacity="0.4"/>
+        <rect x="14" y="34" width="20" height="4" rx="2" fill="#F7931A" opacity="0.7"/>
+      </svg>
+      <div>
+        <h3>Create</h3>
+        <p>Name your jar. Set a time-lock. Deploy on Bitcoin L1.</p>
+      </div>
+    </div>
+    <div class="v2-feature">
+      <svg class="v2-feature-icon" viewBox="0 0 48 48" fill="none">
+        <circle cx="24" cy="24" r="14" stroke="#111" stroke-width="2.5"/>
+        <circle cx="24" cy="24" r="8" fill="#F7931A" opacity="0.2"/>
+        <path d="M24 14v20M14 24h20" stroke="#F7931A" stroke-width="2"/>
+        <circle cx="24" cy="14" r="3" fill="#111"/>
+        <circle cx="34" cy="24" r="3" fill="#111"/>
+        <circle cx="24" cy="34" r="3" fill="#111"/>
+        <circle cx="14" cy="24" r="3" fill="#111"/>
+      </svg>
+      <div>
+        <h3>Contribute</h3>
+        <p>Share the link. Anyone adds BTC via OPWallet.</p>
+      </div>
+    </div>
+    <div class="v2-feature">
+      <svg class="v2-feature-icon" viewBox="0 0 48 48" fill="none">
+        <path d="M8 38 Q16 34, 22 28 Q28 20, 34 16 Q38 14, 42 13" stroke="#F7931A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M8 38 Q16 34, 22 28 Q28 20, 34 16 Q38 14, 42 13 L42 38 Z" fill="#F7931A" opacity="0.08"/>
+        <circle cx="12" cy="36" r="3" fill="#111"/>
+        <circle cx="42" cy="13" r="3" fill="#F7931A"/>
+        <text x="42" y="10" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" fill="#999">YOU</text>
+      </svg>
+      <div>
+        <h3>Earn</h3>
+        <p>Early givers earn more $FJAR tokens via bonding curve.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="a-stats">
+    <div class="a-stat"><div class="a-stat-label">Total Value Locked</div><div class="a-stat-value"><em>4.82</em> BTC</div></div>
+    <div class="a-stat"><div class="a-stat-label">Active Jars</div><div class="a-stat-value">47</div></div>
+    <div class="a-stat"><div class="a-stat-label">$FJAR Minted</div><div class="a-stat-value">2.4M</div></div>
+    <div class="a-stat"><div class="a-stat-label">Current Rate</div><div class="a-stat-value"><em>120K</em>/BTC</div></div>
+  </div>
+
+  <section class="a-section">
+    <div>
+      <div class="a-section-label">[01] How It Works</div>
+      <h2 class="a-section-title">A SAVINGS<br>PROTOCOL<br>FOR FAMILIES</h2>
+    </div>
+    <div>
+      <div class="a-acc-item open" onclick="toggleAcc(this)"><div class="a-acc-header"><span class="a-acc-title">Create a Jar</span><span class="a-acc-arrow">+</span></div><div class="a-acc-body"><p class="a-acc-desc">Name it anything — college fund, wedding, emergency. Set an optional time-lock.</p><div class="a-acc-meta">Zero setup fees</div></div></div>
+      <div class="a-acc-item" onclick="toggleAcc(this)"><div class="a-acc-header"><span class="a-acc-title">Share &amp; Contribute BTC</span><span class="a-acc-arrow">+</span></div><div class="a-acc-body"><p class="a-acc-desc">Share the link. Anyone with OPWallet can contribute BTC. Every contribution mints $FJAR.</p><div class="a-acc-meta">100% to the fund</div></div></div>
+      <div class="a-acc-item" onclick="toggleAcc(this)"><div class="a-acc-header"><span class="a-acc-title">Earn $FJAR via Bonding Curve</span><span class="a-acc-arrow">+</span></div><div class="a-acc-body"><p class="a-acc-desc">Earlier contributors earn more tokens. The bonding curve reduces rate as total BTC grows.</p><div class="a-acc-meta">120K tokens/BTC at genesis</div></div></div>
+      <div class="a-acc-item" onclick="toggleAcc(this)"><div class="a-acc-header"><span class="a-acc-title">Withdraw Anytime</span><span class="a-acc-arrow">+</span></div><div class="a-acc-body"><p class="a-acc-desc">Creator withdraws when ready. Or let the time-lock hold it. Bitcoin-native settlement.</p><div class="a-acc-meta">Optional time-lock</div></div></div>
+    </div>
+  </section>
+</div>
+
+<!-- ============================================================
+     OPTION 3 — CSS GEOMETRIC SHAPES
+     ============================================================ -->
+<div class="variant" id="v3">
+  <nav class="a-nav">
+    <a class="a-logo" href="#">Fat<span>Jar.</span></a>
+    <div class="a-nav-links">
+      <a href="#">Docs</a>
+      <a href="#">GitHub</a>
+      <a href="#">$FJAR</a>
+      <a class="a-nav-cta" href="#">Launch App</a>
+    </div>
+  </nav>
+
+  <section class="a-hero">
+    <div>
+      <div class="a-hero-label"><span class="a-dot"></span> Bitcoin L1 via OPNet</div>
+      <h1>FILL YOUR<br><span class="a-highlight">FATJAR</span><br><span class="a-serif">with</span> SATS.</h1>
+    </div>
+    <div>
+      <div class="v3-geo-container">
+        <div class="v3-circle-large"></div>
+        <div class="v3-diagonal"></div>
+        <div class="v3-arc"></div>
+        <div class="v3-circle-accent"></div>
+        <div class="v3-dots">
+          <span class="v3-dot"></span><span class="v3-dot"></span><span class="v3-dot"></span><span class="v3-dot"></span>
+          <span class="v3-dot"></span><span class="v3-dot"></span><span class="v3-dot"></span><span class="v3-dot"></span>
+          <span class="v3-dot"></span><span class="v3-dot"></span><span class="v3-dot"></span><span class="v3-dot"></span>
+        </div>
+        <span class="v3-label">Protocol</span>
+      </div>
+    </div>
+    <div class="a-hero-divider"></div>
+  </section>
+
+  <div style="max-width:1400px;margin:0 auto;padding:0 clamp(24px,4vw,64px);">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;padding:28px 0;border-bottom:1px solid var(--a-border-light);flex-wrap:wrap;gap:20px;">
+      <p class="a-hero-desc" style="margin-bottom:0;">
+        A social savings protocol on Bitcoin. Create a jar, share with family
+        and friends. Contributors send BTC and earn $FJAR tokens — early
+        givers earn the most. Zero fees. 100% to the fund.
+      </p>
+      <div class="a-hero-actions">
+        <a class="a-btn-primary" href="#">Create a Jar &rarr;</a>
+        <a class="a-btn-secondary" href="#">How it works</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="a-stats">
+    <div class="a-stat"><div class="a-stat-label">Total Value Locked</div><div class="a-stat-value"><em>4.82</em> BTC</div></div>
+    <div class="a-stat"><div class="a-stat-label">Active Jars</div><div class="a-stat-value">47</div></div>
+    <div class="a-stat"><div class="a-stat-label">$FJAR Minted</div><div class="a-stat-value">2.4M</div></div>
+    <div class="a-stat"><div class="a-stat-label">Current Rate</div><div class="a-stat-value"><em>120K</em>/BTC</div></div>
+  </div>
+
+  <section class="a-section">
+    <div>
+      <div class="a-section-label">[01] How It Works</div>
+      <h2 class="a-section-title">A SAVINGS<br>PROTOCOL<br>FOR FAMILIES</h2>
+    </div>
+    <div>
+      <div class="a-acc-item open" onclick="toggleAcc(this)"><div class="a-acc-header"><span class="a-acc-title">Create a Jar</span><span class="a-acc-arrow">+</span></div><div class="a-acc-body"><p class="a-acc-desc">Name it anything — college fund, wedding, emergency. Set an optional time-lock.</p><div class="a-acc-meta">Zero setup fees</div></div></div>
+      <div class="a-acc-item" onclick="toggleAcc(this)"><div class="a-acc-header"><span class="a-acc-title">Share &amp; Contribute BTC</span><span class="a-acc-arrow">+</span></div><div class="a-acc-body"><p class="a-acc-desc">Share the link. Anyone with OPWallet can contribute BTC. Every contribution mints $FJAR.</p><div class="a-acc-meta">100% to the fund</div></div></div>
+      <div class="a-acc-item" onclick="toggleAcc(this)"><div class="a-acc-header"><span class="a-acc-title">Earn $FJAR via Bonding Curve</span><span class="a-acc-arrow">+</span></div><div class="a-acc-body"><p class="a-acc-desc">Earlier contributors earn more tokens. The bonding curve reduces rate as total BTC grows.</p><div class="a-acc-meta">120K tokens/BTC at genesis</div></div></div>
+      <div class="a-acc-item" onclick="toggleAcc(this)"><div class="a-acc-header"><span class="a-acc-title">Withdraw Anytime</span><span class="a-acc-arrow">+</span></div><div class="a-acc-body"><p class="a-acc-desc">Creator withdraws when ready. Or let the time-lock hold it. Bitcoin-native settlement.</p><div class="a-acc-meta">Optional time-lock</div></div></div>
+    </div>
+  </section>
+</div>
+
+<!-- ============================================================
+     OPTION 4 — MIX: JAR HERO + TYPOGRAPHIC REST
+     ============================================================ -->
+<div class="variant" id="v4">
+  <nav class="a-nav">
+    <a class="a-logo" href="#">Fat<span>Jar.</span></a>
+    <div class="a-nav-links">
+      <a href="#">Docs</a>
+      <a href="#">GitHub</a>
+      <a href="#">$FJAR</a>
+      <a class="a-nav-cta" href="#">Launch App</a>
+    </div>
+  </nav>
+
+  <section class="a-hero">
+    <div>
+      <div class="a-hero-label"><span class="a-dot"></span> Bitcoin L1 via OPNet</div>
+      <h1>FILL YOUR<br><span class="a-highlight">FATJAR</span><br><span class="a-serif">with</span> SATS.</h1>
+    </div>
+    <div>
+      <div class="v4-jar-hero">
+        <div class="v4-jar-wrap">
+          <div class="v4-jar-lid">
+            <span class="v4-btc-symbol">BTC</span>
+          </div>
+          <div class="v4-jar-neck"></div>
+          <div class="v4-jar-outline">
+            <div class="v4-sat-stack">
+              <div class="v4-sat"></div>
+              <div class="v4-sat"></div>
+              <div class="v4-sat"></div>
+              <div class="v4-sat"></div>
+              <div class="v4-sat"></div>
+              <div class="v4-sat"></div>
+              <div class="v4-sat"></div>
+            </div>
+          </div>
+          <div class="v4-arrow">
+            <span>SATS</span>
+            <div class="v4-arrow-line"></div>
+            <div class="v4-arrow-head"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="a-hero-divider"></div>
+  </section>
+
+  <div style="max-width:1400px;margin:0 auto;padding:0 clamp(24px,4vw,64px);">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;padding:28px 0;border-bottom:1px solid var(--a-border-light);flex-wrap:wrap;gap:20px;">
+      <p class="a-hero-desc" style="margin-bottom:0;">
+        A social savings protocol on Bitcoin. Create a jar, share with family
+        and friends. Contributors send BTC and earn $FJAR tokens — early
+        givers earn the most. Zero fees. 100% to the fund.
+      </p>
+      <div class="a-hero-actions">
+        <a class="a-btn-primary" href="#">Create a Jar &rarr;</a>
+        <a class="a-btn-secondary" href="#">How it works</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="a-stats">
+    <div class="a-stat"><div class="a-stat-label">Total Value Locked</div><div class="a-stat-value"><em>4.82</em> BTC</div></div>
+    <div class="a-stat"><div class="a-stat-label">Active Jars</div><div class="a-stat-value">47</div></div>
+    <div class="a-stat"><div class="a-stat-label">$FJAR Minted</div><div class="a-stat-value">2.4M</div></div>
+    <div class="a-stat"><div class="a-stat-label">Current Rate</div><div class="a-stat-value"><em>120K</em>/BTC</div></div>
+  </div>
+
+  <!-- NO icons below — pure typography for the rest -->
+  <section class="a-section">
+    <div>
+      <div class="a-section-label">[01] How It Works</div>
+      <h2 class="a-section-title">A SAVINGS<br>PROTOCOL<br>FOR FAMILIES</h2>
+    </div>
+    <div>
+      <div class="a-acc-item open" onclick="toggleAcc(this)"><div class="a-acc-header"><span class="a-acc-title">Create a Jar</span><span class="a-acc-arrow">+</span></div><div class="a-acc-body"><p class="a-acc-desc">Name it anything — college fund, wedding, emergency. Set an optional time-lock.</p><div class="a-acc-meta">Zero setup fees</div></div></div>
+      <div class="a-acc-item" onclick="toggleAcc(this)"><div class="a-acc-header"><span class="a-acc-title">Share &amp; Contribute BTC</span><span class="a-acc-arrow">+</span></div><div class="a-acc-body"><p class="a-acc-desc">Share the link. Anyone with OPWallet can contribute BTC. Every contribution mints $FJAR.</p><div class="a-acc-meta">100% to the fund</div></div></div>
+      <div class="a-acc-item" onclick="toggleAcc(this)"><div class="a-acc-header"><span class="a-acc-title">Earn $FJAR via Bonding Curve</span><span class="a-acc-arrow">+</span></div><div class="a-acc-body"><p class="a-acc-desc">Earlier contributors earn more tokens. The bonding curve reduces rate as total BTC grows.</p><div class="a-acc-meta">120K tokens/BTC at genesis</div></div></div>
+      <div class="a-acc-item" onclick="toggleAcc(this)"><div class="a-acc-header"><span class="a-acc-title">Withdraw Anytime</span><span class="a-acc-arrow">+</span></div><div class="a-acc-body"><p class="a-acc-desc">Creator withdraws when ready. Or let the time-lock hold it. Bitcoin-native settlement.</p><div class="a-acc-meta">Optional time-lock</div></div></div>
+    </div>
+  </section>
+</div>
+
+<script>
+function showVar(n) {
+  document.querySelectorAll('.variant').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.switcher button').forEach(b => b.classList.remove('active'));
+  document.getElementById('v' + n).classList.add('active');
+  document.querySelectorAll('.switcher button')[n - 1].classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function toggleAcc(item) {
+  const wasOpen = item.classList.contains('open');
+  item.parentElement.querySelectorAll('.a-acc-item').forEach(i => i.classList.remove('open'));
+  if (!wasOpen) item.classList.add('open');
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === '1') showVar(1);
+  if (e.key === '2') showVar(2);
+  if (e.key === '3') showVar(3);
+  if (e.key === '4') showVar(4);
+});
+</script>
+
+</body>
+</html>

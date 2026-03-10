@@ -233,3 +233,53 @@
 **Days to deadline:** 3 (March 13, 2026)
 
 **Next session:** Install OPWallet → deploy contracts → link them → test create/contribute/withdraw flow on testnet
+
+---
+
+## Session 5 — 2026-03-10 — UI Direction & Hero Design
+
+**Goal:** Explore visual directions for the landing page, converge on a design, create hero illustration.
+
+**What we did:**
+1. Studied 6 design references (W3 editorial, Paytech dark dashboard, Avalon Labs DeFi, etc.)
+2. Built 3-direction comparison prototype (`prototype/comparison.html`):
+   - Direction A: Editorial Brutalist (light bg, Syne font, accordion features)
+   - Direction B: Dark Finance (dark bg, chartreuse accent, stat cards)
+   - Direction C: Premium Protocol (purple-black gradient, gold accent)
+3. User chose **Direction A** — most distinctive, never seen in crypto
+4. Built 4 graphic variants (`prototype/comparison-graphics.html`)
+5. Explored piggy bank as key visual — "FatJar, the piggy bank for Bitcoin"
+6. Iterated on SVG piggy bank illustration (4+ versions) — learned SVG ears are hard
+7. Pivoted to AI-generated illustration via Leonardo DaVinci
+8. Generated final hero image: minimalist line art piggy with orange BTC fill
+9. Integrated DaVinci image into prototype, removed background, balanced layout
+10. Built full editorial homepage (`prototype/direction-final.html`):
+    - Hero: bold Syne typography + piggy illustration, two-column grid
+    - Stats strip: TVL, Active Jars, $FJAR Minted, Current Rate
+    - Features: accordion layout with protocol details
+    - How It Works: 3-step cards (Create, Share, Grow)
+    - Bonding Curve: visual explainer with rate table
+    - Footer: minimal editorial
+
+**Design decisions:**
+- Aesthetic: Editorial Brutalist — warm cream bg (#F5F2ED), black text, orange (#F7931A) accent
+- Typography: Syne (display), IBM Plex Mono (labels), Source Sans 3 (body), Newsreader (italic accents)
+- Hero image: AI-generated (DaVinci) minimalist piggy bank with orange BTC fill, line art style
+- Piggy faces left toward text — creates visual flow to CTAs
+- Brand: "FatJar — The Piggy Bank for Bitcoin"
+
+**Files created:**
+- `prototype/comparison.html` — 3-direction comparison with tab switcher
+- `prototype/comparison-graphics.html` — 4 graphic variant comparison
+- `prototype/direction-final.html` — converged editorial homepage prototype
+- `prototype/piggy-hero.png` — DaVinci-generated hero illustration (transparent bg)
+
+**Open items carried forward:**
+- Logo/branding still open (piggy hero works, need icon/wordmark)
+- Frontend not yet scaffolded (React + Vite)
+- Contracts not yet deployed
+- OPWallet not yet installed
+
+**Days to deadline:** 3 (March 13, 2026)
+
+**Next session:** Scaffold React frontend, port prototype design to components, integrate OPWallet

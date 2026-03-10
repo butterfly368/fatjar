@@ -1,0 +1,2366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FatJar — Design Comparison</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@300;400;500;600&family=Lexend:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Oswald:wght@400;500;600;700&family=Figtree:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   COMPARISON SWITCHER
+   ================================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.switcher {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 10px 16px;
+  background: rgba(0,0,0,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.switcher-label {
+  color: rgba(255,255,255,0.4);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-right: 16px;
+}
+
+.switcher button {
+  padding: 7px 20px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(255,255,255,0.5);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s;
+  letter-spacing: 0.02em;
+}
+
+.switcher button:hover {
+  color: rgba(255,255,255,0.8);
+  border-color: rgba(255,255,255,0.2);
+}
+
+.switcher button.active {
+  background: #F7931A;
+  color: #000;
+  border-color: #F7931A;
+  font-weight: 600;
+}
+
+.direction { display: none; }
+.direction.active { display: block; }
+
+/* ================================================================
+   DIRECTION A — EDITORIAL BRUTALIST
+   Inspired by W3 landing page
+   ================================================================ */
+.dir-a {
+  --a-bg: #F5F2ED;
+  --a-bg-alt: #EDEAE4;
+  --a-text: #111111;
+  --a-text-sec: #555555;
+  --a-text-muted: #999999;
+  --a-accent: #F7931A;
+  --a-border: #111111;
+  --a-border-light: #D5D0C8;
+
+  background: var(--a-bg);
+  color: var(--a-text);
+  font-family: 'Source Sans 3', sans-serif;
+  min-height: 100vh;
+  padding-top: 48px;
+}
+
+/* A — Nav */
+.dir-a .a-nav {
+  position: fixed;
+  top: 48px; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 clamp(24px, 4vw, 64px);
+  height: 60px;
+  background: var(--a-bg);
+  border-bottom: 1px solid var(--a-border-light);
+}
+
+.dir-a .a-logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: -0.03em;
+  color: var(--a-text);
+  text-decoration: none;
+}
+
+.dir-a .a-logo span { color: var(--a-accent); }
+
+.dir-a .a-nav-links {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.dir-a .a-nav-links a {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--a-text-muted);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 6px 12px;
+  transition: color 0.2s;
+}
+
+.dir-a .a-nav-links a:hover { color: var(--a-text); }
+
+.dir-a .a-nav-links .a-nav-cta {
+  color: var(--a-text);
+  border: 1.5px solid var(--a-text);
+  border-radius: 0;
+  padding: 6px 16px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.dir-a .a-nav-links .a-nav-cta:hover {
+  background: var(--a-text);
+  color: var(--a-bg);
+}
+
+/* A — Hero */
+/* A — Hero: two-column grid like W3 reference */
+.dir-a .a-hero {
+  padding: clamp(80px, 8vw, 120px) clamp(24px, 4vw, 64px) 0;
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+@media (min-width: 900px) {
+  .dir-a .a-hero {
+    grid-template-columns: 1.1fr 1fr;
+    gap: 64px;
+    align-items: end;
+  }
+}
+
+.dir-a .a-hero-left {}
+
+.dir-a .a-hero-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--a-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dir-a .a-hero-label .a-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--a-accent);
+  border-radius: 50%;
+}
+
+.dir-a .a-hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(40px, 5.5vw, 76px);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  color: var(--a-text);
+  margin-bottom: 0;
+}
+
+.dir-a .a-hero h1 .a-highlight {
+  color: var(--a-accent);
+}
+
+.dir-a .a-hero h1 .a-serif {
+  font-family: 'Newsreader', serif;
+  font-style: italic;
+  font-weight: 400;
+  text-transform: none;
+}
+
+/* Right column: description + actions */
+.dir-a .a-hero-right {
+  padding-bottom: 8px;
+}
+
+.dir-a .a-hero-desc {
+  max-width: 420px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--a-text-sec);
+  font-weight: 400;
+  margin-bottom: 28px;
+}
+
+.dir-a .a-hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Divider below hero */
+.dir-a .a-hero-divider {
+  grid-column: 1 / -1;
+  height: 2px;
+  background: var(--a-text);
+  margin-top: 48px;
+}
+
+.dir-a .a-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 32px;
+  background: var(--a-text);
+  color: var(--a-bg);
+  border: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.dir-a .a-btn-primary:hover {
+  background: var(--a-accent);
+  color: var(--a-text);
+}
+
+.dir-a .a-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 32px;
+  background: transparent;
+  color: var(--a-text);
+  border: 1.5px solid var(--a-border-light);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.dir-a .a-btn-secondary:hover {
+  border-color: var(--a-text);
+}
+
+/* A — Stats strip */
+.dir-a .a-stats {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 clamp(24px, 4vw, 64px);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--a-border-light);
+}
+
+.dir-a .a-stat {
+  padding: 32px 0;
+  border-right: 1px solid var(--a-border-light);
+  padding-right: 24px;
+}
+
+.dir-a .a-stat:last-child { border-right: none; }
+
+.dir-a .a-stat-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--a-text-muted);
+  margin-bottom: 8px;
+}
+
+.dir-a .a-stat-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--a-text);
+  letter-spacing: -0.02em;
+}
+
+.dir-a .a-stat-value span { color: var(--a-accent); }
+
+/* A — Features (Accordion style) */
+.dir-a .a-features {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 80px clamp(24px, 4vw, 64px);
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 80px;
+}
+
+@media (max-width: 768px) {
+  .dir-a .a-features { grid-template-columns: 1fr; gap: 40px; }
+  .dir-a .a-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+.dir-a .a-features-left {}
+
+.dir-a .a-section-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--a-text-muted);
+  margin-bottom: 24px;
+}
+
+.dir-a .a-features-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+.dir-a .a-features-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 28px;
+}
+
+.dir-a .a-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  padding: 6px 14px;
+  border: 1px solid var(--a-border-light);
+  color: var(--a-text-sec);
+  cursor: default;
+}
+
+.dir-a .a-tag.active {
+  border-color: var(--a-text);
+  color: var(--a-text);
+}
+
+/* A — Accordion */
+.dir-a .a-accordion {}
+
+.dir-a .a-acc-item {
+  border-bottom: 1px solid var(--a-border-light);
+  transition: border-color 0.3s;
+}
+
+.dir-a .a-acc-item:first-child {
+  border-top: 1px solid var(--a-border-light);
+}
+
+.dir-a .a-acc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dir-a .a-acc-header:hover { padding-left: 8px; }
+
+.dir-a .a-acc-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.dir-a .a-acc-arrow {
+  font-size: 18px;
+  color: var(--a-text-muted);
+  transition: transform 0.3s, color 0.3s;
+}
+
+.dir-a .a-acc-item.open .a-acc-arrow {
+  transform: rotate(45deg);
+  color: var(--a-accent);
+}
+
+.dir-a .a-acc-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dir-a .a-acc-item.open .a-acc-body {
+  max-height: 200px;
+}
+
+.dir-a .a-acc-desc {
+  padding-bottom: 20px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--a-text-sec);
+  max-width: 480px;
+}
+
+.dir-a .a-acc-meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--a-accent);
+  margin-top: 4px;
+}
+
+/* A — How it works */
+.dir-a .a-how {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 clamp(24px, 4vw, 64px) 80px;
+  border-top: 2px solid var(--a-text);
+}
+
+.dir-a .a-how-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 48px 0 40px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.dir-a .a-how h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(28px, 4vw, 52px);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.dir-a .a-how-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--a-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.dir-a .a-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+}
+
+@media (max-width: 768px) {
+  .dir-a .a-steps { grid-template-columns: 1fr; }
+}
+
+.dir-a .a-step {
+  padding: 32px;
+  border: 1px solid var(--a-border-light);
+  border-right: none;
+  position: relative;
+}
+
+.dir-a .a-step:last-child { border-right: 1px solid var(--a-border-light); }
+
+.dir-a .a-step:hover { background: var(--a-bg-alt); }
+
+.dir-a .a-step-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--a-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 20px;
+}
+
+.dir-a .a-step h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  margin-bottom: 10px;
+}
+
+.dir-a .a-step p {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--a-text-sec);
+}
+
+/* A — Footer */
+.dir-a .a-footer {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 48px clamp(24px, 4vw, 64px);
+  border-top: 1px solid var(--a-border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.dir-a .a-footer-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dir-a .a-footer-brand {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.dir-a .a-footer-brand span { color: var(--a-accent); }
+
+.dir-a .a-footer-tagline {
+  font-size: 13px;
+  color: var(--a-text-muted);
+  max-width: 300px;
+  line-height: 1.5;
+}
+
+.dir-a .a-footer-links {
+  display: flex;
+  gap: 24px;
+}
+
+.dir-a .a-footer-links a {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--a-text-muted);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: color 0.2s;
+}
+
+.dir-a .a-footer-links a:hover { color: var(--a-text); }
+
+
+/* ================================================================
+   DIRECTION B — DARK FINANCE
+   Inspired by Paytech dashboard
+   ================================================================ */
+.dir-b {
+  --b-bg: #08080C;
+  --b-surface: #111118;
+  --b-surface-hover: #18181F;
+  --b-border: rgba(255,255,255,0.06);
+  --b-border-hover: rgba(255,255,255,0.12);
+  --b-text: #E8E8EC;
+  --b-text-sec: rgba(232,232,236,0.55);
+  --b-text-muted: rgba(232,232,236,0.3);
+  --b-lime: #C8FF00;
+  --b-lime-dim: rgba(200,255,0,0.15);
+  --b-orange: #F7931A;
+  --b-green: #4ADE80;
+  --b-radius: 14px;
+
+  background: var(--b-bg);
+  color: var(--b-text);
+  font-family: 'Lexend', sans-serif;
+  min-height: 100vh;
+  padding-top: 48px;
+}
+
+/* B — Nav */
+.dir-b .b-nav {
+  position: fixed;
+  top: 48px; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 clamp(24px, 4vw, 48px);
+  height: 64px;
+  background: rgba(8,8,12,0.88);
+  backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--b-border);
+}
+
+.dir-b .b-logo {
+  font-family: 'Lexend', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: -0.03em;
+  color: var(--b-text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dir-b .b-logo-icon {
+  width: 30px;
+  height: 30px;
+  background: var(--b-lime);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dir-b .b-logo-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.dir-b .b-logo span { color: var(--b-lime); }
+
+.dir-b .b-nav-mid {
+  display: flex;
+  gap: 2px;
+  background: var(--b-surface);
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.dir-b .b-nav-mid a {
+  padding: 7px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--b-text-muted);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.dir-b .b-nav-mid a:hover { color: var(--b-text-sec); }
+.dir-b .b-nav-mid a.active { color: var(--b-text); background: var(--b-surface-hover); }
+
+.dir-b .b-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dir-b .b-btn-wallet {
+  padding: 9px 22px;
+  background: var(--b-lime);
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.dir-b .b-btn-wallet:hover {
+  box-shadow: 0 0 24px rgba(200,255,0,0.25);
+  transform: translateY(-1px);
+}
+
+/* B — Hero */
+.dir-b .b-hero {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 100px clamp(24px, 4vw, 48px) 60px;
+  text-align: center;
+}
+
+.dir-b .b-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: var(--b-lime-dim);
+  border: 1px solid rgba(200,255,0,0.15);
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--b-lime);
+  margin-bottom: 32px;
+}
+
+.dir-b .b-hero-badge .b-pulse {
+  width: 6px;
+  height: 6px;
+  background: var(--b-lime);
+  border-radius: 50%;
+  animation: b-pulse 2s ease infinite;
+}
+
+@keyframes b-pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+.dir-b .b-hero h1 {
+  font-size: clamp(36px, 6vw, 64px);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  margin-bottom: 20px;
+}
+
+.dir-b .b-hero h1 .b-grad {
+  background: linear-gradient(135deg, var(--b-lime), #A0E000);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dir-b .b-hero-sub {
+  font-size: 17px;
+  color: var(--b-text-sec);
+  max-width: 500px;
+  margin: 0 auto 36px;
+  line-height: 1.65;
+  font-weight: 300;
+}
+
+.dir-b .b-hero-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.dir-b .b-btn-lime {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background: var(--b-lime);
+  color: #000;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.dir-b .b-btn-lime:hover {
+  box-shadow: 0 8px 32px rgba(200,255,0,0.2);
+  transform: translateY(-2px);
+}
+
+.dir-b .b-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background: transparent;
+  color: var(--b-text);
+  border: 1.5px solid var(--b-border);
+  border-radius: 12px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.dir-b .b-btn-outline:hover {
+  border-color: var(--b-border-hover);
+  background: var(--b-surface);
+}
+
+/* B — Stats Cards */
+.dir-b .b-stats {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(24px, 4vw, 48px);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .dir-b .b-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+.dir-b .b-stat-card {
+  background: var(--b-surface);
+  border: 1px solid var(--b-border);
+  border-radius: var(--b-radius);
+  padding: 22px;
+  transition: all 0.25s;
+}
+
+.dir-b .b-stat-card:hover {
+  border-color: var(--b-border-hover);
+  background: var(--b-surface-hover);
+}
+
+.dir-b .b-stat-label {
+  font-size: 11px;
+  color: var(--b-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.dir-b .b-stat-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--b-text);
+}
+
+.dir-b .b-stat-value .b-lime-text { color: var(--b-lime); }
+.dir-b .b-stat-value .b-orange-text { color: var(--b-orange); }
+
+.dir-b .b-stat-change {
+  font-size: 12px;
+  color: var(--b-green);
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* B — Live Feed */
+.dir-b .b-feed {
+  max-width: 1200px;
+  margin: 48px auto 0;
+  padding: 0 clamp(24px, 4vw, 48px);
+}
+
+.dir-b .b-feed-card {
+  background: var(--b-surface);
+  border: 1px solid var(--b-border);
+  border-radius: var(--b-radius);
+  overflow: hidden;
+}
+
+.dir-b .b-feed-header {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--b-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dir-b .b-feed-title {
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dir-b .b-feed-title .b-live {
+  width: 6px;
+  height: 6px;
+  background: var(--b-lime);
+  border-radius: 50%;
+  animation: b-pulse 2s ease infinite;
+}
+
+.dir-b .b-feed-link {
+  font-size: 12px;
+  color: var(--b-lime);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.dir-b .b-feed-items {}
+
+.dir-b .b-feed-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--b-border);
+  transition: background 0.15s;
+}
+
+.dir-b .b-feed-item:last-child { border-bottom: none; }
+.dir-b .b-feed-item:hover { background: var(--b-surface-hover); }
+
+.dir-b .b-feed-who {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.dir-b .b-feed-to {
+  color: var(--b-text-muted);
+  font-size: 13px;
+}
+
+.dir-b .b-feed-amount {
+  text-align: right;
+}
+
+.dir-b .b-feed-btc {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--b-lime);
+  font-weight: 500;
+}
+
+.dir-b .b-feed-tokens {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--b-green);
+}
+
+/* B — How it works */
+.dir-b .b-how {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px clamp(24px, 4vw, 48px);
+}
+
+.dir-b .b-how h2 {
+  font-size: clamp(24px, 4vw, 40px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.dir-b .b-how-sub {
+  text-align: center;
+  color: var(--b-text-sec);
+  font-size: 15px;
+  font-weight: 300;
+  margin-bottom: 48px;
+}
+
+.dir-b .b-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .dir-b .b-steps { grid-template-columns: 1fr; }
+}
+
+.dir-b .b-step {
+  background: var(--b-surface);
+  border: 1px solid var(--b-border);
+  border-radius: var(--b-radius);
+  padding: 28px 24px;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.dir-b .b-step::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--b-lime), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.dir-b .b-step:hover {
+  border-color: var(--b-border-hover);
+  transform: translateY(-4px);
+}
+
+.dir-b .b-step:hover::before { opacity: 1; }
+
+.dir-b .b-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--b-lime-dim);
+  color: var(--b-lime);
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 18px;
+}
+
+.dir-b .b-step h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.dir-b .b-step p {
+  font-size: 14px;
+  color: var(--b-text-sec);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+/* B — Bonding Curve */
+.dir-b .b-curve {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(24px, 4vw, 48px) 80px;
+}
+
+.dir-b .b-curve-card {
+  background: var(--b-surface);
+  border: 1px solid var(--b-border);
+  border-radius: var(--b-radius);
+  overflow: hidden;
+}
+
+.dir-b .b-curve-header {
+  padding: 24px 28px;
+  border-bottom: 1px solid var(--b-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.dir-b .b-curve-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.dir-b .b-curve-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 5px 12px;
+  background: var(--b-lime-dim);
+  color: var(--b-lime);
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.dir-b .b-curve-body {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 0;
+}
+
+@media (max-width: 768px) {
+  .dir-b .b-curve-body { grid-template-columns: 1fr; }
+}
+
+.dir-b .b-curve-chart {
+  padding: 28px;
+  position: relative;
+  border-right: 1px solid var(--b-border);
+}
+
+.dir-b .b-curve-chart svg {
+  width: 100%;
+  height: 200px;
+}
+
+.dir-b .b-curve-tiers {
+  padding: 0;
+}
+
+.dir-b .b-tier {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--b-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.15s;
+}
+
+.dir-b .b-tier:last-child { border-bottom: none; }
+.dir-b .b-tier:hover { background: var(--b-surface-hover); }
+
+.dir-b .b-tier-label {
+  font-size: 12px;
+  color: var(--b-text-muted);
+}
+
+.dir-b .b-tier-label strong {
+  color: var(--b-text);
+  font-weight: 600;
+}
+
+.dir-b .b-tier-rate {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.dir-b .b-tier-rate .rate { color: var(--b-lime); }
+.dir-b .b-tier-rate .change { color: var(--b-text-muted); font-size: 11px; margin-left: 6px; }
+
+/* B — Footer */
+.dir-b .b-footer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px clamp(24px, 4vw, 48px);
+  border-top: 1px solid var(--b-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.dir-b .b-footer-text {
+  font-size: 12px;
+  color: var(--b-text-muted);
+}
+
+.dir-b .b-footer-text a { color: var(--b-lime); text-decoration: none; }
+
+.dir-b .b-footer-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 4px 10px;
+  background: var(--b-lime-dim);
+  border: 1px solid rgba(200,255,0,0.12);
+  border-radius: 6px;
+  color: var(--b-lime);
+}
+
+
+/* ================================================================
+   DIRECTION C — PREMIUM PROTOCOL
+   Inspired by Avalon Labs
+   ================================================================ */
+.dir-c {
+  --c-bg: #0A0614;
+  --c-surface: rgba(255,255,255,0.04);
+  --c-surface-hover: rgba(255,255,255,0.07);
+  --c-border: rgba(255,255,255,0.06);
+  --c-border-hover: rgba(255,255,255,0.12);
+  --c-text: #F0ECE4;
+  --c-text-sec: rgba(240,236,228,0.6);
+  --c-text-muted: rgba(240,236,228,0.3);
+  --c-gold: #D4A843;
+  --c-gold-dim: rgba(212,168,67,0.12);
+  --c-amber: #F7931A;
+  --c-purple: #6B3FA0;
+  --c-purple-dim: rgba(107,63,160,0.15);
+  --c-radius: 16px;
+
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: 'Figtree', sans-serif;
+  min-height: 100vh;
+  padding-top: 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* C — Background atmosphere */
+.dir-c::before {
+  content: '';
+  position: fixed;
+  top: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120%;
+  height: 70%;
+  background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(107,63,160,0.2), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.dir-c::after {
+  content: '';
+  position: fixed;
+  top: 10%;
+  right: -10%;
+  width: 50%;
+  height: 50%;
+  background: radial-gradient(circle at center, rgba(212,168,67,0.06), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.dir-c > * { position: relative; z-index: 1; }
+
+/* C — Nav */
+.dir-c .c-nav {
+  position: fixed;
+  top: 48px; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 clamp(24px, 4vw, 56px);
+  height: 68px;
+  background: rgba(10,6,20,0.82);
+  backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--c-border);
+}
+
+.dir-c .c-logo {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--c-text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dir-c .c-logo-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--c-gold), var(--c-amber));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px rgba(212,168,67,0.3);
+}
+
+.dir-c .c-logo-mark svg { width: 18px; height: 18px; }
+
+.dir-c .c-nav-mid {
+  display: flex;
+  gap: 6px;
+}
+
+.dir-c .c-nav-mid a {
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--c-text-muted);
+  text-decoration: none;
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+
+.dir-c .c-nav-mid a:hover { color: var(--c-text-sec); }
+
+.dir-c .c-btn-gold {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, var(--c-gold), #C49A30);
+  color: #0A0614;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Figtree', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(212,168,67,0.25);
+}
+
+.dir-c .c-btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(212,168,67,0.35);
+}
+
+/* C — Hero */
+.dir-c .c-hero {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 120px clamp(24px, 4vw, 56px) 60px;
+  text-align: center;
+  position: relative;
+}
+
+.dir-c .c-hero-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  width: 600px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(212,168,67,0.08), transparent 60%);
+  pointer-events: none;
+}
+
+.dir-c .c-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 18px;
+  background: var(--c-gold-dim);
+  border: 1px solid rgba(212,168,67,0.18);
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 32px;
+}
+
+.dir-c .c-hero-badge .c-badge-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--c-gold);
+  border-radius: 50%;
+  animation: c-pulse 2s ease infinite;
+}
+
+@keyframes c-pulse { 0%,100% { opacity:1; box-shadow: 0 0 8px rgba(212,168,67,0.4); } 50% { opacity:0.4; box-shadow: none; } }
+
+.dir-c .c-hero h1 {
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(48px, 10vw, 120px);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.dir-c .c-hero h1 .c-gold-text {
+  background: linear-gradient(135deg, var(--c-gold), #E8C060, var(--c-amber));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dir-c .c-hero-sub {
+  font-size: 18px;
+  color: var(--c-text-sec);
+  max-width: 520px;
+  margin: 0 auto 40px;
+  line-height: 1.65;
+  font-weight: 400;
+}
+
+.dir-c .c-hero-actions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+}
+
+.dir-c .c-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background: transparent;
+  color: var(--c-text);
+  border: 1.5px solid var(--c-border);
+  border-radius: 12px;
+  font-family: 'Figtree', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.dir-c .c-btn-ghost:hover {
+  border-color: var(--c-border-hover);
+  background: var(--c-surface);
+}
+
+.dir-c .c-btn-gold-lg {
+  padding: 14px 36px;
+  font-size: 15px;
+}
+
+/* C — Trust badges */
+.dir-c .c-trust {
+  max-width: 1200px;
+  margin: 60px auto 0;
+  padding: 0 clamp(24px, 4vw, 56px);
+  text-align: center;
+}
+
+.dir-c .c-trust-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--c-text-muted);
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.dir-c .c-trust-logos {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  flex-wrap: wrap;
+  opacity: 0.4;
+}
+
+.dir-c .c-trust-logo {
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--c-text);
+}
+
+/* C — Stats */
+.dir-c .c-stats {
+  max-width: 1200px;
+  margin: 64px auto 0;
+  padding: 0 clamp(24px, 4vw, 56px);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border-top: 1px solid var(--c-border);
+  border-bottom: 1px solid var(--c-border);
+}
+
+@media (max-width: 768px) {
+  .dir-c .c-stats { grid-template-columns: 1fr; }
+}
+
+.dir-c .c-stat {
+  padding: 36px 28px;
+  text-align: center;
+  border-right: 1px solid var(--c-border);
+}
+
+.dir-c .c-stat:last-child { border-right: none; }
+
+.dir-c .c-stat-value {
+  font-family: 'Oswald', sans-serif;
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+
+.dir-c .c-stat-value .c-gold-val {
+  background: linear-gradient(135deg, var(--c-gold), var(--c-amber));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dir-c .c-stat-label {
+  font-size: 13px;
+  color: var(--c-text-muted);
+  font-weight: 400;
+}
+
+/* C — How it works */
+.dir-c .c-how {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px clamp(24px, 4vw, 56px);
+  text-align: center;
+}
+
+.dir-c .c-how h2 {
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  margin-bottom: 8px;
+}
+
+.dir-c .c-how-sub {
+  color: var(--c-text-sec);
+  font-size: 16px;
+  margin-bottom: 48px;
+  font-weight: 400;
+}
+
+.dir-c .c-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .dir-c .c-steps { grid-template-columns: 1fr; }
+}
+
+/* Connector line */
+.dir-c .c-steps::before {
+  content: '';
+  position: absolute;
+  top: 36px;
+  left: calc(16.66% + 10px);
+  right: calc(16.66% + 10px);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--c-gold), transparent);
+  opacity: 0.3;
+}
+
+@media (max-width: 768px) {
+  .dir-c .c-steps::before { display: none; }
+}
+
+.dir-c .c-step {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--c-radius);
+  padding: 32px 24px;
+  transition: all 0.3s;
+  text-align: center;
+}
+
+.dir-c .c-step:hover {
+  border-color: rgba(212,168,67,0.2);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(212,168,67,0.06);
+}
+
+.dir-c .c-step-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: var(--c-gold-dim);
+  border: 1px solid rgba(212,168,67,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  position: relative;
+}
+
+.dir-c .c-step-icon .c-step-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+  background: var(--c-gold);
+  color: var(--c-bg);
+  border-radius: 50%;
+  font-family: 'Figtree', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dir-c .c-step h3 {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.dir-c .c-step p {
+  font-size: 14px;
+  color: var(--c-text-sec);
+  line-height: 1.6;
+}
+
+/* C — Features */
+.dir-c .c-features {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(24px, 4vw, 56px) 80px;
+  text-align: center;
+}
+
+.dir-c .c-features h2 {
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.dir-c .c-features h2 .c-gold-text {
+  background: linear-gradient(135deg, var(--c-gold), #E8C060);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dir-c .c-features-sub {
+  color: var(--c-text-sec);
+  font-size: 16px;
+  max-width: 500px;
+  margin: 0 auto 48px;
+}
+
+.dir-c .c-feature-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .dir-c .c-feature-cards { grid-template-columns: 1fr; }
+}
+
+.dir-c .c-feature-card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--c-radius);
+  padding: 32px 24px;
+  text-align: left;
+  transition: all 0.3s;
+}
+
+.dir-c .c-feature-card:hover {
+  border-color: rgba(212,168,67,0.15);
+  background: var(--c-surface-hover);
+}
+
+.dir-c .c-feature-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--c-gold-dim);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  font-size: 18px;
+}
+
+.dir-c .c-feature-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.dir-c .c-feature-card p {
+  font-size: 14px;
+  color: var(--c-text-sec);
+  line-height: 1.6;
+}
+
+.dir-c .c-feature-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--c-gold);
+  font-weight: 600;
+  text-decoration: none;
+  transition: gap 0.2s;
+}
+
+.dir-c .c-feature-link:hover { gap: 8px; }
+
+/* C — CTA Banner */
+.dir-c .c-cta {
+  max-width: 1200px;
+  margin: 0 auto 80px;
+  padding: 0 clamp(24px, 4vw, 56px);
+}
+
+.dir-c .c-cta-card {
+  border-radius: var(--c-radius);
+  padding: 64px 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(107,63,160,0.15), rgba(212,168,67,0.08));
+  border: 1px solid rgba(212,168,67,0.12);
+}
+
+.dir-c .c-cta-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 40%, rgba(212,168,67,0.08), transparent 50%),
+              radial-gradient(circle at 70% 60%, rgba(107,63,160,0.08), transparent 50%);
+  pointer-events: none;
+}
+
+.dir-c .c-cta-card > * { position: relative; }
+
+.dir-c .c-cta h2 {
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.dir-c .c-cta p {
+  color: var(--c-text-sec);
+  font-size: 16px;
+  max-width: 450px;
+  margin: 0 auto 28px;
+}
+
+.dir-c .c-cta-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* C — Footer */
+.dir-c .c-footer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px clamp(24px, 4vw, 56px);
+  border-top: 1px solid var(--c-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.dir-c .c-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.dir-c .c-footer-brand {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dir-c .c-footer-text {
+  font-size: 12px;
+  color: var(--c-text-muted);
+}
+
+.dir-c .c-footer-text a { color: var(--c-gold); text-decoration: none; }
+
+.dir-c .c-footer-links {
+  display: flex;
+  gap: 20px;
+}
+
+.dir-c .c-footer-links a {
+  font-size: 13px;
+  color: var(--c-text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.dir-c .c-footer-links a:hover { color: var(--c-text); }
+
+/* ================================================================
+   ANIMATIONS
+   ================================================================ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.direction.active .a-hero,
+.direction.active .b-hero,
+.direction.active .c-hero {
+  animation: fadeUp 0.6s cubic-bezier(0.05, 0.7, 0.1, 1);
+}
+
+/* Staggered entrance for cards */
+.direction.active .a-step,
+.direction.active .b-step,
+.direction.active .c-step,
+.direction.active .b-stat-card,
+.direction.active .c-feature-card {
+  animation: fadeUp 0.5s cubic-bezier(0.05, 0.7, 0.1, 1) backwards;
+}
+
+.direction.active .a-step:nth-child(1),
+.direction.active .b-step:nth-child(1),
+.direction.active .c-step:nth-child(1),
+.direction.active .b-stat-card:nth-child(1),
+.direction.active .c-feature-card:nth-child(1) { animation-delay: 0.1s; }
+
+.direction.active .a-step:nth-child(2),
+.direction.active .b-step:nth-child(2),
+.direction.active .c-step:nth-child(2),
+.direction.active .b-stat-card:nth-child(2),
+.direction.active .c-feature-card:nth-child(2) { animation-delay: 0.2s; }
+
+.direction.active .a-step:nth-child(3),
+.direction.active .b-step:nth-child(3),
+.direction.active .c-step:nth-child(3),
+.direction.active .b-stat-card:nth-child(3),
+.direction.active .c-feature-card:nth-child(3) { animation-delay: 0.3s; }
+
+.direction.active .b-stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* Responsive switcher */
+@media (max-width: 600px) {
+  .switcher { gap: 4px; padding: 8px 12px; }
+  .switcher-label { display: none; }
+  .switcher button { padding: 6px 12px; font-size: 10px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     TAB SWITCHER
+     ============================================================ -->
+<div class="switcher">
+  <span class="switcher-label">Compare</span>
+  <button class="active" onclick="showDir('a')">A: Editorial</button>
+  <button onclick="showDir('b')">B: Dark Finance</button>
+  <button onclick="showDir('c')">C: Premium Protocol</button>
+</div>
+
+<!-- ============================================================
+     DIRECTION A — EDITORIAL BRUTALIST
+     ============================================================ -->
+<div class="direction dir-a active" id="dir-a">
+  <nav class="a-nav">
+    <a class="a-logo" href="#">Fat<span>Jar.</span></a>
+    <div class="a-nav-links">
+      <a href="#">Docs</a>
+      <a href="#">GitHub</a>
+      <a href="#">$FJAR</a>
+      <a class="a-nav-cta" href="#">Launch App</a>
+    </div>
+  </nav>
+
+  <section class="a-hero">
+    <div class="a-hero-left">
+      <div class="a-hero-label"><span class="a-dot"></span> Bitcoin L1 via OPNet</div>
+      <h1>
+        FILL YOUR<br>
+        <span class="a-highlight">FATJAR</span><br>
+        <span class="a-serif">with</span> SATS.
+      </h1>
+    </div>
+    <div class="a-hero-right">
+      <p class="a-hero-desc">
+        A social savings protocol on Bitcoin. Create a jar, share with family
+        and friends. Contributors send BTC and earn $FJAR tokens &mdash; early
+        givers earn the most. Zero fees. 100% to the fund.
+      </p>
+      <div class="a-hero-actions">
+        <a class="a-btn-primary" href="#">Create a Jar &rarr;</a>
+        <a class="a-btn-secondary" href="#">How it works</a>
+      </div>
+    </div>
+    <div class="a-hero-divider"></div>
+  </section>
+
+  <div class="a-stats">
+    <div class="a-stat">
+      <div class="a-stat-label">Total Value Locked</div>
+      <div class="a-stat-value"><span>4.82</span> BTC</div>
+    </div>
+    <div class="a-stat">
+      <div class="a-stat-label">Active Jars</div>
+      <div class="a-stat-value">47</div>
+    </div>
+    <div class="a-stat">
+      <div class="a-stat-label">$FJAR Minted</div>
+      <div class="a-stat-value">2.4M</div>
+    </div>
+    <div class="a-stat">
+      <div class="a-stat-label">Current Rate</div>
+      <div class="a-stat-value"><span>120K</span>/BTC</div>
+    </div>
+  </div>
+
+  <section class="a-features">
+    <div class="a-features-left">
+      <div class="a-section-label">[01] How It Works</div>
+      <h2 class="a-features-title">
+        A SAVINGS<br>
+        PROTOCOL<br>
+        FOR FAMILIES
+      </h2>
+      <div class="a-features-tags">
+        <span class="a-tag active">Bitcoin L1</span>
+        <span class="a-tag">OP20 Token</span>
+        <span class="a-tag">Bonding Curve</span>
+        <span class="a-tag">Time-Lock</span>
+      </div>
+    </div>
+    <div class="a-accordion">
+      <div class="a-acc-item open" onclick="toggleAcc(this)">
+        <div class="a-acc-header">
+          <span class="a-acc-title">Create a Jar</span>
+          <span class="a-acc-arrow">+</span>
+        </div>
+        <div class="a-acc-body">
+          <p class="a-acc-desc">
+            Name it anything — a college fund, wedding savings, emergency reserve.
+            Set an optional time-lock so funds stay safe until the right moment.
+          </p>
+          <div class="a-acc-meta">Zero setup fees</div>
+        </div>
+      </div>
+      <div class="a-acc-item" onclick="toggleAcc(this)">
+        <div class="a-acc-header">
+          <span class="a-acc-title">Share &amp; Contribute BTC</span>
+          <span class="a-acc-arrow">+</span>
+        </div>
+        <div class="a-acc-body">
+          <p class="a-acc-desc">
+            Share the link with family and friends. Anyone with OPWallet can contribute
+            BTC directly. Every contribution mints $FJAR tokens to the sender.
+          </p>
+          <div class="a-acc-meta">100% to the fund</div>
+        </div>
+      </div>
+      <div class="a-acc-item" onclick="toggleAcc(this)">
+        <div class="a-acc-header">
+          <span class="a-acc-title">Earn $FJAR via Bonding Curve</span>
+          <span class="a-acc-arrow">+</span>
+        </div>
+        <div class="a-acc-body">
+          <p class="a-acc-desc">
+            The earlier you contribute, the more tokens you earn. The bonding curve
+            reduces token rate as total platform BTC grows. Early believers win.
+          </p>
+          <div class="a-acc-meta">120K tokens/BTC at genesis</div>
+        </div>
+      </div>
+      <div class="a-acc-item" onclick="toggleAcc(this)">
+        <div class="a-acc-header">
+          <span class="a-acc-title">Withdraw Anytime</span>
+          <span class="a-acc-arrow">+</span>
+        </div>
+        <div class="a-acc-body">
+          <p class="a-acc-desc">
+            Fund creators withdraw when ready, or let the time-lock hold it.
+            No platform fees, no middlemen. Bitcoin-native settlement.
+          </p>
+          <div class="a-acc-meta">Optional time-lock</div>
+        </div>
+      </div>
+      <div class="a-acc-item" onclick="toggleAcc(this)">
+        <div class="a-acc-header">
+          <span class="a-acc-title">Trade $FJAR on Any OPNet DEX</span>
+          <span class="a-acc-arrow">+</span>
+        </div>
+        <div class="a-acc-body">
+          <p class="a-acc-desc">
+            $FJAR follows the OP20 standard. Fully tradeable on any OPNet-compatible
+            decentralized exchange. No lock-up on tokens.
+          </p>
+          <div class="a-acc-meta">OP20 Standard</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="a-how">
+    <div class="a-how-header">
+      <h2>Three Steps.<br>Zero Fees.</h2>
+      <span class="a-how-sub">Bitcoin-native from start to finish</span>
+    </div>
+    <div class="a-steps">
+      <div class="a-step">
+        <div class="a-step-num">Step 01</div>
+        <h3>Create</h3>
+        <p>Name your jar. Set a description and optional unlock date. Deploy on Bitcoin L1.</p>
+      </div>
+      <div class="a-step">
+        <div class="a-step-num">Step 02</div>
+        <h3>Share</h3>
+        <p>Send the link to contributors. Anyone with OPWallet can add BTC and earn $FJAR.</p>
+      </div>
+      <div class="a-step">
+        <div class="a-step-num">Step 03</div>
+        <h3>Grow</h3>
+        <p>Watch contributions stack. Early givers earn more tokens. Withdraw when ready.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="a-footer">
+    <div class="a-footer-left">
+      <div class="a-footer-brand">Fat<span>Jar.</span></div>
+      <p class="a-footer-tagline">Fill your FatJar with sats. Built for vibecode.finance Week 3.</p>
+    </div>
+    <div class="a-footer-links">
+      <a href="#">GitHub</a>
+      <a href="#">Docs</a>
+      <a href="#">OPNet</a>
+    </div>
+  </footer>
+</div>
+
+<!-- ============================================================
+     DIRECTION B — DARK FINANCE
+     ============================================================ -->
+<div class="direction dir-b" id="dir-b">
+  <nav class="b-nav">
+    <a class="b-logo" href="#">
+      <span class="b-logo-icon">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M10 3C8.5 3 5.5 4.5 5.5 8C5.5 9.5 6.2 10.5 6.2 10.5L5.5 14.5C5.5 15.5 6.5 16.5 7.5 16.5H12.5C13.5 16.5 14.5 15.5 14.5 14.5L13.8 10.5C13.8 10.5 14.5 9.5 14.5 8C14.5 4.5 11.5 3 10 3Z" fill="#000" fill-opacity="0.85"/></svg>
+      </span>
+      fat<span>jar</span>
+    </a>
+    <div class="b-nav-mid">
+      <a href="#" class="active">Home</a>
+      <a href="#">Create</a>
+      <a href="#">Explore</a>
+      <a href="#">$FJAR</a>
+    </div>
+    <div class="b-nav-right">
+      <button class="b-btn-wallet">Connect Wallet</button>
+    </div>
+  </nav>
+
+  <section class="b-hero">
+    <div class="b-hero-badge">
+      <span class="b-pulse"></span>
+      Live on Bitcoin L1
+    </div>
+    <h1>
+      Your family's<br>
+      <span class="b-grad">Bitcoin savings.</span>
+    </h1>
+    <p class="b-hero-sub">
+      Create a jar. Family and friends contribute BTC on Layer 1.
+      Early contributors earn more $FJAR tokens through the bonding curve.
+    </p>
+    <div class="b-hero-actions">
+      <button class="b-btn-lime">Create a Jar &rarr;</button>
+      <button class="b-btn-outline">How it works</button>
+    </div>
+  </section>
+
+  <div class="b-stats">
+    <div class="b-stat-card">
+      <div class="b-stat-label">Total Value Locked</div>
+      <div class="b-stat-value"><span class="b-lime-text">4.82</span> BTC</div>
+      <div class="b-stat-change">+12.4% this week</div>
+    </div>
+    <div class="b-stat-card">
+      <div class="b-stat-label">Active Jars</div>
+      <div class="b-stat-value">47</div>
+      <div class="b-stat-change">+8 new</div>
+    </div>
+    <div class="b-stat-card">
+      <div class="b-stat-label">$FJAR Minted</div>
+      <div class="b-stat-value"><span class="b-orange-text">2.4M</span></div>
+      <div class="b-stat-change">of 100M supply</div>
+    </div>
+    <div class="b-stat-card">
+      <div class="b-stat-label">Current Rate</div>
+      <div class="b-stat-value">120K<span style="color:var(--b-text-muted);font-size:14px">/BTC</span></div>
+      <div class="b-stat-change">Early tier active</div>
+    </div>
+  </div>
+
+  <div class="b-feed">
+    <div class="b-feed-card">
+      <div class="b-feed-header">
+        <span class="b-feed-title"><span class="b-live"></span> Recent Contributions</span>
+        <a class="b-feed-link" href="#">View all</a>
+      </div>
+      <div class="b-feed-items">
+        <div class="b-feed-item">
+          <div>
+            <span class="b-feed-who">Grandma Rose</span>
+            <span class="b-feed-to"> &rarr; Emma's College Fund</span>
+          </div>
+          <div class="b-feed-amount">
+            <div class="b-feed-btc">+0.025 BTC</div>
+            <div class="b-feed-tokens">+2,083 FJAR</div>
+          </div>
+        </div>
+        <div class="b-feed-item">
+          <div>
+            <span class="b-feed-who">Uncle Marco</span>
+            <span class="b-feed-to"> &rarr; Wedding Fund</span>
+          </div>
+          <div class="b-feed-amount">
+            <div class="b-feed-btc">+0.080 BTC</div>
+            <div class="b-feed-tokens">+6,240 FJAR</div>
+          </div>
+        </div>
+        <div class="b-feed-item">
+          <div>
+            <span class="b-feed-who">Aunt Julia</span>
+            <span class="b-feed-to"> &rarr; Baby Noah</span>
+          </div>
+          <div class="b-feed-amount">
+            <div class="b-feed-btc">+0.005 BTC</div>
+            <div class="b-feed-tokens">+380 FJAR</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="b-how">
+    <h2>How it works</h2>
+    <p class="b-how-sub">Three steps to a Bitcoin savings jar. No fees, no middlemen.</p>
+    <div class="b-steps">
+      <div class="b-step">
+        <div class="b-step-num">1</div>
+        <h3>Create a Jar</h3>
+        <p>Name your jar, add a description, set an optional time-lock. Deploys on Bitcoin L1 via OPNet.</p>
+      </div>
+      <div class="b-step">
+        <div class="b-step-num">2</div>
+        <h3>Share &amp; Contribute</h3>
+        <p>Send the link. Anyone with OPWallet contributes BTC and earns $FJAR tokens instantly.</p>
+      </div>
+      <div class="b-step">
+        <div class="b-step-num">3</div>
+        <h3>Grow Together</h3>
+        <p>Watch it stack. Early contributors earn more tokens via the bonding curve. Withdraw anytime.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="b-curve">
+    <div class="b-curve-card">
+      <div class="b-curve-header">
+        <span class="b-curve-title">Bonding Curve</span>
+        <span class="b-curve-badge">Early = More Tokens</span>
+      </div>
+      <div class="b-curve-body">
+        <div class="b-curve-chart">
+          <svg viewBox="0 0 400 200" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="rgba(200,255,0,0.15)"/>
+                <stop offset="100%" stop-color="rgba(200,255,0,0)"/>
+              </linearGradient>
+            </defs>
+            <line x1="0" y1="50" x2="400" y2="50" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+            <line x1="0" y1="100" x2="400" y2="100" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+            <line x1="0" y1="150" x2="400" y2="150" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+            <path d="M 0 15 Q 60 16, 100 40 Q 180 85, 260 135 Q 320 165, 400 185 L 400 200 L 0 200 Z" fill="url(#bg)"/>
+            <path d="M 0 15 Q 60 16, 100 40 Q 180 85, 260 135 Q 320 165, 400 185" fill="none" stroke="#C8FF00" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="30" cy="16" r="5" fill="#C8FF00"/>
+            <text x="30" y="8" text-anchor="middle" fill="#C8FF00" font-size="9" font-family="JetBrains Mono" font-weight="600">YOU</text>
+          </svg>
+        </div>
+        <div class="b-curve-tiers">
+          <div class="b-tier">
+            <div class="b-tier-label"><strong>Early</strong> (now)</div>
+            <div class="b-tier-rate"><span class="rate">120K</span> FJAR/BTC</div>
+          </div>
+          <div class="b-tier">
+            <div class="b-tier-label">After <strong>5 BTC</strong> total</div>
+            <div class="b-tier-rate"><span class="rate">80K</span> FJAR/BTC <span class="change">-33%</span></div>
+          </div>
+          <div class="b-tier">
+            <div class="b-tier-label">After <strong>20 BTC</strong></div>
+            <div class="b-tier-rate"><span class="rate">40K</span> FJAR/BTC <span class="change">-67%</span></div>
+          </div>
+          <div class="b-tier">
+            <div class="b-tier-label">After <strong>100 BTC</strong></div>
+            <div class="b-tier-rate"><span class="rate">15K</span> FJAR/BTC <span class="change">-88%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="b-footer">
+    <span class="b-footer-text">Built for <a href="#">vibecode.finance</a> Week 3</span>
+    <span class="b-footer-badge">OPNet &middot; Bitcoin L1</span>
+  </footer>
+</div>
+
+<!-- ============================================================
+     DIRECTION C — PREMIUM PROTOCOL
+     ============================================================ -->
+<div class="direction dir-c" id="dir-c">
+  <nav class="c-nav">
+    <a class="c-logo" href="#">
+      <span class="c-logo-mark">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M10 3C8.5 3 5.5 4.5 5.5 8C5.5 9.5 6.2 10.5 6.2 10.5L5.5 14.5C5.5 15.5 6.5 16.5 7.5 16.5H12.5C13.5 16.5 14.5 15.5 14.5 14.5L13.8 10.5C13.8 10.5 14.5 9.5 14.5 8C14.5 4.5 11.5 3 10 3Z" fill="#0A0614" fill-opacity="0.9"/></svg>
+      </span>
+      FatJar
+    </a>
+    <div class="c-nav-mid">
+      <a href="#">Protocol</a>
+      <a href="#">$FJAR</a>
+      <a href="#">Docs</a>
+    </div>
+    <a class="c-btn-gold" href="#">Launch App</a>
+  </nav>
+
+  <section class="c-hero">
+    <div class="c-hero-glow"></div>
+    <div class="c-hero-badge">
+      <span class="c-badge-dot"></span>
+      Live on Bitcoin L1
+    </div>
+    <h1>
+      <span class="c-gold-text">FATJAR</span>
+    </h1>
+    <p class="c-hero-sub">
+      The social savings protocol on Bitcoin. Create a jar, invite family and friends
+      to contribute BTC. Early contributors earn more $FJAR tokens. Zero fees.
+    </p>
+    <div class="c-hero-actions">
+      <a class="c-btn-gold c-btn-gold-lg" href="#">Create a Jar &rarr;</a>
+      <button class="c-btn-ghost">Read Documentation</button>
+    </div>
+  </section>
+
+  <section class="c-trust">
+    <div class="c-trust-label">Built On</div>
+    <div class="c-trust-logos">
+      <span class="c-trust-logo">Bitcoin</span>
+      <span class="c-trust-logo">OPNet</span>
+      <span class="c-trust-logo">OP20</span>
+      <span class="c-trust-logo">OPWallet</span>
+      <span class="c-trust-logo">WASM</span>
+    </div>
+  </section>
+
+  <div class="c-stats">
+    <div class="c-stat">
+      <div class="c-stat-value"><span class="c-gold-val">4.82</span> BTC</div>
+      <div class="c-stat-label">Total Value Locked</div>
+    </div>
+    <div class="c-stat">
+      <div class="c-stat-value">47</div>
+      <div class="c-stat-label">Active Jars Created</div>
+    </div>
+    <div class="c-stat">
+      <div class="c-stat-value"><span class="c-gold-val">2.4M</span></div>
+      <div class="c-stat-label">$FJAR Tokens Minted</div>
+    </div>
+  </div>
+
+  <section class="c-how">
+    <h2>How It Works</h2>
+    <p class="c-how-sub">Get started in minutes. No KYC. Bitcoin-native from day one.</p>
+    <div class="c-steps">
+      <div class="c-step">
+        <div class="c-step-icon">
+          &#128230;
+          <span class="c-step-badge">1</span>
+        </div>
+        <h3>Create a Jar</h3>
+        <p>Name your savings fund. Set an optional time-lock. Deploy on Bitcoin L1 instantly.</p>
+      </div>
+      <div class="c-step">
+        <div class="c-step-icon">
+          &#128279;
+          <span class="c-step-badge">2</span>
+        </div>
+        <h3>Share &amp; Contribute</h3>
+        <p>Send the link. Contributors send BTC via OPWallet and earn $FJAR tokens.</p>
+      </div>
+      <div class="c-step">
+        <div class="c-step-icon">
+          &#128200;
+          <span class="c-step-badge">3</span>
+        </div>
+        <h3>Earn $FJAR</h3>
+        <p>Early contributors earn more tokens via the bonding curve. Trade on any OPNet DEX.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="c-features">
+    <h2>Unlock the Full Potential of<br><span class="c-gold-text">Bitcoin Savings</span></h2>
+    <p class="c-features-sub">
+      The first social savings protocol built specifically for Bitcoin holders on Layer 1.
+    </p>
+    <div class="c-feature-cards">
+      <div class="c-feature-card">
+        <div class="c-feature-icon">&#9889;</div>
+        <h3>Zero Fees</h3>
+        <p>100% of BTC goes directly to the fund. No platform cuts, no middlemen, no hidden costs.</p>
+        <a class="c-feature-link" href="#">Learn more &rarr;</a>
+      </div>
+      <div class="c-feature-card">
+        <div class="c-feature-icon">&#128200;</div>
+        <h3>Bonding Curve Rewards</h3>
+        <p>The earlier you contribute, the more $FJAR tokens you earn. The curve reduces over time.</p>
+        <a class="c-feature-link" href="#">Learn more &rarr;</a>
+      </div>
+      <div class="c-feature-card">
+        <div class="c-feature-icon">&#128274;</div>
+        <h3>Optional Time-Lock</h3>
+        <p>Lock funds until a specific date. Perfect for kids' college funds or future milestones.</p>
+        <a class="c-feature-link" href="#">Learn more &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="c-cta">
+    <div class="c-cta-card">
+      <h2>Ready to Fill Your<br><span class="c-gold-text">FatJar</span>?</h2>
+      <p>Join the first wave of contributors and earn the highest $FJAR token rate.</p>
+      <div class="c-cta-actions">
+        <a class="c-btn-gold c-btn-gold-lg" href="#">Create a Jar &rarr;</a>
+        <button class="c-btn-ghost">Read Docs</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="c-footer">
+    <div class="c-footer-left">
+      <span class="c-footer-brand">FatJar</span>
+      <span class="c-footer-text">Built for <a href="#">vibecode.finance</a> Week 3</span>
+    </div>
+    <div class="c-footer-links">
+      <a href="#">GitHub</a>
+      <a href="#">Docs</a>
+      <a href="#">OPNet</a>
+      <a href="#">Twitter</a>
+    </div>
+  </footer>
+</div>
+
+<!-- ============================================================
+     SCRIPTS
+     ============================================================ -->
+<script>
+function showDir(dir) {
+  document.querySelectorAll('.direction').forEach(d => d.classList.remove('active'));
+  document.querySelectorAll('.switcher button').forEach(b => b.classList.remove('active'));
+  document.getElementById('dir-' + dir).classList.add('active');
+  const buttons = document.querySelectorAll('.switcher button');
+  const idx = dir === 'a' ? 0 : dir === 'b' ? 1 : 2;
+  buttons[idx].classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function toggleAcc(item) {
+  const wasOpen = item.classList.contains('open');
+  item.parentElement.querySelectorAll('.a-acc-item').forEach(i => i.classList.remove('open'));
+  if (!wasOpen) item.classList.add('open');
+}
+
+// Keyboard shortcuts for fast switching
+document.addEventListener('keydown', (e) => {
+  if (e.key === '1') showDir('a');
+  if (e.key === '2') showDir('b');
+  if (e.key === '3') showDir('c');
+});
+</script>
+
+</body>
+</html>
