@@ -346,3 +346,53 @@ frontend/
 **Days to deadline:** 3 (March 13, 2026)
 
 **Next session:** Apply narrative revisions, then OPWallet integration + deploy
+
+---
+
+## Session 7 — 2026-03-10 — Product Direction & Copy Rework
+
+**Goal:** Brainstorm product direction (trust problem for strangers), formalize positioning, rework all user-facing copy.
+
+**What we did:**
+1. Brainstormed the fundamental trust gap: strangers vs known networks
+2. Concluded FatJar is a **group piggy bank for people who trust each other** — not a crowdfunding platform for strangers
+3. Scoped out investment management (ROI splits, portfolio tracking) as a different product
+4. Defined "FatJar IS for" / "FatJar is NOT for" boundaries
+5. Chose "group piggy bank" as the core framing
+6. Rewrote all user-facing copy across 11 files (vault → jar, protocol → human)
+7. Updated mode labels: Collect, Save for Someone, All-or-Nothing, Fund a Dream
+
+**Decisions:**
+- **Trust model**: Social, not protocol-enforced. We provide tools, people decide.
+- **Investment management**: Explicitly out of scope. FatJar is collect-and-save, not invest-and-return.
+- **Contribution visibility**: Creator's choice (show/hide individual amounts) — noted as UX feature, not yet implemented.
+- **$FJAR token**: Kept as platform-level growth mechanic (early adopter rewards), not fund-level trust.
+- **Stranger trust infrastructure**: Not building (no reputation, KYC, milestones, voting).
+
+**Key copy changes:**
+- Hero: "THE PIGGY BANK FOR EVERYONE ON BITCOIN" (was "LOCK BITCOIN TOGETHER")
+- Tagline: "Create a jar. Share the link. Friends and family chip in with BTC."
+- How it works: Create a Jar → Share the Link → Open the Jar
+- Features section: "What Makes FatJar Different" (was "Trustless Vaults on Bitcoin L1")
+- All pages: vault → jar in every user-facing string
+- Create form placeholder: "Sarah's College Fund" (was "Bitcoin Mining Collective")
+
+**Commits:**
+- `eaa4a7a` — Add product direction doc: Bitcoin group piggy bank
+- `76b1218` — Add is-for/not-for boundaries and contribution visibility
+- `21c779b` — Rework all user-facing copy: vault → jar, protocol → human
+
+**Files created/modified:**
+- `docs/plans/2026-03-10-product-direction.md` — product direction (approved)
+- 11 frontend files updated with new copy
+
+**Open items carried forward:**
+- Contribution visibility toggle (show/hide amounts) — not yet implemented
+- OPWallet real integration (still stubbed)
+- Contract deployment to testnet
+- Dark/light theme toggle
+- Demo video (90s)
+
+**Days to deadline:** 3 (March 13, 2026)
+
+**Next session:** OPWallet integration + contract deployment, or demo video
