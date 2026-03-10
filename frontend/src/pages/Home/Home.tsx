@@ -10,9 +10,9 @@ export function Home() {
     <>
       <HeroSection />
       <StatsStrip />
+      <ActiveJars />
       <HowItWorks />
       <FeaturesSection />
-      <ActiveJars />
       <BondingCurveSection />
     </>
   );

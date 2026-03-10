@@ -16,45 +16,45 @@ const vaults: Map<string, Vault> = new Map();
 const contributions: Contribution[] = [];
 const creatorVaults: Map<string, string[]> = new Map();
 
-// Seed: 1) Bitcoin Mining Collective — all-or-nothing
+// Seed: 1) Lisa's Birthday Surprise — open-collection (Collect)
 vaults.set('1', {
   id: '1',
-  name: 'Bitcoin Mining Collective',
+  name: "Lisa's Birthday Surprise",
   creator: 'bc1q...creator1',
-  totalRaised: 320000000n,
+  totalRaised: 8500000n, // 0.085 BTC
   unlockBlock: 900000n,
   isClosed: false,
   withdrawn: 0n,
-  contributorCount: 4,
-  goalAmount: 500000000n,
+  contributorCount: 6,
+  goalAmount: 0n,
   beneficiary: ZERO_ADDRESS,
 });
 
-// Seed: 2) Dev Grant: OPNet Toolkit — funded-grant
+// Seed: 2) Jake's College Fund — trust-fund (Save for Someone)
 vaults.set('2', {
   id: '2',
-  name: 'Dev Grant: OPNet Toolkit',
+  name: "Jake's College Fund",
   creator: 'bc1q...creator2',
-  totalRaised: 110000000n,
-  unlockBlock: 850000n,
+  totalRaised: 150000000n, // 1.5 BTC
+  unlockBlock: 1050000n,
   isClosed: false,
   withdrawn: 0n,
-  contributorCount: 8,
-  goalAmount: 100000000n,
-  beneficiary: 'bc1q...grantee',
+  contributorCount: 4,
+  goalAmount: 0n,
+  beneficiary: 'bc1q...jake',
 });
 
-// Seed: 3) HODL Vault 2027 — open-collection
+// Seed: 3) Community Skatepark Build — all-or-nothing
 vaults.set('3', {
   id: '3',
-  name: 'HODL Vault 2027',
+  name: 'Community Skatepark Build',
   creator: 'bc1q...creator3',
-  totalRaised: 75000000n,
-  unlockBlock: 1000000n,
+  totalRaised: 120000000n, // 1.2 BTC
+  unlockBlock: 920000n,
   isClosed: false,
   withdrawn: 0n,
-  contributorCount: 3,
-  goalAmount: 0n,
+  contributorCount: 11,
+  goalAmount: 200000000n, // 2 BTC goal
   beneficiary: ZERO_ADDRESS,
 });
 
@@ -63,35 +63,41 @@ creatorVaults.set('bc1q...creator1', ['1']);
 creatorVaults.set('bc1q...creator2', ['2']);
 creatorVaults.set('bc1q...creator3', ['3']);
 
-// Seed contributions for vault 1
+// Seed contributions for vault 1 — Lisa's Birthday Surprise
 contributions.push(
-  { vaultId: '1', contributor: 'bc1q...alpha1', amount: 100000000n, tokensEarned: 12000000000000000000000n },
-  { vaultId: '1', contributor: 'bc1q...alpha2', amount: 80000000n, tokensEarned: 9600000000000000000000n },
-  { vaultId: '1', contributor: 'bc1q...alpha3', amount: 90000000n, tokensEarned: 10800000000000000000000n },
-  { vaultId: '1', contributor: 'bc1q...alpha4', amount: 50000000n, tokensEarned: 6000000000000000000000n },
+  { vaultId: '1', contributor: 'bc1q...alpha1', amount: 2000000n, tokensEarned: 240000000000000000000n },
+  { vaultId: '1', contributor: 'bc1q...alpha2', amount: 1500000n, tokensEarned: 180000000000000000000n },
+  { vaultId: '1', contributor: 'bc1q...alpha3', amount: 1000000n, tokensEarned: 120000000000000000000n },
+  { vaultId: '1', contributor: 'bc1q...alpha4', amount: 1500000n, tokensEarned: 180000000000000000000n },
+  { vaultId: '1', contributor: 'bc1q...alpha5', amount: 1000000n, tokensEarned: 120000000000000000000n },
+  { vaultId: '1', contributor: 'bc1q...alpha6', amount: 1500000n, tokensEarned: 180000000000000000000n },
 );
 
-// Seed contributions for vault 2
+// Seed contributions for vault 2 — Jake's College Fund
 contributions.push(
-  { vaultId: '2', contributor: 'bc1q...beta1', amount: 20000000n, tokensEarned: 2400000000000000000000n },
-  { vaultId: '2', contributor: 'bc1q...beta2', amount: 15000000n, tokensEarned: 1800000000000000000000n },
-  { vaultId: '2', contributor: 'bc1q...beta3', amount: 25000000n, tokensEarned: 3000000000000000000000n },
-  { vaultId: '2', contributor: 'bc1q...beta4', amount: 10000000n, tokensEarned: 1200000000000000000000n },
-  { vaultId: '2', contributor: 'bc1q...beta5', amount: 12000000n, tokensEarned: 1440000000000000000000n },
-  { vaultId: '2', contributor: 'bc1q...beta6', amount: 8000000n, tokensEarned: 960000000000000000000n },
-  { vaultId: '2', contributor: 'bc1q...beta7', amount: 10000000n, tokensEarned: 1200000000000000000000n },
-  { vaultId: '2', contributor: 'bc1q...beta8', amount: 10000000n, tokensEarned: 1200000000000000000000n },
+  { vaultId: '2', contributor: 'bc1q...beta1', amount: 50000000n, tokensEarned: 6000000000000000000000n },
+  { vaultId: '2', contributor: 'bc1q...beta2', amount: 30000000n, tokensEarned: 3600000000000000000000n },
+  { vaultId: '2', contributor: 'bc1q...beta3', amount: 50000000n, tokensEarned: 6000000000000000000000n },
+  { vaultId: '2', contributor: 'bc1q...beta4', amount: 20000000n, tokensEarned: 2400000000000000000000n },
 );
 
-// Seed contributions for vault 3
+// Seed contributions for vault 3 — Community Skatepark Build
 contributions.push(
-  { vaultId: '3', contributor: 'bc1q...gamma1', amount: 30000000n, tokensEarned: 3600000000000000000000n },
-  { vaultId: '3', contributor: 'bc1q...gamma2', amount: 25000000n, tokensEarned: 3000000000000000000000n },
-  { vaultId: '3', contributor: 'bc1q...gamma3', amount: 20000000n, tokensEarned: 2400000000000000000000n },
+  { vaultId: '3', contributor: 'bc1q...gamma1', amount: 15000000n, tokensEarned: 1800000000000000000000n },
+  { vaultId: '3', contributor: 'bc1q...gamma2', amount: 10000000n, tokensEarned: 1200000000000000000000n },
+  { vaultId: '3', contributor: 'bc1q...gamma3', amount: 12000000n, tokensEarned: 1440000000000000000000n },
+  { vaultId: '3', contributor: 'bc1q...gamma4', amount: 8000000n, tokensEarned: 960000000000000000000n },
+  { vaultId: '3', contributor: 'bc1q...gamma5', amount: 15000000n, tokensEarned: 1800000000000000000000n },
+  { vaultId: '3', contributor: 'bc1q...gamma6', amount: 10000000n, tokensEarned: 1200000000000000000000n },
+  { vaultId: '3', contributor: 'bc1q...gamma7', amount: 8000000n, tokensEarned: 960000000000000000000n },
+  { vaultId: '3', contributor: 'bc1q...gamma8', amount: 12000000n, tokensEarned: 1440000000000000000000n },
+  { vaultId: '3', contributor: 'bc1q...gamma9', amount: 10000000n, tokensEarned: 1200000000000000000000n },
+  { vaultId: '3', contributor: 'bc1q...gamma10', amount: 10000000n, tokensEarned: 1200000000000000000000n },
+  { vaultId: '3', contributor: 'bc1q...gamma11', amount: 10000000n, tokensEarned: 1200000000000000000000n },
 );
 
 // Platform-level mock state
-let totalPlatformBtc = 505000000n; // sum of all vault totalRaised
+let totalPlatformBtc = 278500000n; // sum of all vault totalRaised
 const MOCK_TOKEN_RATE = 120000n; // tokens per 1 BTC at current level
 let totalMinted = 0n; // simplified, not tracking exactly
 
