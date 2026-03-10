@@ -59,7 +59,7 @@
 .acc-meta {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 11px;
-  color: var(--accent);
+  color: var(--text);
   margin-top: 4px;
   padding-bottom: 20px;
 }

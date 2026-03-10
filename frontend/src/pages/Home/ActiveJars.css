@@ -144,7 +144,7 @@
 }
 
 .jar-card-stat-accent {
-  color: var(--accent);
+  color: var(--text);
 }
 
 .jar-card-arrow {

@@ -255,7 +255,7 @@
 }
 
 .fund-stat-accent {
-  color: var(--accent);
+  color: var(--text);
 }
 
 /* ── Contributors table ────────────────────────────────────────── */
@@ -330,7 +330,7 @@
 
 .fund-contributor-tokens {
   font-family: 'IBM Plex Mono', monospace;
-  color: var(--accent);
+  color: var(--text);
   font-size: 12px;
 }
 
@@ -358,7 +358,7 @@
 }
 
 .fund-curve-desc strong {
-  color: var(--accent);
+  color: var(--text);
 }
 
 /* ── Actions ───────────────────────────────────────────────────── */
@@ -398,7 +398,7 @@
 }
 
 .fund-contribute-estimate strong {
-  color: var(--accent);
+  color: var(--text);
 }
 
 .fund-contribute-actions {

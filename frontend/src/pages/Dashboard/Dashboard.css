@@ -135,7 +135,7 @@
 }
 
 .dashboard-accent {
-  color: var(--accent);
+  color: var(--text);
 }
 
 /* ── Status badges ───────────────────────────────────────────────── */
