@@ -97,6 +97,32 @@
   flex: 1;
 }
 
+.jar-card-progress-wrap {
+  margin-bottom: 16px;
+}
+
+.jar-card-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--border-light);
+  overflow: hidden;
+}
+
+.jar-card-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.4s ease;
+}
+
+.jar-card-progress-text {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 6px;
+}
+
 .jar-card-stats {
   display: flex;
   gap: 24px;

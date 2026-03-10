@@ -1,6 +1,26 @@
 import { StepCard } from '../../components/ui/StepCard';
-import { MOCK_STEPS } from '../../services/mockData';
 import './HowItWorks.css';
+
+const STEPS = [
+  {
+    number: 'Step 01',
+    title: 'Create',
+    description:
+      'Set your vault name, goal amount, time-lock, and optional beneficiary.',
+  },
+  {
+    number: 'Step 02',
+    title: 'Fund',
+    description:
+      'Contributors back it with BTC and earn $FJAR tokens. Early backers earn more.',
+  },
+  {
+    number: 'Step 03',
+    title: 'Resolve',
+    description:
+      'Goal met? Withdraw the BTC. Goal missed? Everyone gets a full refund.',
+  },
+];
 
 export function HowItWorks() {
   return (
@@ -10,7 +30,7 @@ export function HowItWorks() {
         <span className="how-sub">Bitcoin-native from start to finish</span>
       </div>
       <div className="steps-grid">
-        {MOCK_STEPS.map((step) => (
+        {STEPS.map((step) => (
           <StepCard key={step.number} {...step} />
         ))}
       </div>

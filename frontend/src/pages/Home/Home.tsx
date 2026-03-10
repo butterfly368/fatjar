@@ -1,18 +1,18 @@
 import { HeroSection } from './HeroSection';
 import { StatsStrip } from './StatsStrip';
-import { FeaturesSection } from './FeaturesSection';
 import { HowItWorks } from './HowItWorks';
-import { BondingCurveSection } from './BondingCurveSection';
+import { FeaturesSection } from './FeaturesSection';
 import { ActiveJars } from './ActiveJars';
+import { BondingCurveSection } from './BondingCurveSection';
 
 export function Home() {
   return (
     <>
       <HeroSection />
       <StatsStrip />
-      <ActiveJars />
-      <FeaturesSection />
       <HowItWorks />
+      <FeaturesSection />
+      <ActiveJars />
       <BondingCurveSection />
     </>
   );
