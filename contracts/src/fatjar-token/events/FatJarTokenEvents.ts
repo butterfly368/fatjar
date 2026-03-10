@@ -23,3 +23,19 @@ export class ContributionMintedEvent extends NetEvent {
         super('ContributionMinted', data);
     }
 }
+
+/**
+ * Emitted when tokens are burned during refund.
+ */
+@final
+export class TokensBurnedEvent extends NetEvent {
+    constructor(contributor: Address, tokensBurned: u256) {
+        const data: BytesWriter = new BytesWriter(
+            ADDRESS_BYTE_LENGTH + U256_BYTE_LENGTH,
+        );
+        data.writeAddress(contributor);
+        data.writeU256(tokensBurned);
+
+        super('TokensBurned', data);
+    }
+}

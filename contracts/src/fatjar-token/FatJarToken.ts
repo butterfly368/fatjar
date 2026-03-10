@@ -12,7 +12,7 @@ import {
 } from '@btc-vision/btc-runtime/runtime';
 import { EMPTY_POINTER } from '@btc-vision/btc-runtime/runtime/math/bytes';
 import { StoredMapU256 } from '@btc-vision/btc-runtime/runtime/storage/maps/StoredMapU256';
-import { ContributionMintedEvent } from './events/FatJarTokenEvents';
+import { ContributionMintedEvent, TokensBurnedEvent } from './events/FatJarTokenEvents';
 
 // Storage pointers (module level — unique, no collisions)
 const managerAddressPointer: u16 = Blockchain.nextPointer;
@@ -185,6 +185,40 @@ export class FatJarToken extends OP20 {
         const writer = new BytesWriter(32);
         writer.writeU256(remaining);
         return writer;
+    }
+
+    /**
+     * Burn tokens from a contributor during refund. Only callable by Manager.
+     * D1: totalBtcContributed is NOT decremented — curve reflects all-time activity.
+     */
+    @method(
+        {
+            name: 'contributor',
+            type: ABIDataTypes.ADDRESS,
+        },
+        {
+            name: 'tokenAmount',
+            type: ABIDataTypes.UINT256,
+        },
+    )
+    @emit('TokensBurned')
+    @returns()
+    public burnForRefund(calldata: Calldata): BytesWriter {
+        this.onlyManager();
+
+        const contributor: Address = calldata.readAddress();
+        const tokenAmount: u256 = calldata.readU256();
+
+        if (u256.eq(tokenAmount, u256.Zero)) {
+            throw new Revert('Zero burn amount');
+        }
+
+        // Burn tokens from contributor (OP20._burn checks balance internally)
+        this._burn(contributor, tokenAmount);
+
+        this.emitEvent(new TokensBurnedEvent(contributor, tokenAmount));
+
+        return new BytesWriter(0);
     }
 
     // =========================================================================
