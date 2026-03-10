@@ -4,7 +4,7 @@
 **Status:** Approved (evolving)
 **Competition:** vibecode.finance Week 3 "The Breakthrough" (deadline Mar 13)
 **Platform:** OPNet (Bitcoin L1, AssemblyScript/WASM)
-**Name:** TBD (working name: PiggyCoin — exploring alternatives)
+**Name:** FatJar ($FJAR)
 
 ---
 
@@ -29,7 +29,7 @@ A social savings protocol on Bitcoin L1. Anyone creates a fund ("piggy bank"). F
 
 ## 2. Token Economics
 
-### Token: $[TBD] (OP20)
+### Token: $FJAR (OP20)
 - **Max supply:** 100,000,000 tokens (capped)
 - **Minting:** Only via contributions to funds (no pre-mine, no team allocation for MVP)
 - **Tradeable:** On any OPNet DEX
@@ -62,17 +62,17 @@ The fund creator is the distribution channel. Every fund shared = marketing.
 ## 3. Smart Contract Architecture
 
 ### Contracts
-1. **PiggyFactory** — creates funds, tracks global state (total BTC, token supply)
-2. **PiggyFund** — individual fund with goals, contributions, time-lock
-3. **PiggyToken (OP20)** — bonding curve minting, capped at 100M
+1. **FatJarFactory** — creates funds, tracks global state (total BTC, token supply)
+2. **FatJarFund** — individual fund with goals, contributions, time-lock
+3. **FatJarToken (OP20)** — bonding curve minting, capped at 100M
 
-### PiggyFactory
+### FatJarFactory
 - `createFund(name, description, unlockDate?)` → deploys new fund
 - `getFunds(creator)` → list creator's funds
 - `getTotalBTC()` → total BTC contributed platform-wide
 - `getTokenRate()` → current tokens per BTC
 
-### PiggyFund
+### FatJarFund
 - `addGoal(name, targetAmount)` → add savings goal
 - `contribute(goalId?)` → send BTC, triggers token mint
 - `withdraw()` → creator claims (blocked if time-locked)
@@ -80,7 +80,7 @@ The fund creator is the distribution channel. Every fund shared = marketing.
 - `getGoals()` → all goals with progress
 - `getContributors()` → contributor list with amounts + tokens earned
 
-### PiggyToken (OP20)
+### FatJarToken (OP20)
 - Standard OP20 (transfer, approve, balanceOf)
 - `mint(to, amount)` — only callable by Factory during contribution
 - `totalMinted()` — tokens minted so far (of 100M cap)
@@ -122,7 +122,7 @@ Submission: GitHub + video + README + tweet #opnetvibecode + live Vercel demo
 ---
 
 ## 6. Open Questions
-- [ ] Final name and ticker
+- [x] Final name and ticker — FatJar / $FJAR (2026-03-09)
 - [ ] Logo design
 - [ ] Images/illustrations for the landing page
 - [ ] NFT layer (v2 — deferred)
