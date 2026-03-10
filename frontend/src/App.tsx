@@ -4,7 +4,6 @@ import { Home } from './pages/Home/Home';
 import { CreateFund } from './pages/CreateFund/CreateFund';
 import { FundDetail } from './pages/FundDetail/FundDetail';
 import { Dashboard } from './pages/Dashboard/Dashboard';
-
 export function App() {
   return (
     <Routes>
