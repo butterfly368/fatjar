@@ -1,0 +1,239 @@
+.fund-detail {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: clamp(40px, 6vw, 80px) var(--side-padding) 80px;
+}
+
+.fund-detail-header {
+  margin-bottom: 48px;
+}
+
+.fund-share-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.fund-share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 8px 16px;
+  border: 1.5px solid var(--border-light);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.fund-share-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.fund-share-url {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 300px;
+}
+
+@media (max-width: 600px) {
+  .fund-share-url { display: none; }
+}
+
+.fund-detail-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fund-detail-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin-bottom: 12px;
+}
+
+.fund-detail-desc {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text-sec);
+  max-width: 560px;
+}
+
+.fund-detail-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 48px;
+}
+
+@media (max-width: 768px) {
+  .fund-detail-grid { grid-template-columns: 1fr; }
+}
+
+.fund-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+  border: 1px solid var(--border-light);
+  margin-bottom: 32px;
+}
+
+.fund-stat {
+  padding: 24px;
+  border-right: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.fund-stat:nth-child(2n) {
+  border-right: none;
+}
+
+.fund-stat:nth-last-child(-n+2) {
+  border-bottom: none;
+}
+
+.fund-stat-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.fund-stat-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.fund-stat-accent {
+  color: var(--accent);
+}
+
+.fund-contributors-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  margin-bottom: 16px;
+}
+
+.fund-contributor {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 13px;
+}
+
+.fund-contributor:last-child {
+  border-bottom: none;
+}
+
+.fund-contributor-addr {
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--text-sec);
+}
+
+.fund-contributor-amount {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500;
+}
+
+.fund-contributor-tokens {
+  color: var(--accent);
+  font-size: 11px;
+  margin-left: 8px;
+}
+
+.fund-contribute-card {
+  border: 1px solid var(--border-light);
+  padding: 32px;
+}
+
+.fund-contribute-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.fund-contribute-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.fund-contribute-estimate {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 12px;
+  background: var(--bg-alt);
+}
+
+.fund-contribute-estimate strong {
+  color: var(--accent);
+}
+
+.fund-status-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 3px 10px;
+  border: 1px solid;
+}
+
+.fund-status-open {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.fund-status-locked {
+  border-color: var(--text-muted);
+  color: var(--text-muted);
+}
+
+.fund-not-found {
+  text-align: center;
+  padding: 120px 0;
+}
+
+.fund-not-found-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.fund-not-found-desc {
+  color: var(--text-sec);
+  margin-bottom: 24px;
+}

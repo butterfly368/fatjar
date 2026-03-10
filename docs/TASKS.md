@@ -23,15 +23,16 @@
 - [ ] `[contracts]` P1 — Test: create fund, contribute, check token mint math
 
 ### Session 4 — Frontend
-- [ ] `[frontend]` P0 — Scaffold React + TypeScript + Vite project
+- [x] `[frontend]` P0 — Scaffold React + TypeScript + Vite project (2026-03-10)
 - [ ] `[frontend]` P0 — OPWallet integration (connect, sign, send)
-- [ ] `[frontend]` P0 — Home page (hero, stats, how-it-works)
-- [ ] `[frontend]` P0 — Create Fund page (form → contract call)
-- [ ] `[frontend]` P0 — Fund Detail page (contributions, progress, contribute CTA)
+- [x] `[frontend]` P0 — Home page (hero, stats, how-it-works, active jars, bonding curve) (2026-03-10)
+- [x] `[frontend]` P0 — Create Fund page (form + validation + public/private toggle) (2026-03-10)
+- [x] `[frontend]` P0 — Fund Detail page (stats, contributors, contribute form, share/copy link) (2026-03-10)
 - [ ] `[frontend]` P1 — Dashboard (creator's funds, totals, withdraw)
 - [ ] `[frontend]` P1 — Dark/light theme toggle (port from prototype)
-- [ ] `[frontend]` P2 — Bonding curve visualizer
+- [x] `[frontend]` P2 — Bonding curve visualizer (2026-03-10)
 - [ ] `[frontend]` P2 — Live activity feed
+- [ ] `[frontend]` P0 — **Narrative revision** — update copy/content per direction change (pending)
 
 ### Session 5 — Polish & Submit
 - [ ] `[demo]` P0 — Deploy frontend to Vercel
@@ -50,3 +51,7 @@
 ## Completed
 - [x] FatJarToken.wasm compiled (37KB) — OP20 + bonding curve + authorized minter
 - [x] FatJarManager.wasm compiled (24KB) — fund CRUD, contributions, time-lock, withdrawals
+- [x] Frontend scaffolded: Vite + React + TS, 3 routes, all components, mock data, zero build errors
+- [x] Design system ported: tokens.css, typography, animations, all co-located CSS from prototype
+- [x] Public/private jar visibility toggle added to Create Fund + filtered on homepage
+- [x] Share/copy-link functionality on Fund Detail page

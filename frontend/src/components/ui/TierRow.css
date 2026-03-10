@@ -1,0 +1,41 @@
+.tier-row {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  transition: background 0.15s;
+}
+
+.tier-row:last-child {
+  border-bottom: none;
+}
+
+.tier-row:hover {
+  background: var(--bg-alt);
+}
+
+.tier-label {
+  color: var(--text-sec);
+}
+
+.tier-label strong {
+  color: var(--text);
+}
+
+.tier-rate {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.tier-rate-value {
+  color: var(--accent);
+}
+
+.tier-rate-change {
+  color: var(--text-muted);
+  font-size: 11px;
+  margin-left: 6px;
+}

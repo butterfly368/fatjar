@@ -1,0 +1,28 @@
+.stat-block {
+  padding: 32px 24px 32px 0;
+  border-right: 1px solid var(--border-light);
+}
+
+.stat-block:last-child {
+  border-right: none;
+}
+
+.stat-block-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.stat-block-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.stat-block-accent {
+  color: var(--accent);
+}

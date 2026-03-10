@@ -1,0 +1,151 @@
+.jars {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--side-padding) 80px;
+  border-top: 2px solid var(--text);
+}
+
+.jars-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 48px 0 40px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.jars-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(28px, 4vw, 52px);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.jars-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.jars-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+}
+
+@media (max-width: 768px) {
+  .jars-grid { grid-template-columns: 1fr; }
+}
+
+.jar-card {
+  padding: 32px;
+  border: 1px solid var(--border-light);
+  border-right: none;
+  transition: background 0.2s;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.jar-card:last-child {
+  border-right: 1px solid var(--border-light);
+}
+
+.jar-card:hover {
+  background: var(--bg-alt);
+}
+
+.jar-card-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.jar-card-status {
+  font-size: 9px;
+  padding: 2px 8px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+}
+
+.jar-card-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+
+.jar-card-desc {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-sec);
+  margin-bottom: 20px;
+  flex: 1;
+}
+
+.jar-card-stats {
+  display: flex;
+  gap: 24px;
+  border-top: 1px solid var(--border-light);
+  padding-top: 16px;
+}
+
+.jar-card-stat-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+.jar-card-stat-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.jar-card-stat-accent {
+  color: var(--accent);
+}
+
+.jar-card-arrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s;
+}
+
+.jar-card:hover .jar-card-arrow {
+  color: var(--accent);
+}
+
+@media (max-width: 768px) {
+  .jar-card {
+    border-right: 1px solid var(--border-light);
+    border-bottom: none;
+  }
+  .jar-card:last-child {
+    border-bottom: 1px solid var(--border-light);
+  }
+}

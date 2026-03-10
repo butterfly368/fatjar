@@ -1,0 +1,13 @@
+@import './reset.css';
+@import './tokens.css';
+@import './typography.css';
+@import './animations.css';
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Source Sans 3', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}

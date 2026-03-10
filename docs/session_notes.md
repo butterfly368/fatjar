@@ -283,3 +283,66 @@
 **Days to deadline:** 3 (March 13, 2026)
 
 **Next session:** Scaffold React frontend, port prototype design to components, integrate OPWallet
+
+---
+
+## Session 6 — 2026-03-10 — Frontend Scaffold & Full Build
+
+**Goal:** Scaffold React frontend from plan, port prototype CSS, build all 3 pages, add UX features.
+
+**What we did:**
+1. Scaffolded Vite + React + TypeScript in `frontend/`
+2. Installed react-router-dom + lucide-react
+3. Created design system CSS: tokens, reset, typography, animations, global
+4. Built layout shell: Navbar (fixed, wallet-aware), Footer (editorial), Layout (Outlet), Section
+5. Built UI atoms: Button (primary/secondary), StatBlock, Tag, AccordionItem, StepCard, Input/TextArea, BondingCurveChart (SVG), TierRow, WalletButton, Logo (SVG piggy + wordmark)
+6. Built Home page: HeroSection (two-column, piggy float), StatsStrip (4 KPIs), FeaturesSection (accordion, 5 items), HowItWorks (3 step cards), BondingCurveSection (chart + tier table)
+7. Built Create Fund page: form with name, description, unlock date, validation, success state
+8. Built Fund Detail page: fund header, 4-stat grid, contributor list, contribute form with token estimate
+9. Created TypeScript interfaces, mock data, contract call stubs, useWallet hook
+10. All verified: `npm run build` — zero errors, 19KB CSS, 254KB JS
+
+**UX improvements (from user feedback):**
+11. Added **Active Jars** section to homepage — clickable fund cards linking to `/fund/:id`
+12. Added **Share bar** to Fund Detail — Copy Link (clipboard API), Share (Web Share API), URL display
+13. Updated **Nav** — Explore link (#jars), Create link (wallet-gated)
+14. Added **Public/Private visibility toggle** to Create Fund — segmented button with hint text
+15. Added `isPublic` field to Fund type — homepage filters to public jars only
+16. Added visibility badge (Public/Private) on Fund Detail header
+
+**Key UX decisions:**
+- Public jars: visible on homepage + shareable via link
+- Private jars: only accessible via direct link (share buttons on Fund Detail)
+- Wallet addresses always truncated (bc1q...xyz1) — standard crypto UX, safe
+- Default: Public (encourages discovery), can toggle to Private
+
+**Design system created:**
+- `design-system/fatjar/MASTER.md` — full spec: colors, typography, spacing, components, anti-patterns, checklist
+
+**File structure (40+ files):**
+```
+frontend/
+  public/piggy-hero.png
+  src/
+    main.tsx, App.tsx
+    styles/ (tokens, reset, typography, animations, global)
+    components/layout/ (Navbar, Footer, Layout, Section, Logo)
+    components/ui/ (Button, StatBlock, Tag, AccordionItem, StepCard, Input, BondingCurveChart, TierRow, WalletButton)
+    pages/Home/ (Home, HeroSection, StatsStrip, ActiveJars, FeaturesSection, HowItWorks, BondingCurveSection)
+    pages/CreateFund/ (CreateFund)
+    pages/FundDetail/ (FundDetail)
+    hooks/useWallet.ts
+    services/ (contracts.ts, mockData.ts)
+    types/index.ts
+```
+
+**Open items carried forward:**
+- **Narrative revision needed** — user has direction changes to copy/content
+- OPWallet real integration (currently stubbed)
+- Contract deployment to testnet
+- Dark/light theme toggle
+- Dashboard page (creator's funds view)
+
+**Days to deadline:** 3 (March 13, 2026)
+
+**Next session:** Apply narrative revisions, then OPWallet integration + deploy

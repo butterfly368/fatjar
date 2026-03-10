@@ -1,0 +1,49 @@
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+.input-field {
+  padding: 14px 16px;
+  border: 1.5px solid var(--border-light);
+  background: var(--bg);
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 16px;
+  color: var(--text);
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+.input-field:focus {
+  border-color: var(--text);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.05);
+}
+
+.input-field::placeholder {
+  color: var(--text-muted);
+}
+
+.input-error {
+  border-color: #c0392b;
+}
+
+.input-error-text {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: #c0392b;
+}
+
+textarea.input-field {
+  resize: vertical;
+  min-height: 100px;
+}

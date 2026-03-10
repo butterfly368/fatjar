@@ -1,0 +1,131 @@
+.create-fund {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: clamp(40px, 6vw, 80px) var(--side-padding) 80px;
+}
+
+.create-fund-header {
+  margin-bottom: 48px;
+}
+
+.create-fund-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.create-fund-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.create-fund-form {
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.create-fund-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 600px) {
+  .create-fund-row { grid-template-columns: 1fr; }
+}
+
+.create-fund-divider {
+  height: 1px;
+  background: var(--border-light);
+  margin: 8px 0;
+}
+
+.create-fund-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.create-fund-success {
+  padding: 32px;
+  border: 1px solid var(--accent);
+  background: var(--accent-dim);
+}
+
+.create-fund-success-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.create-fund-success-desc {
+  font-size: 14px;
+  color: var(--text-sec);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.create-fund-visibility {}
+
+.create-fund-visibility-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.create-fund-visibility-options {
+  display: flex;
+  gap: 0;
+}
+
+.visibility-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: 1.5px solid var(--border-light);
+  background: transparent;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.visibility-option:first-child {
+  border-right: none;
+}
+
+.visibility-option-active {
+  border-color: var(--text);
+  color: var(--text);
+  background: var(--bg-alt);
+}
+
+.visibility-option:hover:not(.visibility-option-active) {
+  border-color: var(--text-muted);
+}
+
+.create-fund-visibility-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 8px;
+  line-height: 1.5;
+}

@@ -1,0 +1,31 @@
+.wallet-btn {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text);
+  border: 1.5px solid var(--text);
+  padding: 6px 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wallet-btn:hover {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.wallet-btn-connected {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.wallet-btn-connected:hover {
+  background: var(--accent);
+  color: var(--text);
+}

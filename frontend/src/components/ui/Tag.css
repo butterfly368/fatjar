@@ -1,0 +1,13 @@
+.tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  padding: 6px 14px;
+  border: 1px solid var(--border-light);
+  color: var(--text-sec);
+  cursor: default;
+}
+
+.tag-active {
+  border-color: var(--text);
+  color: var(--text);
+}
