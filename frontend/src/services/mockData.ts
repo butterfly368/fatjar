@@ -1,4 +1,4 @@
-import type { Fund, Contribution, BondingCurveTier, Stat, Feature, Step } from '../types';
+import type { Fund, LegacyContribution, BondingCurveTier, Stat, Feature, Step } from '../types';
 
 export const MOCK_STATS: Stat[] = [
   { label: 'Total Value Locked', value: '4.82', accent: 'BTC' },
@@ -107,7 +107,7 @@ export const MOCK_FUNDS: Fund[] = [
   },
 ];
 
-export const MOCK_CONTRIBUTIONS: Contribution[] = [
+export const MOCK_CONTRIBUTIONS: LegacyContribution[] = [
   { fundId: 1, contributor: 'bc1q...aaa1', amount: 50000000, tokensMinted: 6000000, timestamp: Date.now() - 86400000 },
   { fundId: 1, contributor: 'bc1q...bbb2', amount: 25000000, tokensMinted: 2800000, timestamp: Date.now() - 43200000 },
   { fundId: 1, contributor: 'bc1q...ccc3', amount: 10000000, tokensMinted: 1100000, timestamp: Date.now() - 3600000 },

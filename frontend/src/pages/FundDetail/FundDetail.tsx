@@ -4,13 +4,13 @@ import { ArrowRight, Lock, Unlock, Link2, Check, Share2, Globe, EyeOff } from 'l
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { getFundDetails, getContributions, formatSats, formatAddress, contribute } from '../../services/contracts';
-import type { Fund, Contribution } from '../../types';
+import type { Fund, LegacyContribution } from '../../types';
 import './FundDetail.css';
 
 export function FundDetail() {
   const { id } = useParams<{ id: string }>();
   const [fund, setFund] = useState<Fund | null>(null);
-  const [contributions, setContributions] = useState<Contribution[]>([]);
+  const [contributions, setContributions] = useState<LegacyContribution[]>([]);
   const [loading, setLoading] = useState(true);
   const [amount, setAmount] = useState('');
   const [contributing, setContributing] = useState(false);
