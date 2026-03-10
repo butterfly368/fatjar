@@ -175,3 +175,61 @@
 **Days to deadline:** 3 (March 13, 2026)
 
 **Next steps:** Deploy to testnet, test full flow (create fund → contribute → check token mint), then frontend integration
+
+---
+
+## Session 4b — 2026-03-10 — Security Review & Cross-Contract Minting
+
+**Goal:** Code review, fix security issues, wire up cross-contract minting between Manager and Token.
+
+**What we did:**
+1. Ran security code review via dedicated agent — found 3 critical, 4 important, 5 suggestions
+2. Fixed C1: Added MAX_SATOSHIS (21M BTC) upper-bound check in bonding curve to prevent overflow DoS
+3. Fixed C2: Added one-time guards on `setManager()` and `setTokenAddress()` — cannot change once set
+4. Fixed C3: Replaced custom `sqrt` implementation with audited `SafeMath.sqrt` from btc-runtime
+5. Fixed I1: Reordered state update (`totalBtcContributed`) before `_mint()` — Checks-Effects-Interactions pattern
+6. Fixed I2: Validated `unlockTimestamp` fits in u64 range, changed `FundCreatedEvent` to use u256
+7. Fixed S2: `ContributionEvent` now includes `tokensMinted` amount for frontend indexing
+8. Researched OPNet cross-contract calls — `Blockchain.call()` is first-class, used by TransferHelper/safeTransfer
+9. Fixed S5: Wired up `Manager.contribute()` → `Token.mintForContribution()` via `Blockchain.call()`
+   - Single atomic transaction, reverts entirely on failure
+   - `Blockchain.tx.sender` inside Token resolves to Manager address → `onlyManager()` passes
+   - `Blockchain.tx.origin` stays as the user throughout the call chain
+10. Both contracts recompile clean (Token 37KB, Manager 26KB)
+
+**Key findings — OPNet cross-contract calls:**
+- `Blockchain.call(destinationContract, calldata)` — canonical pattern
+- `Blockchain.tx.sender` = immediate caller (changes in call chain)
+- `Blockchain.tx.origin` = original user (stays constant)
+- `TransferHelper` and `OP20Utils` in btc-runtime demonstrate the pattern
+- OP20 has `ReentrancyGuard` with CALLBACK mode for safe cross-contract calls
+- vibecode bible has no specific guidance — this is a runtime-level feature
+
+**Architecture (final):**
+- User calls `Manager.contribute(fundId, satoshis)`
+- Manager updates fund state, then calls `Token.mintForContribution(contributor, satoshis)`
+- Token calculates bonding curve, mints $FJAR to contributor, returns tokensMinted
+- All in one atomic transaction
+
+**Deployment order (for next session):**
+1. Deploy FatJarToken via OPWallet → get token address
+2. Deploy FatJarManager via OPWallet → get manager address
+3. Call `Token.setManager(managerAddress)` — links them (one-time)
+4. Call `Manager.setTokenAddress(tokenAddress)` — links them (one-time)
+
+**Note on contribute():** Changed `Blockchain.tx.sender` to `Blockchain.tx.origin` for contributor address in Manager.contribute(), since tx.sender could be a relayer/frontend contract. The actual contributor is the original transaction signer.
+
+**Commits:**
+- `3ae5d6d` — Add smart contracts and project docs (sessions 2-4)
+- `86cb9da` — Fix security issues and wire up cross-contract minting
+
+**Open items carried forward:**
+- OPWallet not yet installed (manual: Chrome extension + faucet.opnet.org)
+- Contracts not yet deployed to testnet
+- No unit tests (acceptable for competition — contracts are reviewed)
+- Fund name emitted in FundCreatedEvent but as unlockTimestamp only — consider adding name string to event in future
+- I4 (compositeKey collision for 160-bit addresses) — fine for competition, fix post-competition
+
+**Days to deadline:** 3 (March 13, 2026)
+
+**Next session:** Install OPWallet → deploy contracts → link them → test create/contribute/withdraw flow on testnet
