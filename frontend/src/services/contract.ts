@@ -12,8 +12,6 @@
 import type { Vault, Contribution } from '../types';
 import * as mock from './contract.mock';
 import * as live from './contract.live';
-import { OPNET_CONFIG } from './opnet-config';
-
 // ── Mode detection ──────────────────────────────────────────────────
 
 type Mode = 'live' | 'mock' | 'pending';
@@ -28,23 +26,6 @@ function getUrlMode(): 'live' | 'mock' | null {
   return null;
 }
 
-async function probeRpc(): Promise<boolean> {
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 3000);
-    const res = await fetch(`${OPNET_CONFIG.rpcUrl}/api/v1/json-rpc`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ jsonrpc: '2.0', method: 'btc_blockNumber', params: [], id: 1 }),
-      signal: controller.signal,
-    });
-    clearTimeout(timeout);
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
-
 async function detectMode(): Promise<Mode> {
   const forced = getUrlMode();
   if (forced) {
@@ -52,8 +33,9 @@ async function detectMode(): Promise<Mode> {
     return forced;
   }
 
-  const rpcAlive = await probeRpc();
-  currentMode = rpcAlive ? 'live' : 'mock';
+  // Default to mock — demo always works with seed data.
+  // Use ?live=true to read from chain (empty until funds are created).
+  currentMode = 'mock';
   return currentMode;
 }
 
