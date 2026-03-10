@@ -147,6 +147,22 @@
 
 @media (max-width: 768px) {
   .fund-detail-grid { grid-template-columns: 1fr; }
+  .fund-detail-grid > div:last-child { order: -1; }
+}
+
+@media (max-width: 480px) {
+  .fund-stats {
+    grid-template-columns: 1fr;
+  }
+  .fund-stat {
+    border-right: none;
+  }
+  .fund-stat:nth-last-child(-n+2) {
+    border-bottom: 1px solid var(--border-light);
+  }
+  .fund-stat:last-child {
+    border-bottom: none;
+  }
 }
 
 /* ── Progress section ──────────────────────────────────────────── */
@@ -177,7 +193,7 @@
 
 .fund-progress-track {
   width: 100%;
-  height: 6px;
+  height: 10px;
   background: var(--bg-alt);
   border: 1px solid var(--border-light);
   overflow: hidden;
@@ -261,6 +277,7 @@
 
 .fund-contributors-table {
   border: 1px solid var(--border-light);
+  overflow-x: auto;
 }
 
 .fund-contributors-thead {
@@ -276,6 +293,12 @@
   background: var(--bg-alt);
 }
 
+.fund-contributors-thead > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .fund-contributor {
   display: grid;
   grid-template-columns: 1.4fr 0.8fr 1fr;
@@ -287,6 +310,12 @@
 
 .fund-contributor:last-child {
   border-bottom: none;
+}
+
+.fund-contributor > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .fund-contributor-addr {

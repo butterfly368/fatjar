@@ -118,3 +118,9 @@
   .hero-actions { justify-content: center; }
   .hero-label { justify-content: center; }
 }
+
+@media (max-width: 768px) {
+  .hero-left { order: -1; }
+  .hero-right { order: 0; }
+  .piggy-img { max-height: 200px; object-fit: contain; }
+}
