@@ -317,8 +317,8 @@ export class FatJarManager extends OP_NET {
     }
 
     /**
-     * Withdraw BTC from a fund. Only the fund creator can withdraw.
-     * Respects time-lock if set.
+     * Withdraw BTC from a fund. Creator withdraws (or beneficiary if set).
+     * Respects time-lock and goal conditions.
      */
     @method({
         name: 'fundId',
@@ -482,13 +482,12 @@ export class FatJarManager extends OP_NET {
             throw new Revert('No contribution to refund');
         }
 
-        // Get tokens earned from this fund
-        const tokensKey: u256 = this.compositeKey(fundId, contributorKey);
-        const tokensEarned: u256 = this.contributionTokensEarned.get(tokensKey);
+        // Get tokens earned from this fund (same composite key as contribution)
+        const tokensEarned: u256 = this.contributionTokensEarned.get(contribKey);
 
         // Zero out contribution and tokens earned
         this.contributionAmount.set(contribKey, ZERO);
-        this.contributionTokensEarned.set(tokensKey, ZERO);
+        this.contributionTokensEarned.set(contribKey, ZERO);
 
         // Decrement fund total raised
         this.fundTotalRaised.set(fundId, SafeMath.sub(totalRaised, contributionAmount));
