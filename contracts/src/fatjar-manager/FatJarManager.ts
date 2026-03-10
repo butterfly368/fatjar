@@ -332,7 +332,7 @@ export class FatJarManager extends OP_NET {
     public withdraw(calldata: Calldata): BytesWriter {
         const fundId: u256 = calldata.readU256();
 
-        // Validate fund exists and caller is creator
+        // Validate fund exists
         const creatorU256: u256 = this.fundCreator.get(fundId);
         if (u256.eq(creatorU256, ZERO)) {
             throw new Revert('Fund does not exist');
@@ -340,8 +340,19 @@ export class FatJarManager extends OP_NET {
 
         const sender: Address = Blockchain.tx.sender;
         const senderU256: u256 = this.addressToU256(sender);
-        if (!u256.eq(creatorU256, senderU256)) {
-            throw new Revert('Only creator can withdraw');
+
+        // D5: Check if beneficiary is set — determines who can withdraw
+        const beneficiaryU256: u256 = this.fundBeneficiary.get(fundId);
+        if (!u256.eq(beneficiaryU256, ZERO)) {
+            // Beneficiary mode: only beneficiary can withdraw
+            if (!u256.eq(beneficiaryU256, senderU256)) {
+                throw new Revert('Only beneficiary can withdraw');
+            }
+        } else {
+            // Creator mode: only creator can withdraw
+            if (!u256.eq(creatorU256, senderU256)) {
+                throw new Revert('Only creator can withdraw');
+            }
         }
 
         // Check time-lock
@@ -353,8 +364,18 @@ export class FatJarManager extends OP_NET {
             }
         }
 
-        // Calculate withdrawable amount (total raised - already withdrawn)
+        // Read totalRaised once (used for goal check AND withdrawal calculation)
         const totalRaised: u256 = this.fundTotalRaised.get(fundId);
+
+        // If goal-based, require goal to be met
+        const goalAmount: u256 = this.fundGoalAmount.get(fundId);
+        if (!u256.eq(goalAmount, ZERO)) {
+            if (u256.lt(totalRaised, goalAmount)) {
+                throw new Revert('Goal not met');
+            }
+        }
+
+        // Calculate withdrawable amount
         const alreadyWithdrawn: u256 = this.fundWithdrawn.get(fundId);
         const withdrawable: u256 = SafeMath.sub(totalRaised, alreadyWithdrawn);
 
@@ -362,10 +383,8 @@ export class FatJarManager extends OP_NET {
             throw new Revert('Nothing to withdraw');
         }
 
-        // Mark as withdrawn
         this.fundWithdrawn.set(fundId, totalRaised);
 
-        // Emit event (actual BTC transfer handled at transaction level)
         this.emitEvent(new WithdrawalEvent(fundId, sender, withdrawable));
 
         const writer = new BytesWriter(32);
@@ -408,6 +427,90 @@ export class FatJarManager extends OP_NET {
         return new BytesWriter(0);
     }
 
+    /**
+     * Refund a contributor's BTC from a failed goal-based vault.
+     * Burns the $FJAR tokens they earned from this vault.
+     * D2: Contributor must hold enough $FJAR — if they sold, refund reverts.
+     * D4: Only available for goal-based vaults (goalAmount > 0).
+     */
+    @method({
+        name: 'fundId',
+        type: ABIDataTypes.UINT256,
+    })
+    @emit('Refund')
+    @returns({
+        name: 'amount',
+        type: ABIDataTypes.UINT256,
+    })
+    public refund(calldata: Calldata): BytesWriter {
+        const fundId: u256 = calldata.readU256();
+
+        // Must be a goal-based vault
+        const goalAmount: u256 = this.fundGoalAmount.get(fundId);
+        if (u256.eq(goalAmount, ZERO)) {
+            throw new Revert('Not a goal-based vault');
+        }
+
+        // Validate fund exists
+        const creatorU256: u256 = this.fundCreator.get(fundId);
+        if (u256.eq(creatorU256, ZERO)) {
+            throw new Revert('Fund does not exist');
+        }
+
+        // Time-lock must have expired
+        const unlockTimestamp: u256 = this.fundUnlockTimestamp.get(fundId);
+        if (!u256.eq(unlockTimestamp, ZERO)) {
+            const currentBlock: u256 = u256.fromU64(Blockchain.block.number);
+            if (u256.gt(unlockTimestamp, currentBlock)) {
+                throw new Revert('Fund is time-locked');
+            }
+        }
+
+        // Goal must NOT be met
+        const totalRaised: u256 = this.fundTotalRaised.get(fundId);
+        if (u256.ge(totalRaised, goalAmount)) {
+            throw new Revert('Goal was met');
+        }
+
+        // Caller must have contributed
+        const contributor: Address = Blockchain.tx.sender;
+        const contributorKey: u256 = this.addressToU256(contributor);
+        const contribKey: u256 = this.compositeKey(fundId, contributorKey);
+        const contributionAmount: u256 = this.contributionAmount.get(contribKey);
+
+        if (u256.eq(contributionAmount, ZERO)) {
+            throw new Revert('No contribution to refund');
+        }
+
+        // Get tokens earned from this fund
+        const tokensKey: u256 = this.compositeKey(fundId, contributorKey);
+        const tokensEarned: u256 = this.contributionTokensEarned.get(tokensKey);
+
+        // Zero out contribution and tokens earned
+        this.contributionAmount.set(contribKey, ZERO);
+        this.contributionTokensEarned.set(tokensKey, ZERO);
+
+        // Decrement fund total raised
+        this.fundTotalRaised.set(fundId, SafeMath.sub(totalRaised, contributionAmount));
+
+        // Decrement contributor count
+        const contribCount: u256 = this.fundContributorCount.get(fundId);
+        if (u256.gt(contribCount, ZERO)) {
+            this.fundContributorCount.set(fundId, SafeMath.sub(contribCount, ONE));
+        }
+
+        // Cross-contract call: burn $FJAR tokens
+        if (!u256.eq(tokensEarned, ZERO)) {
+            this.burnTokensForRefund(contributor, tokensEarned);
+        }
+
+        this.emitEvent(new RefundEvent(fundId, contributor, contributionAmount, tokensEarned));
+
+        const writer = new BytesWriter(32);
+        writer.writeU256(contributionAmount);
+        return writer;
+    }
+
     // =========================================================================
     // VIEW METHODS
     // =========================================================================
@@ -440,17 +543,21 @@ export class FatJarManager extends OP_NET {
         { name: 'isClosed', type: ABIDataTypes.UINT256 },
         { name: 'withdrawn', type: ABIDataTypes.UINT256 },
         { name: 'contributorCount', type: ABIDataTypes.UINT256 },
+        { name: 'goalAmount', type: ABIDataTypes.UINT256 },
+        { name: 'beneficiary', type: ABIDataTypes.UINT256 },
     )
     public getFundDetails(calldata: Calldata): BytesWriter {
         const fundId: u256 = calldata.readU256();
 
-        const writer = new BytesWriter(32 * 6);
+        const writer = new BytesWriter(32 * 8);
         writer.writeU256(this.fundCreator.get(fundId));
         writer.writeU256(this.fundTotalRaised.get(fundId));
         writer.writeU256(this.fundUnlockTimestamp.get(fundId));
         writer.writeU256(this.fundIsClosed.get(fundId));
         writer.writeU256(this.fundWithdrawn.get(fundId));
         writer.writeU256(this.fundContributorCount.get(fundId));
+        writer.writeU256(this.fundGoalAmount.get(fundId));
+        writer.writeU256(this.fundBeneficiary.get(fundId));
         return writer;
     }
 
@@ -474,6 +581,29 @@ export class FatJarManager extends OP_NET {
 
         const writer = new BytesWriter(32);
         writer.writeU256(amount);
+        return writer;
+    }
+
+    /**
+     * Get tokens earned by a contributor for a specific fund.
+     */
+    @method(
+        { name: 'fundId', type: ABIDataTypes.UINT256 },
+        { name: 'contributor', type: ABIDataTypes.ADDRESS },
+    )
+    @returns({
+        name: 'tokens',
+        type: ABIDataTypes.UINT256,
+    })
+    public getContributionTokens(calldata: Calldata): BytesWriter {
+        const fundId: u256 = calldata.readU256();
+        const contributor: Address = calldata.readAddress();
+
+        const tokensKey: u256 = this.compositeKey(fundId, this.addressToU256(contributor));
+        const tokens: u256 = this.contributionTokensEarned.get(tokensKey);
+
+        const writer = new BytesWriter(32);
+        writer.writeU256(tokens);
         return writer;
     }
 
@@ -557,6 +687,29 @@ export class FatJarManager extends OP_NET {
 
         // Read the minted token amount from the response
         return result.data.readU256();
+    }
+
+    /**
+     * Cross-contract call to FatJarToken.burnForRefund(contributor, tokenAmount).
+     */
+    private burnTokensForRefund(contributor: Address, tokenAmount: u256): void {
+        const tokenU256: u256 = this.tokenAddress.get(ZERO);
+        if (u256.eq(tokenU256, ZERO)) {
+            throw new Revert('Token address not set');
+        }
+
+        const tokenBytes: Uint8Array = tokenU256.toUint8Array(true);
+        const tokenAddr: Address = changetype<Address>(tokenBytes);
+
+        const burnSelector = encodeSelector('burnForRefund(address,uint256)');
+        const burnCalldata = new BytesWriter(
+            SELECTOR_BYTE_LENGTH + ADDRESS_BYTE_LENGTH + U256_BYTE_LENGTH,
+        );
+        burnCalldata.writeSelector(burnSelector);
+        burnCalldata.writeAddress(contributor);
+        burnCalldata.writeU256(tokenAmount);
+
+        Blockchain.call(tokenAddr, burnCalldata);
     }
 
     /**
