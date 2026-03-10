@@ -1,0 +1,360 @@
+{
+    "functions": [
+        {
+            "name": "setTokenAddress",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "tokenAddress",
+                    "type": "ADDRESS"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "createFund",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "name",
+                    "type": "STRING"
+                },
+                {
+                    "name": "unlockTimestamp",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "goalAmount",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "beneficiary",
+                    "type": "ADDRESS"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "fundId",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "contribute",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "fundId",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "satoshis",
+                    "type": "UINT256"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "withdraw",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "fundId",
+                    "type": "UINT256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "amount",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "closeFund",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "fundId",
+                    "type": "UINT256"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "refund",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "fundId",
+                    "type": "UINT256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "amount",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "getFundCount",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [],
+            "outputs": [
+                {
+                    "name": "count",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "getFundDetails",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "fundId",
+                    "type": "UINT256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "creator",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "totalRaised",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "unlockTimestamp",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "isClosed",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "withdrawn",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "contributorCount",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "goalAmount",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "beneficiary",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "getContribution",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "fundId",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "contributor",
+                    "type": "ADDRESS"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "amount",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "getContributionTokens",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "fundId",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "contributor",
+                    "type": "ADDRESS"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "tokens",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "getCreatorFundCount",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "creator",
+                    "type": "ADDRESS"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "count",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "getCreatorFundByIndex",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "creator",
+                    "type": "ADDRESS"
+                },
+                {
+                    "name": "index",
+                    "type": "UINT256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "fundId",
+                    "type": "UINT256"
+                }
+            ]
+        }
+    ],
+    "events": [
+        {
+            "name": "FundCreated",
+            "values": [
+                {
+                    "name": "fundId",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "creator",
+                    "type": "ADDRESS"
+                },
+                {
+                    "name": "unlockTimestamp",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "goalAmount",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "beneficiary",
+                    "type": "ADDRESS"
+                }
+            ],
+            "type": "Event"
+        },
+        {
+            "name": "Contribution",
+            "values": [
+                {
+                    "name": "fundId",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "contributor",
+                    "type": "ADDRESS"
+                },
+                {
+                    "name": "satoshis",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "tokensMinted",
+                    "type": "UINT256"
+                }
+            ],
+            "type": "Event"
+        },
+        {
+            "name": "Withdrawal",
+            "values": [
+                {
+                    "name": "fundId",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "creator",
+                    "type": "ADDRESS"
+                },
+                {
+                    "name": "satoshis",
+                    "type": "UINT256"
+                }
+            ],
+            "type": "Event"
+        },
+        {
+            "name": "FundClosed",
+            "values": [
+                {
+                    "name": "fundId",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "creator",
+                    "type": "ADDRESS"
+                }
+            ],
+            "type": "Event"
+        },
+        {
+            "name": "Refund",
+            "values": [
+                {
+                    "name": "fundId",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "contributor",
+                    "type": "ADDRESS"
+                },
+                {
+                    "name": "satoshis",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "tokensBurned",
+                    "type": "UINT256"
+                }
+            ],
+            "type": "Event"
+        }
+    ]
+}

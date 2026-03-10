@@ -1,107 +1,129 @@
 /**
- * Mock contract service for FatJar vaults.
+ * Contract service facade — auto-detects live chain vs mock mode.
  *
- * Uses in-memory state so Create and Contribute work in the demo.
- * Will be replaced with real OPWallet calls in Task 9.
+ * Detection order:
+ *   1. URL param: ?live=true  → force live
+ *   2. URL param: ?mock=true  → force mock
+ *   3. Auto: ping RPC, use live if reachable, else mock
+ *
+ * Same function signatures as before — no page changes needed.
  */
 
 import type { Vault, Contribution } from '../types';
-import { ZERO_ADDRESS } from '../types';
+import * as mock from './contract.mock';
+import * as live from './contract.live';
+import { OPNET_CONFIG } from './opnet-config';
 
-// ── In-memory mock state ──────────────────────────────────────────
+// ── Mode detection ──────────────────────────────────────────────────
 
-let nextVaultId = 4;
+type Mode = 'live' | 'mock' | 'pending';
+let currentMode: Mode = 'pending';
+let modePromise: Promise<Mode> | null = null;
 
-const vaults: Map<string, Vault> = new Map();
-const contributions: Contribution[] = [];
-const creatorVaults: Map<string, string[]> = new Map();
+function getUrlMode(): 'live' | 'mock' | null {
+  if (typeof window === 'undefined') return null;
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('live') === 'true') return 'live';
+  if (params.get('mock') === 'true') return 'mock';
+  return null;
+}
 
-// Seed: 1) Lisa's Birthday Surprise — open-collection (Collect)
-vaults.set('1', {
-  id: '1',
-  name: "Lisa's Birthday Surprise",
-  creator: 'bc1q...creator1',
-  totalRaised: 8500000n, // 0.085 BTC
-  unlockBlock: 900000n,
-  isClosed: false,
-  withdrawn: 0n,
-  contributorCount: 6,
-  goalAmount: 0n,
-  beneficiary: ZERO_ADDRESS,
-});
+async function probeRpc(): Promise<boolean> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+    const res = await fetch(`${OPNET_CONFIG.rpcUrl}/api/v1/json-rpc`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jsonrpc: '2.0', method: 'btc_blockNumber', params: [], id: 1 }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
 
-// Seed: 2) Jake's College Fund — trust-fund (Save for Someone)
-vaults.set('2', {
-  id: '2',
-  name: "Jake's College Fund",
-  creator: 'bc1q...creator2',
-  totalRaised: 150000000n, // 1.5 BTC
-  unlockBlock: 1050000n,
-  isClosed: false,
-  withdrawn: 0n,
-  contributorCount: 4,
-  goalAmount: 0n,
-  beneficiary: 'bc1q...jake',
-});
+async function detectMode(): Promise<Mode> {
+  const forced = getUrlMode();
+  if (forced) {
+    currentMode = forced;
+    return forced;
+  }
 
-// Seed: 3) Community Skatepark Build — all-or-nothing
-vaults.set('3', {
-  id: '3',
-  name: 'Community Skatepark Build',
-  creator: 'bc1q...creator3',
-  totalRaised: 120000000n, // 1.2 BTC
-  unlockBlock: 920000n,
-  isClosed: false,
-  withdrawn: 0n,
-  contributorCount: 11,
-  goalAmount: 200000000n, // 2 BTC goal
-  beneficiary: ZERO_ADDRESS,
-});
+  const rpcAlive = await probeRpc();
+  currentMode = rpcAlive ? 'live' : 'mock';
+  return currentMode;
+}
 
-// Seed creator index
-creatorVaults.set('bc1q...creator1', ['1']);
-creatorVaults.set('bc1q...creator2', ['2']);
-creatorVaults.set('bc1q...creator3', ['3']);
+function ensureMode(): Promise<Mode> {
+  if (currentMode !== 'pending') return Promise.resolve(currentMode);
+  if (!modePromise) modePromise = detectMode();
+  return modePromise;
+}
 
-// Seed contributions for vault 1 — Lisa's Birthday Surprise
-contributions.push(
-  { vaultId: '1', contributor: 'bc1q...alpha1', amount: 2000000n, tokensEarned: 240000000000000000000n },
-  { vaultId: '1', contributor: 'bc1q...alpha2', amount: 1500000n, tokensEarned: 180000000000000000000n },
-  { vaultId: '1', contributor: 'bc1q...alpha3', amount: 1000000n, tokensEarned: 120000000000000000000n },
-  { vaultId: '1', contributor: 'bc1q...alpha4', amount: 1500000n, tokensEarned: 180000000000000000000n },
-  { vaultId: '1', contributor: 'bc1q...alpha5', amount: 1000000n, tokensEarned: 120000000000000000000n },
-  { vaultId: '1', contributor: 'bc1q...alpha6', amount: 1500000n, tokensEarned: 180000000000000000000n },
-);
+export function getMode(): Mode {
+  return currentMode;
+}
 
-// Seed contributions for vault 2 — Jake's College Fund
-contributions.push(
-  { vaultId: '2', contributor: 'bc1q...beta1', amount: 50000000n, tokensEarned: 6000000000000000000000n },
-  { vaultId: '2', contributor: 'bc1q...beta2', amount: 30000000n, tokensEarned: 3600000000000000000000n },
-  { vaultId: '2', contributor: 'bc1q...beta3', amount: 50000000n, tokensEarned: 6000000000000000000000n },
-  { vaultId: '2', contributor: 'bc1q...beta4', amount: 20000000n, tokensEarned: 2400000000000000000000n },
-);
+export async function getResolvedMode(): Promise<'live' | 'mock'> {
+  const mode = await ensureMode();
+  return mode as 'live' | 'mock';
+}
 
-// Seed contributions for vault 3 — Community Skatepark Build
-contributions.push(
-  { vaultId: '3', contributor: 'bc1q...gamma1', amount: 15000000n, tokensEarned: 1800000000000000000000n },
-  { vaultId: '3', contributor: 'bc1q...gamma2', amount: 10000000n, tokensEarned: 1200000000000000000000n },
-  { vaultId: '3', contributor: 'bc1q...gamma3', amount: 12000000n, tokensEarned: 1440000000000000000000n },
-  { vaultId: '3', contributor: 'bc1q...gamma4', amount: 8000000n, tokensEarned: 960000000000000000000n },
-  { vaultId: '3', contributor: 'bc1q...gamma5', amount: 15000000n, tokensEarned: 1800000000000000000000n },
-  { vaultId: '3', contributor: 'bc1q...gamma6', amount: 10000000n, tokensEarned: 1200000000000000000000n },
-  { vaultId: '3', contributor: 'bc1q...gamma7', amount: 8000000n, tokensEarned: 960000000000000000000n },
-  { vaultId: '3', contributor: 'bc1q...gamma8', amount: 12000000n, tokensEarned: 1440000000000000000000n },
-  { vaultId: '3', contributor: 'bc1q...gamma9', amount: 10000000n, tokensEarned: 1200000000000000000000n },
-  { vaultId: '3', contributor: 'bc1q...gamma10', amount: 10000000n, tokensEarned: 1200000000000000000000n },
-  { vaultId: '3', contributor: 'bc1q...gamma11', amount: 10000000n, tokensEarned: 1200000000000000000000n },
-);
+// ── Delegating methods ──────────────────────────────────────────────
 
-// Platform-level mock state
-let totalPlatformBtc = 278500000n; // sum of all vault totalRaised
-const MOCK_TOKEN_RATE = 120000n; // tokens per 1 BTC at current level
-let totalMinted = 0n; // simplified, not tracking exactly
+async function svc() {
+  const mode = await ensureMode();
+  return mode === 'live' ? live : mock;
+}
 
-// ── Write methods ─────────────────────────────────────────────────
+export async function getFundCount(): Promise<number> {
+  return (await svc()).getFundCount();
+}
+
+export async function getFundDetails(fundId: string): Promise<Vault> {
+  return (await svc()).getFundDetails(fundId);
+}
+
+export async function getAllVaults(): Promise<Vault[]> {
+  return (await svc()).getAllVaults();
+}
+
+export async function getVaultContributions(fundId: string): Promise<Contribution[]> {
+  return (await svc()).getVaultContributions(fundId);
+}
+
+export async function getContribution(fundId: string, contributor: string): Promise<bigint> {
+  return (await svc()).getContribution(fundId, contributor);
+}
+
+export async function getContributionTokens(fundId: string, contributor: string): Promise<bigint> {
+  return (await svc()).getContributionTokens(fundId, contributor);
+}
+
+export async function getTokenRate(): Promise<bigint> {
+  return (await svc()).getTokenRate();
+}
+
+export async function getTotalMinted(): Promise<bigint> {
+  return (await svc()).getTotalMinted();
+}
+
+export async function getTotalBtcContributed(): Promise<bigint> {
+  return (await svc()).getTotalBtcContributed();
+}
+
+export async function getCreatorFundCount(creator: string): Promise<number> {
+  return (await svc()).getCreatorFundCount(creator);
+}
+
+export async function getCreatorFundByIndex(creator: string, index: number): Promise<string> {
+  return (await svc()).getCreatorFundByIndex(creator, index);
+}
+
+// ── Write methods (mock handles them; live throws until OPWallet) ───
 
 export async function createVault(
   name: string,
@@ -109,130 +131,21 @@ export async function createVault(
   goalAmount: bigint,
   beneficiary: string,
 ): Promise<string> {
-  const id = String(nextVaultId++);
-  const creator = 'bc1q...demo'; // stub: would come from connected wallet
-
-  const vault: Vault = {
-    id,
-    name,
-    creator,
-    totalRaised: 0n,
-    unlockBlock,
-    isClosed: false,
-    withdrawn: 0n,
-    contributorCount: 0,
-    goalAmount,
-    beneficiary: beneficiary || ZERO_ADDRESS,
-  };
-
-  vaults.set(id, vault);
-
-  const existing = creatorVaults.get(creator) ?? [];
-  existing.push(id);
-  creatorVaults.set(creator, existing);
-
-  return id;
+  return (await svc()).createVault(name, unlockBlock, goalAmount, beneficiary);
 }
 
 export async function contribute(fundId: string, satoshis: bigint): Promise<void> {
-  const vault = vaults.get(fundId);
-  if (!vault) throw new Error(`Vault ${fundId} not found`);
-  if (vault.isClosed) throw new Error(`Vault ${fundId} is closed`);
-
-  const contributor = 'bc1q...demo'; // stub: would come from connected wallet
-  const tokensEarned = satoshis * MOCK_TOKEN_RATE; // simplified
-
-  vault.totalRaised += satoshis;
-  vault.contributorCount += 1;
-  totalPlatformBtc += satoshis;
-  totalMinted += tokensEarned;
-
-  contributions.push({
-    vaultId: fundId,
-    contributor,
-    amount: satoshis,
-    tokensEarned,
-  });
+  return (await svc()).contribute(fundId, satoshis);
 }
 
 export async function withdraw(fundId: string): Promise<bigint> {
-  const vault = vaults.get(fundId);
-  if (!vault) throw new Error(`Vault ${fundId} not found`);
-
-  const available = vault.totalRaised - vault.withdrawn;
-  vault.withdrawn = vault.totalRaised;
-  return available;
+  return (await svc()).withdraw(fundId);
 }
 
 export async function refund(fundId: string): Promise<bigint> {
-  const vault = vaults.get(fundId);
-  if (!vault) throw new Error(`Vault ${fundId} not found`);
-
-  // Stub: return a mock refund amount for the demo contributor
-  const contributor = 'bc1q...demo';
-  const userContributions = contributions.filter(
-    (c) => c.vaultId === fundId && c.contributor === contributor,
-  );
-  const total = userContributions.reduce((sum, c) => sum + c.amount, 0n);
-  return total;
+  return (await svc()).refund(fundId);
 }
 
 export async function closeFund(fundId: string): Promise<void> {
-  const vault = vaults.get(fundId);
-  if (!vault) throw new Error(`Vault ${fundId} not found`);
-  vault.isClosed = true;
-}
-
-// ── Read methods ──────────────────────────────────────────────────
-
-export async function getFundDetails(fundId: string): Promise<Vault> {
-  const vault = vaults.get(fundId);
-  if (!vault) throw new Error(`Vault ${fundId} not found`);
-  return vault;
-}
-
-export async function getFundCount(): Promise<number> {
-  return vaults.size;
-}
-
-export async function getAllVaults(): Promise<Vault[]> {
-  return Array.from(vaults.values());
-}
-
-export async function getVaultContributions(fundId: string): Promise<Contribution[]> {
-  return contributions.filter((c) => c.vaultId === fundId);
-}
-
-export async function getContribution(fundId: string, contributor: string): Promise<bigint> {
-  return contributions
-    .filter((c) => c.vaultId === fundId && c.contributor === contributor)
-    .reduce((sum, c) => sum + c.amount, 0n);
-}
-
-export async function getContributionTokens(fundId: string, contributor: string): Promise<bigint> {
-  return contributions
-    .filter((c) => c.vaultId === fundId && c.contributor === contributor)
-    .reduce((sum, c) => sum + c.tokensEarned, 0n);
-}
-
-export async function getTokenRate(): Promise<bigint> {
-  return MOCK_TOKEN_RATE;
-}
-
-export async function getTotalMinted(): Promise<bigint> {
-  return contributions.reduce((sum, c) => sum + c.tokensEarned, 0n);
-}
-
-export async function getTotalBtcContributed(): Promise<bigint> {
-  return totalPlatformBtc;
-}
-
-export async function getCreatorFundCount(creator: string): Promise<number> {
-  return (creatorVaults.get(creator) ?? []).length;
-}
-
-export async function getCreatorFundByIndex(creator: string, index: number): Promise<string> {
-  const ids = creatorVaults.get(creator) ?? [];
-  if (index < 0 || index >= ids.length) throw new Error('Index out of bounds');
-  return ids[index];
+  return (await svc()).closeFund(fundId);
 }

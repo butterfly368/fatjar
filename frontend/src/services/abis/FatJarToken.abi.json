@@ -1,0 +1,129 @@
+{
+    "functions": [
+        {
+            "name": "setManager",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "managerAddress",
+                    "type": "ADDRESS"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "mintForContribution",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "contributor",
+                    "type": "ADDRESS"
+                },
+                {
+                    "name": "satoshis",
+                    "type": "UINT256"
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "tokensMinted",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "getTokenRate",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [],
+            "outputs": [
+                {
+                    "name": "rate",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "getTotalBtcContributed",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [],
+            "outputs": [
+                {
+                    "name": "totalBtc",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "remainingSupply",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [],
+            "outputs": [
+                {
+                    "name": "remaining",
+                    "type": "UINT256"
+                }
+            ]
+        },
+        {
+            "name": "burnForRefund",
+            "type": "Function",
+            "payable": false,
+            "onlyOwner": false,
+            "inputs": [
+                {
+                    "name": "contributor",
+                    "type": "ADDRESS"
+                },
+                {
+                    "name": "tokenAmount",
+                    "type": "UINT256"
+                }
+            ],
+            "outputs": []
+        }
+    ],
+    "events": [
+        {
+            "name": "ContributionMinted",
+            "values": [
+                {
+                    "name": "contributor",
+                    "type": "ADDRESS"
+                },
+                {
+                    "name": "satoshis",
+                    "type": "UINT256"
+                },
+                {
+                    "name": "tokensMinted",
+                    "type": "UINT256"
+                }
+            ],
+            "type": "Event"
+        },
+        {
+            "name": "TokensBurned",
+            "values": [
+                {
+                    "name": "contributor",
+                    "type": "ADDRESS"
+                },
+                {
+                    "name": "tokensBurned",
+                    "type": "UINT256"
+                }
+            ],
+            "type": "Event"
+        }
+    ]
+}

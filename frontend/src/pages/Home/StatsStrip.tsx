@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { StatBlock } from '../../components/ui/StatBlock';
-import { getAllVaults, getTokenRate, getTotalBtcContributed, getTotalMinted } from '../../services/contract';
+import { getAllVaults, getTokenRate, getTotalBtcContributed, getTotalMinted, getResolvedMode } from '../../services/contract';
 import { formatBtc } from '../../types';
 import './StatsStrip.css';
 
@@ -12,6 +12,7 @@ function formatTokens(tokens: bigint): string {
 }
 
 export function StatsStrip() {
+  const [mode, setMode] = useState<'live' | 'mock' | null>(null);
   const [stats, setStats] = useState([
     { label: 'Total BTC Locked', value: '—', accent: 'BTC' },
     { label: 'Active Jars', value: '—' },
@@ -21,12 +22,14 @@ export function StatsStrip() {
 
   useEffect(() => {
     async function load() {
-      const [vaults, rate, totalBtc, totalMinted] = await Promise.all([
+      const [vaults, rate, totalBtc, totalMinted, resolvedMode] = await Promise.all([
         getAllVaults(),
         getTokenRate(),
         getTotalBtcContributed(),
         getTotalMinted(),
+        getResolvedMode(),
       ]);
+      setMode(resolvedMode);
       const activeCount = vaults.filter((v) => !v.isClosed).length;
       const rateDisplay = rate >= 1000n ? `${Number(rate / 1000n)}K` : String(rate);
 
@@ -42,6 +45,11 @@ export function StatsStrip() {
 
   return (
     <div className="stats-strip">
+      {mode && (
+        <span className={`stats-strip__badge stats-strip__badge--${mode}`}>
+          {mode === 'live' ? 'LIVE' : 'DEMO'}
+        </span>
+      )}
       {stats.map((stat) => (
         <StatBlock key={stat.label} {...stat} />
       ))}
