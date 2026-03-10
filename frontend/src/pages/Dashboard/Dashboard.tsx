@@ -18,11 +18,9 @@ import { getVaultMode, getVaultModeLabel, formatBtc } from '../../types';
 import { Button } from '../../components/ui/Button';
 import './Dashboard.css';
 
-// TODO: Replace with real connected wallet address in Task 9.
-// For the MVP demo we use a hardcoded address that matches seeded data
-// so both "My Vaults" and "My Contributions" sections show content.
-const MOCK_CREATOR_ADDRESS = 'bc1q...creator1';
-const MOCK_CONTRIBUTOR_ADDRESS = 'bc1q...alpha1';
+// Seeded addresses that match mock data — used as fallback when wallet is 'bc1q...demo'
+const SEED_CREATOR_ADDRESS = 'bc1q...creator1';
+const SEED_CONTRIBUTOR_ADDRESS = 'bc1q...alpha1';
 
 interface MyVault {
   vault: Vault;
@@ -37,15 +35,23 @@ interface MyContribution {
   status: 'active' | 'goal-met' | 'refundable';
 }
 
+// TODO: Replace with real chain data when OPWallet is integrated
+const MOCK_CURRENT_BLOCK = 860000n;
+
 function getVaultStatus(vault: Vault): 'active' | 'unlocked' | 'withdrawn' {
   if (vault.withdrawn > 0n) return 'withdrawn';
-  if (vault.isClosed) return 'unlocked';
+  const isPastUnlock = vault.unlockBlock === 0n || MOCK_CURRENT_BLOCK >= vault.unlockBlock;
+  if (isPastUnlock) return 'unlocked';
   return 'active';
 }
 
 function getContributionStatus(vault: Vault): 'active' | 'goal-met' | 'refundable' {
   if (vault.goalAmount > 0n && vault.totalRaised >= vault.goalAmount) return 'goal-met';
-  if (vault.isClosed) return 'refundable';
+  // Refundable: goal-based vault where goal not met AND (time-lock expired OR fund closed)
+  if (vault.goalAmount > 0n && vault.totalRaised < vault.goalAmount) {
+    const isPastUnlock = vault.unlockBlock === 0n || MOCK_CURRENT_BLOCK >= vault.unlockBlock;
+    if (isPastUnlock || vault.isClosed) return 'refundable';
+  }
   return 'active';
 }
 
@@ -58,21 +64,26 @@ function formatTokens(tokens: bigint): string {
 }
 
 export function Dashboard() {
-  const { connected, connect } = useWallet();
+  const { connected, connect, address } = useWallet();
   const [myVaults, setMyVaults] = useState<MyVault[]>([]);
   const [myContributions, setMyContributions] = useState<MyContribution[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
+  // Use connected wallet address, fall back to seeded address for demo
+  const walletAddress = address ?? 'bc1q...demo';
+  const creatorAddr = walletAddress === 'bc1q...demo' ? SEED_CREATOR_ADDRESS : walletAddress;
+  const contributorAddr = walletAddress === 'bc1q...demo' ? SEED_CONTRIBUTOR_ADDRESS : walletAddress;
+
   useEffect(() => {
     async function load() {
       setLoading(true);
 
-      // Load vaults created by the mock wallet address
-      const creatorCount = await getCreatorFundCount(MOCK_CREATOR_ADDRESS);
+      // Load vaults created by the wallet address
+      const creatorCount = await getCreatorFundCount(creatorAddr);
       const vaultResults: MyVault[] = [];
       for (let i = 0; i < creatorCount; i++) {
-        const fundId = await getCreatorFundByIndex(MOCK_CREATOR_ADDRESS, i);
+        const fundId = await getCreatorFundByIndex(creatorAddr, i);
         const vault = await getFundDetails(fundId);
         vaultResults.push({
           vault,
@@ -86,9 +97,9 @@ export function Dashboard() {
       const allVaults = await getAllVaults();
       const contribResults: MyContribution[] = [];
       for (const vault of allVaults) {
-        const amount = await getContribution(vault.id, MOCK_CONTRIBUTOR_ADDRESS);
+        const amount = await getContribution(vault.id, contributorAddr);
         if (amount > 0n) {
-          const tokensEarned = await getContributionTokens(vault.id, MOCK_CONTRIBUTOR_ADDRESS);
+          const tokensEarned = await getContributionTokens(vault.id, contributorAddr);
           contribResults.push({
             vault,
             amount,
@@ -103,7 +114,7 @@ export function Dashboard() {
     }
 
     load();
-  }, []);
+  }, [creatorAddr, contributorAddr]);
 
   async function handleWithdraw(fundId: string) {
     setActionLoading(fundId);

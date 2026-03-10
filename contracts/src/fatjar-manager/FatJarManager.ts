@@ -283,7 +283,7 @@ export class FatJarManager extends OP_NET {
             throw new Revert('Zero contribution');
         }
 
-        const contributor: Address = Blockchain.tx.origin;
+        const contributor: Address = Blockchain.tx.sender;
         const contributorKey: u256 = this.addressToU256(contributor);
 
         // Update fund total raised
@@ -457,12 +457,17 @@ export class FatJarManager extends OP_NET {
             throw new Revert('Fund does not exist');
         }
 
-        // Time-lock must have expired
-        const unlockTimestamp: u256 = this.fundUnlockTimestamp.get(fundId);
-        if (!u256.eq(unlockTimestamp, ZERO)) {
-            const currentBlock: u256 = u256.fromU64(Blockchain.block.number);
-            if (u256.gt(unlockTimestamp, currentBlock)) {
-                throw new Revert('Fund is time-locked');
+        // Time-lock must have expired OR fund must be closed
+        // Closing a goal-based fund early = admitting failure, allows immediate refund
+        const isClosed: u256 = this.fundIsClosed.get(fundId);
+        if (u256.eq(isClosed, ZERO)) {
+            // Fund not closed — time-lock must have expired
+            const unlockTimestamp: u256 = this.fundUnlockTimestamp.get(fundId);
+            if (!u256.eq(unlockTimestamp, ZERO)) {
+                const currentBlock: u256 = u256.fromU64(Blockchain.block.number);
+                if (u256.gt(unlockTimestamp, currentBlock)) {
+                    throw new Revert('Fund is time-locked');
+                }
             }
         }
 

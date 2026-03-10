@@ -219,6 +219,10 @@ export async function getTokenRate(): Promise<bigint> {
   return MOCK_TOKEN_RATE;
 }
 
+export async function getTotalMinted(): Promise<bigint> {
+  return contributions.reduce((sum, c) => sum + c.tokensEarned, 0n);
+}
+
 export async function getTotalBtcContributed(): Promise<bigint> {
   return totalPlatformBtc;
 }

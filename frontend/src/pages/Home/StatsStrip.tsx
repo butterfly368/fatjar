@@ -1,8 +1,15 @@
 import { useEffect, useState } from 'react';
 import { StatBlock } from '../../components/ui/StatBlock';
-import { getAllVaults, getTokenRate, getTotalBtcContributed } from '../../services/contract';
+import { getAllVaults, getTokenRate, getTotalBtcContributed, getTotalMinted } from '../../services/contract';
 import { formatBtc } from '../../types';
 import './StatsStrip.css';
+
+function formatTokens(tokens: bigint): string {
+  const whole = tokens / 1_000_000_000_000_000_000n;
+  if (whole >= 1_000_000n) return `${(Number(whole) / 1_000_000).toFixed(1)}M`;
+  if (whole >= 1_000n) return `${(Number(whole) / 1_000).toFixed(0)}K`;
+  return whole.toString();
+}
 
 export function StatsStrip() {
   const [stats, setStats] = useState([
@@ -14,28 +21,20 @@ export function StatsStrip() {
 
   useEffect(() => {
     async function load() {
-      const [vaults, rate, totalBtc] = await Promise.all([
+      const [vaults, rate, totalBtc, totalMinted] = await Promise.all([
         getAllVaults(),
         getTokenRate(),
         getTotalBtcContributed(),
+        getTotalMinted(),
       ]);
       const activeCount = vaults.filter((v) => !v.isClosed).length;
-      const totalMinted = vaults.reduce(
-        (sum, v) => sum + v.totalRaised * rate,
-        0n,
-      );
-      const mintedDisplay =
-        Number(totalMinted / 10n ** 18n) >= 1_000_000
-          ? `${(Number(totalMinted / 10n ** 18n) / 1_000_000).toFixed(1)}M`
-          : Number(totalMinted / 10n ** 18n) >= 1_000
-            ? `${(Number(totalMinted / 10n ** 18n) / 1_000).toFixed(0)}K`
-            : String(Number(totalMinted / 10n ** 18n));
+      const rateDisplay = rate >= 1000n ? `${Number(rate / 1000n)}K` : String(rate);
 
       setStats([
         { label: 'Total BTC Locked', value: formatBtc(totalBtc), accent: 'BTC' },
         { label: 'Active Jars', value: String(activeCount) },
-        { label: '$FJAR Minted', value: mintedDisplay },
-        { label: 'Current Rate', value: `${Number(rate / 1000n)}K`, accent: '/BTC' },
+        { label: '$FJAR Minted', value: formatTokens(totalMinted) },
+        { label: 'Current Rate', value: rateDisplay, accent: '/BTC' },
       ]);
     }
     load();

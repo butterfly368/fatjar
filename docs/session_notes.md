@@ -477,3 +477,73 @@ frontend/
 - Fix WCAG contrast issues (--text-muted, --accent)
 - Fix mobile responsiveness (CTAs, hamburger, table overflow)
 - Move GitHub repo to separate account
+
+---
+
+## Session 8b — 2026-03-10 — WCAG & Copy Polish
+
+*(Sessions between 8 and 9 — commits exist but no session notes written)*
+
+**Commits:**
+- `1c07f93` — fix(frontend): WCAG contrast and mobile responsiveness
+- `57e52f7` — fix(frontend): restore original Bitcoin orange, use black for accent text
+- `250baa5` — style: restore orange accent on hero 'On Bitcoin' highlight
+
+---
+
+## Session 9 — 2026-03-10 — Landing Page Fixes
+
+**Goal:** Fix Active Jars visibility, broken nav scrolling, and mismatched mock data.
+
+**What we did:**
+1. Identified Active Jars buried 4th on landing page (after HowItWorks + Features)
+2. Moved Active Jars up to right after StatsStrip — now visible immediately
+3. Fixed "Active Jars" nav link — React Router `<Link to="/#active-jars">` doesn't scroll. Replaced with native scroll handler in Navbar (works from any page) and hash-aware `<a>` in Button component
+4. Replaced 3 mock jars that contradicted product positioning:
+   - ~~Bitcoin Mining Collective~~ → **Lisa's Birthday Surprise** (Collect mode, 6 friends, 0.085 BTC)
+   - ~~Dev Grant: OPNet Toolkit~~ → **Jake's College Fund** (Save for Someone, beneficiary set, 1.5 BTC)
+   - ~~HODL Vault 2027~~ → **Community Skatepark Build** (All-or-Nothing, 1.2/2.0 BTC goal, 11 contributors)
+5. Updated seed contributions and platform total BTC to match new jars
+
+**Files modified:**
+- `frontend/src/pages/Home/Home.tsx` — section reorder
+- `frontend/src/components/layout/Navbar.tsx` — scroll handler
+- `frontend/src/components/ui/Button.tsx` — hash link support
+- `frontend/src/services/contract.ts` — new mock data
+
+**Commits:**
+- `140167a` — fix(frontend): promote Active Jars, fix nav scrolling, update mock data
+
+**Days to deadline:** 3 (March 13)
+
+---
+
+## Session 10 — 2026-03-10 — Code Review & Fixes
+
+**Goal:** Full code review before contract deployment. Fix all critical and important issues.
+
+**What we did:**
+1. Dispatched superpowers:code-reviewer agent across full codebase (contracts + frontend + design docs)
+2. Review found 1 critical, 6 important, 6 suggestion-level issues
+3. Fixed all 7 issues + bonus cleanup:
+
+**Fixes applied:**
+- **C1 (CRITICAL):** `contribute()` used `Blockchain.tx.origin` while `refund()` used `Blockchain.tx.sender` — contributions stored under one key, refunds look up under another. BTC would be permanently locked. Changed to `tx.sender` consistently.
+- **I1:** Updated CLAUDE.md — was referencing 3-contract architecture (Factory+Fund+Token) and saying goals/dashboard out of scope. Now reflects 2-contract arch + 4 jar types + current scope.
+- **I2:** Deleted legacy `contracts.ts` and `mockData.ts`. Inlined bonding curve tiers into BondingCurveSection.
+- **I3:** Dashboard hardcoded `bc1q...creator1` but wallet returns `bc1q...demo`. Now uses `useWallet()` address with seeded fallback for demo.
+- **I4:** StatsStrip calculated $FJAR Minted as `totalRaised * rate / 10^18` = 0. Added `getTotalMinted()` that sums actual `tokensEarned` from contributions.
+- **I5:** `refund()` didn't check `isClosed`. Decision: closing a goal-based jar early = immediate refund (skip time-lock). Updated contract.
+- **I6:** Dashboard showed Withdraw on time-locked active vaults. Added block check to status calc. Fixed contribution refundable logic to require goal-based + (expired OR closed).
+- **Bonus:** Removed deprecated legacy types (`Fund`, `LegacyContribution`, `Stat`, `Feature`, `Step`).
+
+**Contract-frontend alignment verified:**
+- All 13 contract methods have matching mock service methods
+- Two mock-only methods (`getAllVaults`, `getVaultContributions`) need event indexing when going live
+- Naming note: contract uses `unlockTimestamp`, frontend uses `unlockBlock` — same concept
+
+**Builds clean:** Token 37KB, Manager 26KB, Frontend 271KB JS (0 errors)
+
+**Days to deadline:** 3 (March 13)
+
+**Next steps:** Deploy contracts to testnet → wire frontend to real contracts → Vercel deploy → demo video → submission

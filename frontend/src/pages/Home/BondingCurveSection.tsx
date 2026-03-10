@@ -1,7 +1,14 @@
 import { BondingCurveChart } from '../../components/ui/BondingCurveChart';
 import { TierRow } from '../../components/ui/TierRow';
-import { MOCK_TIERS } from '../../services/mockData';
+import type { BondingCurveTier } from '../../types';
 import './BondingCurveSection.css';
+
+const TIERS: BondingCurveTier[] = [
+  { label: 'Early', threshold: '(now)', rate: '120K' },
+  { label: 'After', threshold: '5 BTC', rate: '80K', change: '-33%' },
+  { label: 'After', threshold: '20 BTC', rate: '40K', change: '-67%' },
+  { label: 'After', threshold: '100 BTC', rate: '15K', change: '-88%' },
+];
 
 export function BondingCurveSection() {
   return (
@@ -21,7 +28,7 @@ export function BondingCurveSection() {
             <BondingCurveChart />
           </div>
           <div>
-            {MOCK_TIERS.map((tier) => (
+            {TIERS.map((tier) => (
               <TierRow key={tier.rate} {...tier} />
             ))}
           </div>

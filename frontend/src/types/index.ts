@@ -60,55 +60,13 @@ export function truncateAddress(address: string): string {
   return address.slice(0, 6) + '...' + address.slice(-4);
 }
 
-// ── Legacy types (still used by Home page components, TierRow, useWallet) ──
-// These will be removed as pages are migrated in Tasks 5-8.
-
-/** @deprecated Use Vault instead */
-export interface Fund {
-  id: number;
-  name: string;
-  description: string;
-  creator: string;
-  totalRaised: number; // satoshis
-  unlockTimestamp: number; // block number, 0 = no lock
-  isClosed: boolean;
-  isPublic: boolean;
-  withdrawn: number; // satoshis
-  contributorCount: number;
-}
-
-/** @deprecated Use Contribution instead */
-export interface LegacyContribution {
-  fundId: number;
-  contributor: string;
-  amount: number; // satoshis
-  tokensMinted: number;
-  timestamp: number;
-}
+// ── Shared types ────────────────────────────────────────────────────
 
 export interface BondingCurveTier {
   label: string;
   threshold: string;
   rate: string;
   change?: string;
-}
-
-export interface Stat {
-  label: string;
-  value: string;
-  accent?: string;
-}
-
-export interface Feature {
-  title: string;
-  description: string;
-  meta: string;
-}
-
-export interface Step {
-  number: string;
-  title: string;
-  description: string;
 }
 
 export interface WalletState {
