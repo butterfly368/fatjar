@@ -17,6 +17,11 @@ export function Navbar() {
           Explore
         </Link>
         {connected && (
+          <Link className="nav-link" to="/dashboard">
+            Dashboard
+          </Link>
+        )}
+        {connected && (
           <Link className="nav-link" to="/create">
             Create
           </Link>
