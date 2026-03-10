@@ -40,11 +40,12 @@ frontend/                # React app (TBD)
 - Read existing code/docs before modifying
 - Use `docs/TASKS.md` for task tracking — filter by tags
 - Log every session in `docs/session_notes.md`
-- Design doc is source of truth: `docs/plans/2026-03-09-satgift-design.md`
+- Design doc is source of truth: `docs/plans/2026-03-10-vault-redesign.md`
 - Prototype is reference only — don't modify `prototype/index.html`
 - No pre-mine, no team token allocation (MVP)
 - Zero platform fees (100% BTC to fund creator)
 - Competition deadline is hard — ship MVP, defer nice-to-haves
+- Do NOT add `Co-Authored-By` lines to commit messages
 
 ## Open Decisions
 - [x] Final name and ticker — FatJar / $FJAR
