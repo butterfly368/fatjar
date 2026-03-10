@@ -28,6 +28,9 @@ const SATS_PER_BTC: u256 = u256.fromU64(100000000);
 // 10^18 for decimal scaling
 const DECIMALS_MULTIPLIER: u256 = u256.fromString('1000000000000000000');
 
+// Maximum realistic contribution: 21M BTC in satoshis (C1: upper-bound check)
+const MAX_SATOSHIS: u256 = u256.fromString('2100000000000000');
+
 @final
 export class FatJarToken extends OP20 {
     // Address of the FatJarManager contract (authorized minter)
@@ -51,9 +54,6 @@ export class FatJarToken extends OP20 {
         const symbol: string = 'FJAR';
 
         this.instantiate(new OP20InitParameters(maxSupply, decimals, name, symbol));
-
-        // Manager address will be set after Manager contract is deployed
-        // via setManager()
     }
 
     public override onUpdate(_calldata: Calldata): void {
@@ -71,10 +71,14 @@ export class FatJarToken extends OP20 {
     public setManager(calldata: Calldata): BytesWriter {
         this.onlyDeployer(Blockchain.tx.sender);
 
-        const manager: Address = calldata.readAddress();
+        // C2: One-time guard — cannot change manager once set
         const managerKey: u256 = u256.Zero;
+        const existing: u256 = this.managerAddress.get(managerKey);
+        if (!u256.eq(existing, u256.Zero)) {
+            throw new Revert('Manager already set');
+        }
 
-        // Store manager address as u256
+        const manager: Address = calldata.readAddress();
         this.managerAddress.set(managerKey, this.addressToU256(manager));
 
         return new BytesWriter(0);
@@ -83,9 +87,6 @@ export class FatJarToken extends OP20 {
     /**
      * Mint tokens for a contribution. Only callable by the Manager contract.
      * Calculates tokens based on bonding curve: tokens_per_btc = K / sqrt(total_btc + 1)
-     *
-     * @param calldata: contributor address, btc amount in satoshis
-     * @returns tokens minted (u256)
      */
     @method(
         {
@@ -103,7 +104,6 @@ export class FatJarToken extends OP20 {
         type: ABIDataTypes.UINT256,
     })
     public mintForContribution(calldata: Calldata): BytesWriter {
-        // Only the Manager contract can call this
         this.onlyManager();
 
         const contributor: Address = calldata.readAddress();
@@ -113,6 +113,11 @@ export class FatJarToken extends OP20 {
             throw new Revert('Zero contribution');
         }
 
+        // C1: Upper-bound check to prevent overflow in bonding curve math
+        if (u256.gt(satoshis, MAX_SATOSHIS)) {
+            throw new Revert('Contribution too large');
+        }
+
         // Calculate tokens to mint using bonding curve
         const tokensMinted: u256 = this.calculateTokens(satoshis);
 
@@ -120,12 +125,12 @@ export class FatJarToken extends OP20 {
             throw new Revert('Zero tokens calculated');
         }
 
-        // Mint tokens to contributor
-        this._mint(contributor, tokensMinted);
-
-        // Update total BTC contributed
+        // I1: Update state BEFORE mint (Checks-Effects-Interactions pattern)
         const currentTotal: u256 = this.totalBtcContributed.value;
         this.totalBtcContributed.value = SafeMath.add(currentTotal, satoshis);
+
+        // Mint tokens to contributor
+        this._mint(contributor, tokensMinted);
 
         // Emit event
         this.emitEvent(new ContributionMintedEvent(contributor, satoshis, tokensMinted));
@@ -191,34 +196,26 @@ export class FatJarToken extends OP20 {
      *
      * Formula: tokens = (satoshis / SATS_PER_BTC) * K / sqrt(total_btc_in_btc + 1)
      *
-     * To avoid floating point, we use integer math:
-     * tokens = (satoshis * K_SCALED) / (SATS_PER_BTC * sqrt_scaled(total_sats + SATS_PER_BTC))
-     *
-     * Where sqrt_scaled returns sqrt with 18 decimal precision.
+     * Integer math: tokens = (satoshis * K_SCALED * 10^18) / (SATS_PER_BTC * sqrt_scaled)
      */
     private calculateTokens(satoshis: u256): u256 {
-        // total_sats_plus_one_btc = totalBtcContributed + SATS_PER_BTC (adding 1 BTC for the +1)
+        // total_sats + 1 BTC (the "+1" in the formula)
         const totalSatsPlusOne: u256 = SafeMath.add(
             this.totalBtcContributed.value,
             SATS_PER_BTC,
         );
 
         // Convert to BTC with 18 decimal precision for sqrt
-        // total_btc_scaled = totalSatsPlusOne * 10^18 / SATS_PER_BTC
         const totalBtcScaled: u256 = SafeMath.div(
             SafeMath.mul(totalSatsPlusOne, DECIMALS_MULTIPLIER),
             SATS_PER_BTC,
         );
 
-        // Integer square root with 18 decimal precision
-        // sqrt(x * 10^18) = sqrt(x) * 10^9, so we need to scale input by 10^18 first
+        // C3: Use audited SafeMath.sqrt instead of custom implementation
         const sqrtInput: u256 = SafeMath.mul(totalBtcScaled, DECIMALS_MULTIPLIER);
-        const sqrtResult: u256 = this.sqrt(sqrtInput);
+        const sqrtResult: u256 = SafeMath.sqrt(sqrtInput);
 
-        // tokens = satoshis * K_SCALED / (SATS_PER_BTC * sqrtResult)
-        // But K_SCALED already has 18 decimals, sqrtResult has 18 decimals
-        // So: tokens (18 dec) = satoshis * K_SCALED / (SATS_PER_BTC * sqrtResult / 10^18)
-        // Simplified: tokens = satoshis * K_SCALED * 10^18 / (SATS_PER_BTC * sqrtResult)
+        // tokens = satoshis * K_SCALED * 10^18 / (SATS_PER_BTC * sqrtResult)
         const numerator: u256 = SafeMath.mul(
             SafeMath.mul(satoshis, K_SCALED),
             DECIMALS_MULTIPLIER,
@@ -241,34 +238,6 @@ export class FatJarToken extends OP20 {
         }
 
         return tokens;
-    }
-
-    /**
-     * Integer square root using Newton's method (Babylonian method).
-     * Returns floor(sqrt(x)).
-     */
-    private sqrt(x: u256): u256 {
-        if (u256.eq(x, u256.Zero)) {
-            return u256.Zero;
-        }
-        if (u256.eq(x, u256.One)) {
-            return u256.One;
-        }
-
-        // Initial guess: x / 2
-        let z: u256 = SafeMath.div(SafeMath.add(x, u256.One), u256.fromU32(2));
-        let y: u256 = x;
-
-        // Newton's iterations (bounded loop — max 256 iterations for u256)
-        for (let i: i32 = 0; i < 256; i++) {
-            if (u256.ge(z, y)) {
-                break;
-            }
-            y = z;
-            z = SafeMath.div(SafeMath.add(SafeMath.div(x, z), z), u256.fromU32(2));
-        }
-
-        return y;
     }
 
     /**

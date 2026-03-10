@@ -10,7 +10,13 @@ import {
     StoredU256,
 } from '@btc-vision/btc-runtime/runtime';
 import { EMPTY_POINTER } from '@btc-vision/btc-runtime/runtime/math/bytes';
+import { encodeSelector } from '@btc-vision/btc-runtime/runtime/math/abi';
 import { StoredMapU256 } from '@btc-vision/btc-runtime/runtime/storage/maps/StoredMapU256';
+import {
+    SELECTOR_BYTE_LENGTH,
+    ADDRESS_BYTE_LENGTH,
+    U256_BYTE_LENGTH,
+} from '@btc-vision/btc-runtime/runtime/utils/lengths';
 import {
     FundCreatedEvent,
     ContributionEvent,
@@ -34,10 +40,10 @@ const fundUnlockTimestampPointer: u16 = Blockchain.nextPointer;
 const fundIsClosedPointer: u16 = Blockchain.nextPointer;
 const fundWithdrawnPointer: u16 = Blockchain.nextPointer;
 
-// Contribution tracking (keyed by hash of fundId + contributor address)
+// Contribution tracking (keyed by composite of fundId + contributor address)
 const contributionAmountPointer: u16 = Blockchain.nextPointer;
 
-// Creator fund index (keyed by hash of creator address + index)
+// Creator fund index (keyed by composite of creator address + index)
 const creatorFundCountPointer: u16 = Blockchain.nextPointer;
 const creatorFundIdPointer: u16 = Blockchain.nextPointer;
 
@@ -51,6 +57,9 @@ const fundContributorCountPointer: u16 = Blockchain.nextPointer;
 const ONE: u256 = u256.One;
 const ZERO: u256 = u256.Zero;
 
+// I2: Max value that fits in a u64 for unlock timestamp validation
+const MAX_U64: u256 = u256.fromString('18446744073709551615');
+
 // =============================================================================
 // Contract
 // =============================================================================
@@ -60,7 +69,7 @@ export class FatJarManager extends OP_NET {
     // Global state
     private readonly fundCount: StoredU256;
 
-    // Token contract address (for cross-contract calls)
+    // Token contract address (for cross-contract mint calls)
     private readonly tokenAddress: StoredMapU256;
 
     // Fund storage maps (keyed by fundId)
@@ -114,7 +123,7 @@ export class FatJarManager extends OP_NET {
     // =========================================================================
 
     /**
-     * Set the FatJarToken contract address. Only callable by deployer.
+     * Set the FatJarToken contract address. Only callable by deployer, once.
      */
     @method({
         name: 'tokenAddress',
@@ -123,6 +132,12 @@ export class FatJarManager extends OP_NET {
     @returns()
     public setTokenAddress(calldata: Calldata): BytesWriter {
         this.onlyDeployer(Blockchain.tx.sender);
+
+        // C2: One-time guard — cannot change token address once set
+        const existing: u256 = this.tokenAddress.get(ZERO);
+        if (!u256.eq(existing, ZERO)) {
+            throw new Revert('Token address already set');
+        }
 
         const token: Address = calldata.readAddress();
         this.tokenAddress.set(ZERO, this.addressToU256(token));
@@ -136,7 +151,7 @@ export class FatJarManager extends OP_NET {
 
     /**
      * Create a new fund (jar).
-     * @param name - Fund name (string)
+     * @param name - Fund name (string, emitted in event for off-chain indexing)
      * @param unlockTimestamp - Block number when funds can be withdrawn (0 = no lock)
      */
     @method(
@@ -165,6 +180,11 @@ export class FatJarManager extends OP_NET {
             throw new Revert('Name too long');
         }
 
+        // I2: Validate unlock timestamp fits in reasonable range
+        if (u256.gt(unlockTimestamp, MAX_U64)) {
+            throw new Revert('Unlock timestamp too large');
+        }
+
         const creator: Address = Blockchain.tx.sender;
 
         // Increment fund count to get new fund ID
@@ -174,10 +194,9 @@ export class FatJarManager extends OP_NET {
 
         // Store fund data
         this.fundCreator.set(fundId, this.addressToU256(creator));
-        // Fund name emitted in event (indexed off-chain)
         this.fundTotalRaised.set(fundId, ZERO);
         this.fundUnlockTimestamp.set(fundId, unlockTimestamp);
-        this.fundIsClosed.set(fundId, ZERO); // false
+        this.fundIsClosed.set(fundId, ZERO);
         this.fundWithdrawn.set(fundId, ZERO);
 
         // Track creator's funds
@@ -190,9 +209,8 @@ export class FatJarManager extends OP_NET {
         const creatorFundKey: u256 = this.compositeKey(creatorKey, newCreatorCount);
         this.creatorFundId.set(creatorFundKey, fundId);
 
-        // Emit event
-        const unlockTs: u64 = unlockTimestamp.lo1;
-        this.emitEvent(new FundCreatedEvent(fundId, creator, unlockTs));
+        // S2: Emit event with unlockTimestamp as u256 (matching stored type)
+        this.emitEvent(new FundCreatedEvent(fundId, creator, unlockTimestamp));
 
         const writer = new BytesWriter(32);
         writer.writeU256(fundId);
@@ -200,8 +218,8 @@ export class FatJarManager extends OP_NET {
     }
 
     /**
-     * Contribute BTC to a fund. The satoshi amount is passed as calldata
-     * (actual BTC transfer happens at the transaction level).
+     * Contribute BTC to a fund. Records the contribution and triggers
+     * cross-contract mint on FatJarToken for bonding curve token rewards.
      */
     @method(
         {
@@ -235,7 +253,7 @@ export class FatJarManager extends OP_NET {
             throw new Revert('Zero contribution');
         }
 
-        const contributor: Address = Blockchain.tx.sender;
+        const contributor: Address = Blockchain.tx.origin;
         const contributorKey: u256 = this.addressToU256(contributor);
 
         // Update fund total raised
@@ -254,8 +272,11 @@ export class FatJarManager extends OP_NET {
 
         this.contributionAmount.set(contribKey, SafeMath.add(currentContrib, satoshis));
 
-        // Emit event
-        this.emitEvent(new ContributionEvent(fundId, contributor, satoshis));
+        // S5: Cross-contract call to FatJarToken.mintForContribution
+        const tokensMinted: u256 = this.mintTokensForContributor(contributor, satoshis);
+
+        // Emit event with tokens minted info
+        this.emitEvent(new ContributionEvent(fundId, contributor, satoshis, tokensMinted));
 
         return new BytesWriter(0);
     }
@@ -372,7 +393,6 @@ export class FatJarManager extends OP_NET {
 
     /**
      * Get fund details.
-     * Returns: creator (as u256), totalRaised, unlockTimestamp, isClosed, withdrawn, contributorCount
      */
     @method({
         name: 'fundId',
@@ -423,7 +443,7 @@ export class FatJarManager extends OP_NET {
     }
 
     /**
-     * Get creator's fund count and fund IDs by index.
+     * Get creator's fund count.
      */
     @method({
         name: 'creator',
@@ -472,6 +492,39 @@ export class FatJarManager extends OP_NET {
     // =========================================================================
 
     /**
+     * S5: Cross-contract call to FatJarToken.mintForContribution(contributor, satoshis).
+     * Uses Blockchain.call() — the canonical OPNet pattern for contract-to-contract calls.
+     * When called, Blockchain.tx.sender inside the Token will be this Manager's address,
+     * so the Token's onlyManager() check passes.
+     */
+    private mintTokensForContributor(contributor: Address, satoshis: u256): u256 {
+        const tokenU256: u256 = this.tokenAddress.get(ZERO);
+        if (u256.eq(tokenU256, ZERO)) {
+            throw new Revert('Token address not set');
+        }
+
+        // Reconstruct token Address from stored u256
+        const tokenBytes: Uint8Array = tokenU256.toUint8Array(true);
+        const tokenAddr: Address = changetype<Address>(tokenBytes);
+
+        // Build calldata: selector + contributor address + satoshis
+        // mintForContribution(address,uint256) selector
+        const mintSelector = encodeSelector('mintForContribution(address,uint256)');
+        const mintCalldata = new BytesWriter(
+            SELECTOR_BYTE_LENGTH + ADDRESS_BYTE_LENGTH + U256_BYTE_LENGTH,
+        );
+        mintCalldata.writeSelector(mintSelector);
+        mintCalldata.writeAddress(contributor);
+        mintCalldata.writeU256(satoshis);
+
+        // Execute cross-contract call (reverts entire tx on failure)
+        const result = Blockchain.call(tokenAddr, mintCalldata);
+
+        // Read the minted token amount from the response
+        return result.data.readU256();
+    }
+
+    /**
      * Convert an Address to u256 for storage.
      */
     private addressToU256(addr: Address): u256 {
@@ -480,11 +533,11 @@ export class FatJarManager extends OP_NET {
 
     /**
      * Create a composite storage key from two u256 values.
-     * Uses XOR + shift to create unique keys.
+     * Packs a into upper 128 bits, b into lower 128 bits.
+     * Safe for fundId (sequential small numbers) and address keys
+     * where StoredMapU256 applies its own SHA256 hashing on the key.
      */
     private compositeKey(a: u256, b: u256): u256 {
-        // Simple composite: hash by shifting a left and XOR with b
-        // This ensures unique keys for different (a, b) pairs
         const shifted: u256 = u256.shl(a, 128);
         return u256.or(shifted, b);
     }

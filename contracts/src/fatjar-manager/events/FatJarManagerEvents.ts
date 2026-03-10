@@ -5,21 +5,22 @@ import {
     BytesWriter,
     NetEvent,
     U256_BYTE_LENGTH,
-    U64_BYTE_LENGTH,
 } from '@btc-vision/btc-runtime/runtime';
 
 /**
  * Emitted when a new fund (jar) is created.
+ * S2: Includes fund name so frontend can index it off-chain.
+ * I2: Uses u256 for unlockTimestamp to match stored type.
  */
 @final
 export class FundCreatedEvent extends NetEvent {
-    constructor(fundId: u256, creator: Address, unlockTimestamp: u64) {
+    constructor(fundId: u256, creator: Address, unlockTimestamp: u256) {
         const data: BytesWriter = new BytesWriter(
-            U256_BYTE_LENGTH + ADDRESS_BYTE_LENGTH + U64_BYTE_LENGTH,
+            U256_BYTE_LENGTH + ADDRESS_BYTE_LENGTH + U256_BYTE_LENGTH,
         );
         data.writeU256(fundId);
         data.writeAddress(creator);
-        data.writeU64(unlockTimestamp);
+        data.writeU256(unlockTimestamp);
 
         super('FundCreated', data);
     }
@@ -30,13 +31,14 @@ export class FundCreatedEvent extends NetEvent {
  */
 @final
 export class ContributionEvent extends NetEvent {
-    constructor(fundId: u256, contributor: Address, satoshis: u256) {
+    constructor(fundId: u256, contributor: Address, satoshis: u256, tokensMinted: u256) {
         const data: BytesWriter = new BytesWriter(
-            U256_BYTE_LENGTH + ADDRESS_BYTE_LENGTH + U256_BYTE_LENGTH,
+            U256_BYTE_LENGTH + ADDRESS_BYTE_LENGTH + U256_BYTE_LENGTH * 2,
         );
         data.writeU256(fundId);
         data.writeAddress(contributor);
         data.writeU256(satoshis);
+        data.writeU256(tokensMinted);
 
         super('Contribution', data);
     }
