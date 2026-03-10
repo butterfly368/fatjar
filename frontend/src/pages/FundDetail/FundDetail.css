@@ -4,15 +4,115 @@
   padding: clamp(40px, 6vw, 80px) var(--side-padding) 80px;
 }
 
+/* ── Header ────────────────────────────────────────────────────── */
+
 .fund-detail-header {
   margin-bottom: 48px;
 }
+
+.fund-detail-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.fund-detail-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin-bottom: 16px;
+}
+
+.fund-detail-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.fund-mode-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 4px 12px;
+  border: 1px solid var(--border-light);
+  background: var(--bg-alt);
+  color: var(--text-sec);
+}
+
+.fund-status-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 4px 12px;
+  border: 1px solid;
+}
+
+.fund-status-active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.fund-status-unlocked {
+  border-color: #22c55e;
+  color: #22c55e;
+}
+
+.fund-status-withdrawn {
+  border-color: var(--text-muted);
+  color: var(--text-muted);
+}
+
+.fund-status-refundable {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+/* ── Meta (creator, beneficiary) ──────────────────────────────── */
+
+.fund-detail-meta {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.fund-detail-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fund-detail-meta-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+.fund-detail-meta-addr {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--text-sec);
+}
+
+/* ── Share bar ─────────────────────────────────────────────────── */
 
 .fund-share-bar {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 20px;
+  margin-top: 8px;
   flex-wrap: wrap;
 }
 
@@ -38,48 +138,7 @@
   color: var(--accent);
 }
 
-.fund-share-url {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  color: var(--text-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 300px;
-}
-
-@media (max-width: 600px) {
-  .fund-share-url { display: none; }
-}
-
-.fund-detail-label {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--text-muted);
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.fund-detail-title {
-  font-family: 'Syne', sans-serif;
-  font-size: clamp(28px, 4vw, 48px);
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: -0.03em;
-  line-height: 1.05;
-  margin-bottom: 12px;
-}
-
-.fund-detail-desc {
-  font-size: 15px;
-  line-height: 1.7;
-  color: var(--text-sec);
-  max-width: 560px;
-}
+/* ── Grid layout ───────────────────────────────────────────────── */
 
 .fund-detail-grid {
   display: grid;
@@ -90,6 +149,58 @@
 @media (max-width: 768px) {
   .fund-detail-grid { grid-template-columns: 1fr; }
 }
+
+/* ── Progress section ──────────────────────────────────────────── */
+
+.fund-progress-section {
+  margin-bottom: 32px;
+}
+
+.fund-progress-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.fund-progress-raised {
+  font-family: 'Syne', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.fund-progress-goal {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.fund-progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+}
+
+.fund-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.4s ease;
+  min-width: 0;
+}
+
+.fund-progress-pct {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 6px;
+}
+
+/* ── Stats grid ────────────────────────────────────────────────── */
 
 .fund-stats {
   display: grid;
@@ -132,6 +243,8 @@
   color: var(--accent);
 }
 
+/* ── Contributors table ────────────────────────────────────────── */
+
 .fund-contributors-title {
   font-family: 'Syne', sans-serif;
   font-size: 16px;
@@ -141,11 +254,35 @@
   margin-bottom: 16px;
 }
 
+.fund-no-contributors {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 24px 0;
+}
+
+.fund-contributors-table {
+  border: 1px solid var(--border-light);
+}
+
+.fund-contributors-thead {
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr 1fr;
+  padding: 10px 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-light);
+  background: var(--bg-alt);
+}
+
 .fund-contributor {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr 1fr;
   align-items: center;
-  padding: 12px 0;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--border-light);
   font-size: 13px;
 }
@@ -165,9 +302,46 @@
 }
 
 .fund-contributor-tokens {
+  font-family: 'IBM Plex Mono', monospace;
   color: var(--accent);
-  font-size: 11px;
-  margin-left: 8px;
+  font-size: 12px;
+}
+
+/* ── Bonding curve card ────────────────────────────────────────── */
+
+.fund-curve-card {
+  border: 1px solid var(--border-light);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.fund-curve-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 10px;
+}
+
+.fund-curve-desc {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-sec);
+}
+
+.fund-curve-desc strong {
+  color: var(--accent);
+}
+
+/* ── Actions ───────────────────────────────────────────────────── */
+
+.fund-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
 }
 
 .fund-contribute-card {
@@ -201,24 +375,45 @@
   color: var(--accent);
 }
 
-.fund-status-badge {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 3px 10px;
-  border: 1px solid;
+.fund-contribute-actions {
+  display: flex;
+  gap: 12px;
 }
 
-.fund-status-open {
-  border-color: var(--accent);
+.fund-withdrawn-notice {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  padding: 16px;
+  border: 1px solid var(--border-light);
+  text-align: center;
+}
+
+/* ── Back link ─────────────────────────────────────────────────── */
+
+.fund-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.fund-back-link:hover {
   color: var(--accent);
 }
 
-.fund-status-locked {
-  border-color: var(--text-muted);
-  color: var(--text-muted);
-}
+/* ── Not found ─────────────────────────────────────────────────── */
 
 .fund-not-found {
   text-align: center;
