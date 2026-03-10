@@ -7,7 +7,7 @@ import './StatsStrip.css';
 export function StatsStrip() {
   const [stats, setStats] = useState([
     { label: 'Total BTC Locked', value: '—', accent: 'BTC' },
-    { label: 'Active Vaults', value: '—' },
+    { label: 'Active Jars', value: '—' },
     { label: '$FJAR Minted', value: '—' },
     { label: 'Current Rate', value: '—', accent: '/BTC' },
   ]);
@@ -33,7 +33,7 @@ export function StatsStrip() {
 
       setStats([
         { label: 'Total BTC Locked', value: formatBtc(totalBtc), accent: 'BTC' },
-        { label: 'Active Vaults', value: String(activeCount) },
+        { label: 'Active Jars', value: String(activeCount) },
         { label: '$FJAR Minted', value: mintedDisplay },
         { label: 'Current Rate', value: `${Number(rate / 1000n)}K`, accent: '/BTC' },
       ]);

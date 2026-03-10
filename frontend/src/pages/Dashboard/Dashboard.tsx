@@ -14,7 +14,7 @@ import {
   closeFund,
 } from '../../services/contract';
 import type { Vault } from '../../types';
-import { getVaultMode, getVaultModeLabel, formatBtc, ZERO_ADDRESS } from '../../types';
+import { getVaultMode, getVaultModeLabel, formatBtc } from '../../types';
 import { Button } from '../../components/ui/Button';
 import './Dashboard.css';
 
@@ -184,12 +184,12 @@ export function Dashboard() {
           <h1 className="dashboard-title">Dashboard</h1>
         </div>
         <div className="dashboard-empty">
-          <h2 className="dashboard-empty-title">No Vaults Yet</h2>
+          <h2 className="dashboard-empty-title">No Jars Yet</h2>
           <p className="dashboard-empty-desc">
-            No vaults yet. Create one or contribute to an existing vault.
+            No jars yet. Create one or contribute to an existing jar.
           </p>
           <Button to="/create">
-            Create a Vault <ArrowRight size={14} />
+            Create a Jar <ArrowRight size={14} />
           </Button>
         </div>
       </div>
@@ -201,7 +201,7 @@ export function Dashboard() {
       <div className="dashboard-header">
         <h1 className="dashboard-title">Dashboard</h1>
         <span className="dashboard-subtitle">
-          {myVaults.length} vault{myVaults.length !== 1 ? 's' : ''} created
+          {myVaults.length} jar{myVaults.length !== 1 ? 's' : ''} created
           {' / '}
           {myContributions.length} contribution{myContributions.length !== 1 ? 's' : ''}
         </span>
@@ -210,7 +210,7 @@ export function Dashboard() {
       {/* My Vaults Section */}
       {myVaults.length > 0 && (
         <section className="dashboard-section">
-          <h2 className="dashboard-section-title">My Vaults</h2>
+          <h2 className="dashboard-section-title">My Jars</h2>
           <div className="dashboard-cards">
             {myVaults.map(({ vault, mode, status }) => (
               <div className="dashboard-card" key={vault.id}>
@@ -320,7 +320,7 @@ export function Dashboard() {
                   )}
                   {status === 'active' && (
                     <Link to={`/fund/${vault.id}`} className="dashboard-action-btn dashboard-action-secondary">
-                      View Vault
+                      View Jar
                     </Link>
                   )}
                   {status === 'goal-met' && (

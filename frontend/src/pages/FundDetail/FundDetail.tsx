@@ -149,8 +149,8 @@ export function FundDetail() {
     return (
       <div className="fund-detail">
         <div className="fund-not-found">
-          <h1 className="fund-not-found-title">Vault Not Found</h1>
-          <p className="fund-not-found-desc">This vault doesn't exist or has been removed.</p>
+          <h1 className="fund-not-found-title">Jar Not Found</h1>
+          <p className="fund-not-found-desc">This jar doesn't exist or has been removed.</p>
           <Button to="/">Back to Home <ArrowRight size={14} /></Button>
         </div>
       </div>
@@ -185,7 +185,7 @@ export function FundDetail() {
       {/* Header */}
       <div className="fund-detail-header">
         <div className="fund-detail-label">
-          Vault #{vault.id}
+          Jar #{vault.id}
         </div>
         <h1 className="fund-detail-title">{vault.name}</h1>
         <div className="fund-detail-badges">
@@ -360,7 +360,7 @@ export function FundDetail() {
                     onClick={handleClose}
                     disabled={actionLoading}
                   >
-                    {actionLoading ? 'Closing...' : 'Close Vault'}
+                    {actionLoading ? 'Closing...' : 'Close Jar'}
                   </Button>
                 )}
               </>
@@ -380,14 +380,14 @@ export function FundDetail() {
 
             {status === 'withdrawn' && (
               <div className="fund-withdrawn-notice">
-                This vault has been fully withdrawn.
+                This jar has been fully withdrawn.
               </div>
             )}
           </div>
 
           <button className="fund-back-link" onClick={() => navigate('/')}>
             <ArrowRight size={12} style={{ transform: 'rotate(180deg)' }} />
-            Back to all vaults
+            Back to all jars
           </button>
         </div>
       </div>

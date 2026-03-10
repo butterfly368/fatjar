@@ -5,38 +5,38 @@ import './FeaturesSection.css';
 
 const FEATURES = [
   {
-    title: 'All-or-Nothing Guarantee',
+    title: 'Money-Back on Missed Goals',
     description:
-      'Your BTC returns if the goal isn\u2019t met. Trustless, automatic.',
-    meta: 'Refund on failure',
+      'Set a funding goal and your contributors are protected. If the goal isn\u2019t met, every sat goes back automatically.',
+    meta: 'Built-in refunds',
   },
   {
-    title: 'Time-Locked by Bitcoin',
+    title: 'Locked Until You\u2019re Ready',
     description:
-      'The most secure network enforces your timeline. No admin keys, no overrides.',
-    meta: 'Bitcoin L1 security',
+      'Set when the jar opens. Bitcoin enforces it \u2014 no one can withdraw early, not even you.',
+    meta: 'Time-lock',
   },
   {
-    title: 'Early Backer Rewards',
+    title: 'Early Users Earn More',
     description:
-      '$FJAR tokens via bonding curve. First in, most rewarded.',
-    meta: 'Bonding curve',
+      'Every contribution earns $FJAR tokens. The earlier you use FatJar, the more you get per BTC.',
+    meta: '$FJAR rewards',
   },
   {
-    title: 'Zero Platform Fees',
+    title: 'Zero Fees',
     description:
-      '100% of BTC goes to the vault. Network gas only.',
-    meta: '0% fee',
+      '100% of every contribution goes into the jar. You only pay network gas.',
+    meta: '0% platform fee',
   },
   {
-    title: 'Four Vault Modes',
+    title: 'Four Jar Types',
     description:
-      'Open collection, trust fund, all-or-nothing pledge, or funded grant. You decide.',
-    meta: 'Flexible design',
+      'Collect money for anything. Save for someone you love. Set a group goal with built-in refunds. Fund someone\u2019s dream. Pick what fits.',
+    meta: 'Flexible',
   },
 ];
 
-const TAGS = ['OPNet', 'OP20 Token', 'Bonding Curve', 'Time-Lock'];
+const TAGS = ['Bitcoin L1', 'Zero Fees', '$FJAR Rewards', 'Time-Lock'];
 
 export function FeaturesSection() {
   const [openIndex, setOpenIndex] = useState(0);
@@ -44,11 +44,11 @@ export function FeaturesSection() {
   return (
     <section className="features">
       <div className="features-left">
-        <div className="section-label">[01] The Protocol</div>
+        <div className="section-label">[01] Why FatJar</div>
         <h2 className="features-title">
-          TRUSTLESS<br />
-          VAULTS ON<br />
-          BITCOIN L1
+          WHAT MAKES<br />
+          FATJAR<br />
+          DIFFERENT
         </h2>
         <div className="features-tags">
           {TAGS.map((tag, i) => (

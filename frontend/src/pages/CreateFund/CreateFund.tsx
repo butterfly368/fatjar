@@ -14,10 +14,10 @@ import {
 import './CreateFund.css';
 
 const MODE_DESCRIPTIONS: Record<VaultMode, string> = {
-  'open-collection': 'Anyone contributes. You withdraw whatever is raised after unlock.',
-  'trust-fund': 'Anyone contributes. The beneficiary withdraws after unlock.',
-  'all-or-nothing': 'Contributors back your goal. If met, you withdraw. If not, everyone gets a refund.',
-  'funded-grant': 'Contributors fund a goal for the beneficiary. If met, they withdraw. If not, refunds.',
+  'open-collection': 'Collect money for anything. You withdraw when the jar unlocks.',
+  'trust-fund': 'Save for someone you love. The beneficiary opens the jar when the time comes.',
+  'all-or-nothing': 'Set a goal. If it\u2019s met, you withdraw. If not, everyone gets their BTC back.',
+  'funded-grant': 'Fund someone\u2019s dream. If the goal is met, the beneficiary gets it. If not, refunds.',
 };
 
 // Rough estimate: ~10 min per block
@@ -98,7 +98,7 @@ export function CreateFund() {
       setCreated(newId);
       navigate(`/fund/${newId}`);
     } catch {
-      setErrors({ submit: 'Failed to create vault. Please try again.' });
+      setErrors({ submit: 'Failed to create jar. Please try again.' });
     } finally {
       setSubmitting(false);
     }
@@ -110,13 +110,13 @@ export function CreateFund() {
         <div className="create-fund-success">
           <div className="create-fund-success-title">
             <PiggyBank size={20} style={{ verticalAlign: 'middle', marginRight: 8 }} />
-            Vault Created
+            Jar Created
           </div>
           <p className="create-fund-success-desc">
-            Your vault "{name}" has been created. Share the link with contributors to start collecting.
+            Your jar "{name}" has been created. Share the link with your people to start collecting.
           </p>
           <Button to={`/fund/${created}`}>
-            View Your Vault <ArrowRight size={14} />
+            View Your Jar <ArrowRight size={14} />
           </Button>
         </div>
       </div>
@@ -126,7 +126,7 @@ export function CreateFund() {
   return (
     <div className="create-fund">
       <div className="create-fund-header">
-        <div className="create-fund-label">Create a Vault</div>
+        <div className="create-fund-label">Create a Jar</div>
         <h1 className="create-fund-title">
           Start Your<br />FatJar
         </h1>
@@ -134,8 +134,8 @@ export function CreateFund() {
 
       <form className="create-fund-form" onSubmit={handleSubmit}>
         <Input
-          label="Vault Name"
-          placeholder="e.g. Bitcoin Mining Collective"
+          label="Jar Name"
+          placeholder="e.g. Sarah's College Fund"
           value={name}
           onChange={(e) => setName(e.target.value)}
           error={errors.name}
@@ -246,7 +246,7 @@ export function CreateFund() {
 
         <div className="create-fund-actions">
           <Button type="submit" disabled={submitting}>
-            {submitting ? 'Creating...' : 'Create Vault'} <ArrowRight size={14} />
+            {submitting ? 'Creating...' : 'Create Jar'} <ArrowRight size={14} />
           </Button>
           <Button variant="secondary" type="button" onClick={() => navigate('/')}>
             Cancel

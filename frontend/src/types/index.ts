@@ -42,10 +42,10 @@ export function getVaultMode(vault: Vault): VaultMode {
 
 export function getVaultModeLabel(mode: VaultMode): string {
   const labels: Record<VaultMode, string> = {
-    'open-collection': 'Open Collection',
-    'trust-fund': 'Trust Fund',
-    'all-or-nothing': 'All-or-Nothing Pledge',
-    'funded-grant': 'Funded Grant',
+    'open-collection': 'Collect',
+    'trust-fund': 'Save for Someone',
+    'all-or-nothing': 'All-or-Nothing',
+    'funded-grant': 'Fund a Dream',
   };
   return labels[mode];
 }

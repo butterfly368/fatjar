@@ -4,21 +4,21 @@ import './HowItWorks.css';
 const STEPS = [
   {
     number: 'Step 01',
-    title: 'Create',
+    title: 'Create a Jar',
     description:
-      'Set your vault name, goal amount, time-lock, and optional beneficiary.',
+      'Name it, set a goal if you want, pick when it unlocks.',
   },
   {
     number: 'Step 02',
-    title: 'Fund',
+    title: 'Share the Link',
     description:
-      'Contributors back it with BTC and earn $FJAR tokens. Early backers earn more.',
+      'Send it to your people. They contribute BTC directly and earn $FJAR tokens.',
   },
   {
     number: 'Step 03',
-    title: 'Resolve',
+    title: 'Open the Jar',
     description:
-      'Goal met? Withdraw the BTC. Goal missed? Everyone gets a full refund.',
+      'When the time comes, the creator \u2014 or a chosen beneficiary \u2014 withdraws. Set a goal? If it\u2019s not met, everyone gets their BTC back.',
   },
 ];
 
@@ -27,7 +27,7 @@ export function HowItWorks() {
     <section className="how" id="how">
       <div className="how-header">
         <h2 className="how-title">Three Steps.<br />Zero Fees.</h2>
-        <span className="how-sub">Bitcoin-native from start to finish</span>
+        <span className="how-sub">From jar to sats — no middleman, no platform cut.</span>
       </div>
       <div className="steps-grid">
         {STEPS.map((step) => (

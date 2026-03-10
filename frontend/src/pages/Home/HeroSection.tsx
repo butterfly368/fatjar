@@ -12,21 +12,21 @@ export function HeroSection() {
             Bitcoin L1 via OPNet
           </div>
           <h1 className="hero-h1">
-            LOCK<br />
-            BITCOIN<br />
-            <span className="hero-h1-highlight">TOGETHER.</span>
+            THE PIGGY BANK<br />
+            FOR EVERYONE<br />
+            <span className="hero-h1-highlight">ON BITCOIN.</span>
           </h1>
           <p className="hero-tagline">
-            Trustless vaults on Bitcoin L1. Set a goal,<br />
-            set a time-lock. Early backers earn more $FJAR.<br />
-            Zero platform fees.
+            Create a jar. Share the link. Friends and family<br />
+            chip in with BTC. You all earn $FJAR tokens<br />
+            along the way.
           </p>
           <div className="hero-actions">
             <Button to="/create">
-              Create a Vault <ArrowRight size={14} />
+              Create a Jar <ArrowRight size={14} />
             </Button>
-            <Button variant="secondary" to="/#active-vaults">
-              Browse Vaults
+            <Button variant="secondary" to="/#active-jars">
+              See Active Jars
             </Button>
           </div>
         </div>
@@ -36,7 +36,7 @@ export function HeroSection() {
             <img
               className="piggy-img"
               src="/piggy-hero.png"
-              alt="FatJar vault locking Bitcoin together"
+              alt="FatJar — the group piggy bank on Bitcoin"
             />
           </div>
         </div>

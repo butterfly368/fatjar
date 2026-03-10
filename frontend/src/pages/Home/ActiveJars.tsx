@@ -16,11 +16,11 @@ export function ActiveJars() {
   if (vaults.length === 0) return null;
 
   return (
-    <section className="jars" id="active-vaults">
+    <section className="jars" id="active-jars">
       <div className="jars-header">
-        <h2 className="jars-title">Active Vaults</h2>
+        <h2 className="jars-title">Active Jars</h2>
         <span className="jars-sub">
-          {vaults.length} vault{vaults.length !== 1 ? 's' : ''} collecting BTC
+          {vaults.length} jar{vaults.length !== 1 ? 's' : ''} filling up right now
         </span>
       </div>
       <div className="jars-grid">
@@ -31,7 +31,7 @@ export function ActiveJars() {
           return (
             <Link to={`/fund/${vault.id}`} className="jar-card" key={vault.id}>
               <div className="jar-card-label">
-                Vault #{vault.id}
+                Jar #{vault.id}
                 <span className="jar-card-status">{modeLabel}</span>
               </div>
               <div className="jar-card-name">{vault.name}</div>
@@ -67,7 +67,7 @@ export function ActiveJars() {
                 </div>
               </div>
               <div className="jar-card-arrow">
-                View Vault <ArrowRight size={12} />
+                View Jar <ArrowRight size={12} />
               </div>
             </Link>
           );

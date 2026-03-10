@@ -13,17 +13,17 @@ export function Navbar() {
         <Logo />
       </Link>
       <div className="nav-links">
-        <Link className="nav-link" to="/#jars">
-          Explore
+        <Link className="nav-link" to="/#active-jars">
+          Active Jars
         </Link>
         {connected && (
           <Link className="nav-link" to="/dashboard">
-            Dashboard
+            My Jars
           </Link>
         )}
         {connected && (
           <Link className="nav-link" to="/create">
-            Create
+            Create a Jar
           </Link>
         )}
         <a className="nav-link" href="https://github.com" target="_blank" rel="noopener noreferrer">
