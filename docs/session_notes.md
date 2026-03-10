@@ -396,3 +396,84 @@ frontend/
 **Days to deadline:** 3 (March 13, 2026)
 
 **Next session:** OPWallet integration + contract deployment, or demo video
+
+---
+
+## Session 8 — 2026-03-10 — Vault Redesign & Full Frontend Rebuild
+
+**Goal:** Redesign product from consumer piggy bank to trustless Bitcoin vaults for financial coordination. Implement full vault redesign across contracts and frontend.
+
+**What we did:**
+
+**Product redesign:**
+1. Analyzed competitive landscape (Juicebox on ETH, Geyser Fund on Lightning, Week 1-2 vibecode winners)
+2. Identified fundamental product issues: gas fees kill small contributions, no monetization, weak token utility
+3. Repositioned from consumer savings ($20 contributions) to financial coordination (0.01+ BTC where gas is <0.03%)
+4. Designed 4 vault modes from 2 optional params (goalAmount + beneficiary):
+   - Open Collection, Trust Fund, All-or-Nothing Pledge, Funded Grant
+5. Designed burn-on-refund mechanics: sell $FJAR = forfeit refund right
+6. Wrote and approved design doc: `docs/plans/2026-03-10-vault-redesign.md`
+7. Wrote implementation plan: `docs/plans/2026-03-10-vault-implementation.md` (12 tasks)
+
+**Contract changes (Tasks 1-3):**
+8. Token: Added `burnForRefund` method + `TokensBurnedEvent`
+9. Manager: Added `goalAmount`, `beneficiary` params to `createFund`; `contributionTokensEarned` tracking
+10. Manager: Rewrote `withdraw` (beneficiary/creator check, goal-met requirement); added `refund` with CEI pattern
+11. Fixed variable shadowing, redundant compositeKey, stale docstring (code review catches)
+
+**Frontend changes (Tasks 4-9):**
+12. Updated types: `Vault`, `Contribution`, `VaultMode` + helpers (`getVaultMode`, `formatBtc`, `truncateAddress`)
+13. Created mock contract service with 3 seed vaults (all-or-nothing, funded-grant, open-collection)
+14. Updated Home page: hero "Lock Bitcoin Together", stats from mock service, vault cards with mode badges + progress bars
+15. Updated CreateFund: goal amount toggle, beneficiary toggle, live mode preview card, block date estimate, gas estimate
+16. Updated FundDetail: progress bar, mode/status badges, contributor table with $FJAR, contextual actions (contribute/withdraw/refund/close)
+17. Added Dashboard page: wallet gate, my vaults (withdraw/close), my contributions (refund), status badges, empty states
+18. Wired OPWallet: installed `@btc-vision/walletconnect`, found it breaks Vite dev (broken .d.ts structure), removed it. Hook detects `window.opnet` with mock fallback.
+
+**Typography fixes:**
+19. Ran visual readability audit (seo-visual agents on all 3 pages + screenshots)
+20. Found critical issues: Syne 800 + uppercase + negative letter-spacing = unreadable dense blocks
+21. Fixed across all pages (5 parallel agents): Syne headings → weight 700, mixed case, neutral letter-spacing
+22. Kept IBM Plex Mono labels uppercase (works at small sizes)
+
+**Also identified (not yet fixed):**
+- `--text-muted` (#999) fails WCAG AA contrast — needs darkening to #767676
+- `--accent` (#F7931A) fails WCAG AA on text — needs darkening to #C97600
+- Mobile: CTAs below fold, no hamburger menu, contributors table overflow
+- 9-10px labels should be 11-12px minimum
+- Progress bar too thin (6px → 8-10px)
+
+**Decisions:**
+- Positioning: "Juicebox for Bitcoin" — trustless crowdfunding primitive on L1
+- 4 vault modes from 2 params (elegant, one contract)
+- Burn-on-refund gives $FJAR real economic weight
+- Zero fees at launch; transparent treasury upgrade path post-competition
+- `totalBtcContributed` NOT decremented on refund (prevents curve manipulation)
+- Contributor must hold $FJAR to refund (sell = forfeit refund)
+
+**Commits:**
+- `c6304dd` — Add vault redesign v3 design doc
+- `6810951` — Add vault implementation plan (12 tasks)
+- `42d485a` — feat(token): add burnForRefund + TokensBurnedEvent
+- `70d83c1` — feat(manager): add goalAmount, beneficiary params and token tracking
+- `d75c165` — feat(manager): add withdraw goal-check, refund with burn, updated views
+- `616e35f` — fix(manager): clean up docstring and redundant compositeKey
+- `6ab1cf3` — feat(frontend): update types and services for vault redesign
+- `567ff28` — feat(frontend): update Home page for vault redesign
+- `e310fb8` — feat(frontend): update CreateFund with goal/beneficiary toggles
+- `390d8a6` — feat(frontend): update FundDetail with modes, progress bar, actions
+- `4bc56ad` — feat(frontend): add Dashboard page
+- `b9efd42` — feat(frontend): wire OPWallet integration
+- `021dd63` — fix(frontend): improve typography readability across all pages
+
+**GitHub:** https://github.com/mikazaruj/fatjar (to be moved to different account)
+
+**Days to deadline:** 3 (March 13, 2026)
+
+**Remaining tasks:**
+- Task 10: Deploy contracts to testnet (requires OPWallet + faucet BTC)
+- Task 11: Deploy frontend to Vercel
+- Task 12: Submission materials (README, video, tweet)
+- Fix WCAG contrast issues (--text-muted, --accent)
+- Fix mobile responsiveness (CTAs, hamburger, table overflow)
+- Move GitHub repo to separate account
