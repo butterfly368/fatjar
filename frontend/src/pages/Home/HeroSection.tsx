@@ -12,9 +12,9 @@ export function HeroSection() {
             Bitcoin L1 via OPNet
           </div>
           <h1 className="hero-h1">
-            THE PIGGY BANK<br />
-            FOR EVERYONE<br />
-            <span className="hero-h1-highlight">ON BITCOIN.</span>
+            The Piggy Bank<br />
+            For Everyone<br />
+            <span className="hero-h1-highlight">On Bitcoin.</span>
           </h1>
           <p className="hero-tagline">
             Create a jar. Share the link. Friends and family<br />

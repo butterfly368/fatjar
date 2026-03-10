@@ -22,9 +22,8 @@
 .fund-detail-title {
   font-family: 'Syne', sans-serif;
   font-size: clamp(28px, 4vw, 48px);
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: -0.03em;
+  font-weight: 700;
+  letter-spacing: 0;
   line-height: 1.05;
   margin-bottom: 16px;
 }
@@ -249,8 +248,7 @@
   font-family: 'Syne', sans-serif;
   font-size: 16px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
   margin-bottom: 16px;
 }
 
@@ -319,8 +317,7 @@
   font-family: 'Syne', sans-serif;
   font-size: 14px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
   margin-bottom: 10px;
 }
 
@@ -353,7 +350,7 @@
   font-family: 'Syne', sans-serif;
   font-size: 18px;
   font-weight: 700;
-  text-transform: uppercase;
+  letter-spacing: 0;
   margin-bottom: 24px;
 }
 
@@ -423,8 +420,8 @@
 .fund-not-found-title {
   font-family: 'Syne', sans-serif;
   font-size: 32px;
-  font-weight: 800;
-  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0;
   margin-bottom: 12px;
 }
 

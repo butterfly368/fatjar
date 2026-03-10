@@ -21,10 +21,9 @@
 .features-title {
   font-family: 'Syne', sans-serif;
   font-size: clamp(28px, 4vw, 48px);
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.05;
-  letter-spacing: -0.03em;
-  text-transform: uppercase;
+  letter-spacing: 0;
 }
 
 .features-tags {

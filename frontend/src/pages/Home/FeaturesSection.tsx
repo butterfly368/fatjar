@@ -46,9 +46,9 @@ export function FeaturesSection() {
       <div className="features-left">
         <div className="section-label">[01] Why FatJar</div>
         <h2 className="features-title">
-          WHAT MAKES<br />
-          FATJAR<br />
-          DIFFERENT
+          What Makes<br />
+          FatJar<br />
+          Different
         </h2>
         <div className="features-tags">
           {TAGS.map((tag, i) => (

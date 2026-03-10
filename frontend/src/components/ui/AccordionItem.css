@@ -23,8 +23,7 @@
   font-family: 'Syne', sans-serif;
   font-size: 15px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
 }
 
 .acc-arrow {

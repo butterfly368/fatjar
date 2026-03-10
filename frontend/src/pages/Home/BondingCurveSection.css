@@ -23,8 +23,7 @@
   font-family: 'Syne', sans-serif;
   font-size: clamp(20px, 3vw, 28px);
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 .curve-badge {
