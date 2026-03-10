@@ -22,6 +22,7 @@ import {
     ContributionEvent,
     WithdrawalEvent,
     FundClosedEvent,
+    RefundEvent,
 } from './events/FatJarManagerEvents';
 
 // =============================================================================
@@ -49,6 +50,13 @@ const creatorFundIdPointer: u16 = Blockchain.nextPointer;
 
 // Fund contributor tracking
 const fundContributorCountPointer: u16 = Blockchain.nextPointer;
+
+// Goal and beneficiary (keyed by fundId)
+const fundGoalAmountPointer: u16 = Blockchain.nextPointer;
+const fundBeneficiaryPointer: u16 = Blockchain.nextPointer;
+
+// Tokens earned per fund per contributor (keyed by composite fundId + contributor)
+const contributionTokensEarnedPointer: u16 = Blockchain.nextPointer;
 
 // =============================================================================
 // Constants
@@ -90,6 +98,10 @@ export class FatJarManager extends OP_NET {
     // Fund contributor tracking
     private readonly fundContributorCount: StoredMapU256;
 
+    private readonly fundGoalAmount: StoredMapU256;
+    private readonly fundBeneficiary: StoredMapU256;
+    private readonly contributionTokensEarned: StoredMapU256;
+
     public constructor() {
         super();
 
@@ -108,6 +120,10 @@ export class FatJarManager extends OP_NET {
         this.creatorFundId = new StoredMapU256(creatorFundIdPointer);
 
         this.fundContributorCount = new StoredMapU256(fundContributorCountPointer);
+
+        this.fundGoalAmount = new StoredMapU256(fundGoalAmountPointer);
+        this.fundBeneficiary = new StoredMapU256(fundBeneficiaryPointer);
+        this.contributionTokensEarned = new StoredMapU256(contributionTokensEarnedPointer);
     }
 
     public override onDeployment(_calldata: Calldata): void {
@@ -163,6 +179,14 @@ export class FatJarManager extends OP_NET {
             name: 'unlockTimestamp',
             type: ABIDataTypes.UINT256,
         },
+        {
+            name: 'goalAmount',
+            type: ABIDataTypes.UINT256,
+        },
+        {
+            name: 'beneficiary',
+            type: ABIDataTypes.ADDRESS,
+        },
     )
     @emit('FundCreated')
     @returns({
@@ -172,6 +196,8 @@ export class FatJarManager extends OP_NET {
     public createFund(calldata: Calldata): BytesWriter {
         const name: string = calldata.readStringWithLength();
         const unlockTimestamp: u256 = calldata.readU256();
+        const goalAmount: u256 = calldata.readU256();
+        const beneficiary: Address = calldata.readAddress();
 
         if (name.length == 0) {
             throw new Revert('Empty fund name');
@@ -199,6 +225,10 @@ export class FatJarManager extends OP_NET {
         this.fundIsClosed.set(fundId, ZERO);
         this.fundWithdrawn.set(fundId, ZERO);
 
+        // Store goal and beneficiary
+        this.fundGoalAmount.set(fundId, goalAmount);
+        this.fundBeneficiary.set(fundId, this.addressToU256(beneficiary));
+
         // Track creator's funds
         const creatorKey: u256 = this.addressToU256(creator);
         const creatorCount: u256 = this.creatorFundCount.get(creatorKey);
@@ -210,7 +240,7 @@ export class FatJarManager extends OP_NET {
         this.creatorFundId.set(creatorFundKey, fundId);
 
         // S2: Emit event with unlockTimestamp as u256 (matching stored type)
-        this.emitEvent(new FundCreatedEvent(fundId, creator, unlockTimestamp));
+        this.emitEvent(new FundCreatedEvent(fundId, creator, unlockTimestamp, goalAmount, beneficiary));
 
         const writer = new BytesWriter(32);
         writer.writeU256(fundId);
@@ -274,6 +304,11 @@ export class FatJarManager extends OP_NET {
 
         // S5: Cross-contract call to FatJarToken.mintForContribution
         const tokensMinted: u256 = this.mintTokensForContributor(contributor, satoshis);
+
+        // Track tokens earned per fund per contributor (for burn-on-refund)
+        const tokensKey: u256 = this.compositeKey(fundId, contributorKey);
+        const existingTokens: u256 = this.contributionTokensEarned.get(tokensKey);
+        this.contributionTokensEarned.set(tokensKey, SafeMath.add(existingTokens, tokensMinted));
 
         // Emit event with tokens minted info
         this.emitEvent(new ContributionEvent(fundId, contributor, satoshis, tokensMinted));

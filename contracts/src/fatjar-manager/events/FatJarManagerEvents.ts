@@ -14,13 +14,15 @@ import {
  */
 @final
 export class FundCreatedEvent extends NetEvent {
-    constructor(fundId: u256, creator: Address, unlockTimestamp: u256) {
+    constructor(fundId: u256, creator: Address, unlockTimestamp: u256, goalAmount: u256, beneficiary: Address) {
         const data: BytesWriter = new BytesWriter(
-            U256_BYTE_LENGTH + ADDRESS_BYTE_LENGTH + U256_BYTE_LENGTH,
+            U256_BYTE_LENGTH + ADDRESS_BYTE_LENGTH + U256_BYTE_LENGTH * 2 + ADDRESS_BYTE_LENGTH,
         );
         data.writeU256(fundId);
         data.writeAddress(creator);
         data.writeU256(unlockTimestamp);
+        data.writeU256(goalAmount);
+        data.writeAddress(beneficiary);
 
         super('FundCreated', data);
     }
@@ -74,5 +76,23 @@ export class FundClosedEvent extends NetEvent {
         data.writeAddress(creator);
 
         super('FundClosed', data);
+    }
+}
+
+/**
+ * Emitted when a contributor refunds from a failed goal-based vault.
+ */
+@final
+export class RefundEvent extends NetEvent {
+    constructor(fundId: u256, contributor: Address, satoshis: u256, tokensBurned: u256) {
+        const data: BytesWriter = new BytesWriter(
+            U256_BYTE_LENGTH + ADDRESS_BYTE_LENGTH + U256_BYTE_LENGTH * 2,
+        );
+        data.writeU256(fundId);
+        data.writeAddress(contributor);
+        data.writeU256(satoshis);
+        data.writeU256(tokensBurned);
+
+        super('Refund', data);
     }
 }
