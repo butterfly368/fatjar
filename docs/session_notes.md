@@ -747,50 +747,54 @@ Design system compliance:
 
 ---
 
-## Session 14 — TODO — OPWallet Writes + Demo
+## Session 14 — 2026-03-11 — OPWallet Write Integration
 
-**Goal:** Wire OPWallet write transactions, create real jars, record demo video, submit.
+**Goal:** Wire OPWallet write transactions, deploy contracts, test live flow.
 
-**BLOCKER: OPWallet write integration** — create/contribute/withdraw currently throw "need OPWallet". Must wire up `@btc-vision/transaction` TransactionFactory + signInteraction in contract.live.ts.
+**What we did:**
+1. Researched OPNet write transaction flow — `CallResult.sendTransaction()` auto-detects OPWallet via `TransactionFactory`
+2. Implemented all 6 write methods in `contract.live.ts`:
+   - `createFund`, `contribute` — simulation path (no access check in contract)
+   - `withdraw`, `closeFund`, `deleteFund`, `refund` — simulation with fallback to direct `encodeCalldata` + `signAndBroadcastInteraction`
+3. Added OPWallet helpers: `getOPWallet()`, `getWalletAddress()`, `getSenderAddress()`, `getWriteManagerContract()`
+4. Added write method ABIs (6 methods) to Manager ABI
+5. Beneficiary handling: `Address.dead()` for none, `provider.getPublicKeyInfo()` for real addresses
+6. Built admin page (`/admin`) for contract linking (Token↔Manager setManager/setTokenAddress)
+7. Tested live mode — discovered contracts from Session 13 are gone (testnet reset)
+8. Attempted redeployment — failed with "No UTXO found (minAmount)"
 
-**Seed jars to create on-chain (replace mock data):**
+**Architecture — OPWallet write flow:**
+- Simulate call via `contract.methodName(args)` → `CallResult` (has calldata + gas estimate)
+- `callResult.sendTransaction({ signer: null, refundTo, network, maximumAllowedSatToSpend })` → `TransactionFactory.signInteraction()` auto-detects `window.opnet.web3` → OPWallet prompts user → signs + broadcasts
+- For access-controlled methods: builds sender `Address` from OPWallet public key (legacy + ML-DSA)
+- Fallback: `encodeCalldata()` → `window.opnet.web3.signAndBroadcastInteraction()` directly
 
-### Jar 1 — "Lisa's Birthday Surprise" (Open Jar / Collect)
-- Mode: Open Jar (no goal, no beneficiary)
-- Time-lock: ~1 month from now
-- Description: "Pooling BTC from friends and family for Lisa's 30th birthday. She's been eyeing a new camera setup."
+**Wallet setup:**
+- Account 1: `opt1pd...nc5wm6` — 0.08+ tBTC (main wallet, faucet funded)
+- Account 2: created in OPWallet — 0.001 tBTC (sent from Account 1)
+- Friend with OPWallet available for two-person demo
 
-### Jar 2 — "Jake's College Fund" (Open Jar + Beneficiary)
-- Mode: Open Jar with beneficiary (Save for Someone)
-- Beneficiary: second wallet address
-- Time-lock: ~3 years
-- Description: "Saving for Jake's university tuition. Family contributions locked until he turns 18."
+**Commits:**
+- `113d157` — feat(frontend): wire OPWallet write transactions for all 6 contract methods
 
-### Jar 3 — "Community Skatepark Build" (Goal Jar)
-- Mode: Goal Jar (all-or-nothing, no beneficiary)
-- Goal: 0.5 BTC (use smaller amount for testnet)
-- Time-lock: ~1 month
-- Description: "All-or-nothing fundraiser for a neighborhood skatepark. If we hit 0.5 BTC, it happens. If not, everyone gets refunded."
+**BLOCKER: Contract deployment**
+- Testnet reset wiped Session 13 contracts
+- Deploy script fails: "No UTXO found (minAmount)" — Account 1 UTXOs may be too small or fragmented
+- Need to investigate: possibly need larger UTXOs from faucet, or UTXOs are stuck in unconfirmed state
 
-### Jar 4 — "Maya's Dev Bootcamp" (Goal Jar + Beneficiary)
-- Mode: Goal Jar with beneficiary (Fund a Dream)
-- Goal: 0.1 BTC
-- Beneficiary: second wallet address
-- Time-lock: ~2 months
-- Description: "Funding Maya's 12-week coding bootcamp. If we hit 0.1 BTC, it goes directly to her."
-
-**Demo video script (90s):**
-1. Creator (Wallet A): connect → create "Community Skatepark Build" → get link
-2. Contributor (Wallet B): open link → see jar → contribute 0.01 BTC → see $FJAR earned
-3. Result: progress bar updates, contributor listed, Active Jars page shows it
-
-**Remaining tasks:**
-- [ ] Wire OPWallet write transactions (create, contribute, withdraw, refund, close)
-- [ ] Switch default mode to live (or auto-detect)
+**Open items for next session:**
+- [ ] Fix UTXO issue and redeploy both contracts (Token + Manager)
+- [ ] Run admin linking (Token.setManager + Manager.setTokenAddress)
+- [ ] Test full live flow: create jar → contribute → verify on-chain
 - [ ] Create 4 seed jars on-chain
-- [ ] Set up second browser profile + OPWallet (Wallet B)
-- [ ] Record demo video
-- [ ] Tweet #opnetvibecode
-- [ ] Submit to vibecode.finance
+- [ ] Redeploy frontend to Vercel
+- [ ] Record 90s demo video
+- [ ] Tweet #opnetvibecode + submit to vibecode.finance
+
+**Seed jar details (ready to create):**
+- Jar 1: "Lisa's Birthday Surprise" (Open, no goal, lock 1mo)
+- Jar 2: "Jake's College Fund" (Open + beneficiary, lock 1yr)
+- Jar 3: "Community Skatepark Build" (Goal 0.05 BTC, lock 1mo)
+- Jar 4: "Maya's Dev Bootcamp" (Goal 0.01 BTC + beneficiary, lock 2mo)
 
 **Days to deadline:** 2 (March 13, 2026)

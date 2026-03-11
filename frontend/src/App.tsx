@@ -5,6 +5,7 @@ import { CreateFund } from './pages/CreateFund/CreateFund';
 import { FundDetail } from './pages/FundDetail/FundDetail';
 import { Dashboard } from './pages/Dashboard/Dashboard';
 import { ExploreJars } from './pages/ExploreJars/ExploreJars';
+import { Admin } from './pages/Admin/Admin';
 export function App() {
   return (
     <Routes>
@@ -14,6 +15,7 @@ export function App() {
         <Route path="/fund/:id" element={<FundDetail />} />
         <Route path="/jars" element={<ExploreJars />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/admin" element={<Admin />} />
       </Route>
     </Routes>
   );
