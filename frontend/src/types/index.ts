@@ -5,6 +5,7 @@ export type VaultMode = 'open-collection' | 'trust-fund' | 'all-or-nothing' | 'f
 export interface Vault {
   id: string;
   name: string;
+  description: string;        // short description (max 200 chars)
   creator: string;
   totalRaised: bigint;       // satoshis
   unlockBlock: bigint;
@@ -58,6 +59,25 @@ export function formatBtc(satoshis: bigint): string {
 export function truncateAddress(address: string): string {
   if (address.length <= 14) return address;
   return address.slice(0, 8) + '...' + address.slice(-6);
+}
+
+// Deterministic accent color for each jar (based on ID)
+const JAR_COLORS = [
+  '#F7931A', // bitcoin orange
+  '#627EEA', // ethereum blue
+  '#26A17B', // teal
+  '#E6007A', // polkadot pink
+  '#8247E5', // polygon purple
+  '#00D395', // compound green
+  '#FF6B6B', // coral red
+  '#F0B90B', // binance yellow
+  '#2775CA', // usdc blue
+  '#E84142', // avalanche red
+];
+
+export function getJarColor(id: string): string {
+  const num = parseInt(id, 10) || 0;
+  return JAR_COLORS[num % JAR_COLORS.length];
 }
 
 // ── Shared types ────────────────────────────────────────────────────

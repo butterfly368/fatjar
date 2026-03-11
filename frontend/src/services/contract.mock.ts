@@ -20,6 +20,7 @@ const creatorVaults: Map<string, string[]> = new Map();
 vaults.set('1', {
   id: '1',
   name: "Lisa's Birthday Surprise",
+  description: "Pooling BTC from friends and family for Lisa's 30th birthday. She's been eyeing a new camera setup.",
   creator: 'bc1q...creator1',
   totalRaised: 8500000n, // 0.085 BTC
   unlockBlock: 900000n,
@@ -34,6 +35,7 @@ vaults.set('1', {
 vaults.set('2', {
   id: '2',
   name: "Jake's College Fund",
+  description: "Saving for Jake's university tuition. Family contributions locked until he turns 18.",
   creator: 'bc1q...creator2',
   totalRaised: 150000000n, // 1.5 BTC
   unlockBlock: 1050000n,
@@ -48,6 +50,7 @@ vaults.set('2', {
 vaults.set('3', {
   id: '3',
   name: 'Community Skatepark Build',
+  description: 'All-or-nothing fundraiser for a neighborhood skatepark. If we hit 2 BTC, it happens. If not, everyone gets refunded.',
   creator: 'bc1q...creator3',
   totalRaised: 120000000n, // 1.2 BTC
   unlockBlock: 920000n,
@@ -108,6 +111,7 @@ export async function createVault(
   unlockBlock: bigint,
   goalAmount: bigint,
   beneficiary: string,
+  description: string = '',
 ): Promise<string> {
   const id = String(nextVaultId++);
   const creator = 'bc1q...demo'; // stub: would come from connected wallet
@@ -115,6 +119,7 @@ export async function createVault(
   const vault: Vault = {
     id,
     name,
+    description,
     creator,
     totalRaised: 0n,
     unlockBlock,
@@ -160,8 +165,18 @@ export async function withdraw(fundId: string): Promise<bigint> {
   if (!vault) throw new Error(`Vault ${fundId} not found`);
 
   const available = vault.totalRaised - vault.withdrawn;
+  // 0.5% withdraw fee
+  const fee = available * 50n / 10000n;
+  const netAmount = available - fee;
   vault.withdrawn = vault.totalRaised;
-  return available;
+  return netAmount;
+}
+
+export async function deleteFund(fundId: string): Promise<void> {
+  const vault = vaults.get(fundId);
+  if (!vault) throw new Error(`Vault ${fundId} not found`);
+  if (vault.totalRaised > 0n) throw new Error('Cannot delete fund with contributions');
+  vaults.delete(fundId);
 }
 
 export async function refund(fundId: string): Promise<bigint> {

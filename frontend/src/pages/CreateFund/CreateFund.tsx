@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PiggyBank, ArrowRight } from 'lucide-react';
-import { Input } from '../../components/ui/Input';
+import { Input, TextArea } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { createVault } from '../../services/contract';
 import {
@@ -43,6 +43,7 @@ function getMinDate(): string {
 export function CreateFund() {
   const navigate = useNavigate();
   const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const [unlockDate, setUnlockDate] = useState('');
   const [hasGoal, setHasGoal] = useState(false);
   const [goalAmount, setGoalAmount] = useState('');
@@ -57,6 +58,7 @@ export function CreateFund() {
     const tempVault: Vault = {
       id: '0',
       name: name || 'Preview',
+      description: '',
       creator: '',
       totalRaised: 0n,
       unlockBlock: 0n,
@@ -108,7 +110,7 @@ export function CreateFund() {
         : 0n;
       const ben = hasBeneficiary && beneficiary ? beneficiary : ZERO_ADDRESS;
 
-      const newId = await createVault(name, block, goal, ben);
+      const newId = await createVault(name, block, goal, ben, description);
       setCreated(newId);
       navigate(`/fund/${newId}`);
     } catch {
@@ -154,6 +156,16 @@ export function CreateFund() {
           onChange={(e) => setName(e.target.value)}
           error={errors.name}
           maxLength={64}
+        />
+
+        <TextArea
+          label="Description"
+          placeholder="What's this jar for? Help contributors understand the purpose."
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          error={errors.description}
+          maxLength={200}
+          rows={3}
         />
 
         <div className="input-group">

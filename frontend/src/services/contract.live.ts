@@ -176,6 +176,7 @@ export async function getFundDetails(fundId: string): Promise<Vault> {
   return {
     id: fundId,
     name: `Jar #${fundId}`, // names stored via events only
+    description: '', // descriptions stored via events only
     creator: toAddress(p.creator),
     totalRaised: toBigInt(p.totalRaised),
     unlockBlock: toBigInt(p.unlockTimestamp),
@@ -251,6 +252,7 @@ export async function createVault(
   _unlockBlock: bigint,
   _goalAmount: bigint,
   _beneficiary: string,
+  _description: string = '',
 ): Promise<string> {
   throw new Error('Write operations require OPWallet. Use demo mode for testing.');
 }
@@ -268,5 +270,9 @@ export async function refund(_fundId: string): Promise<bigint> {
 }
 
 export async function closeFund(_fundId: string): Promise<void> {
+  throw new Error('Write operations require OPWallet. Use demo mode for testing.');
+}
+
+export async function deleteFund(_fundId: string): Promise<void> {
   throw new Error('Write operations require OPWallet. Use demo mode for testing.');
 }

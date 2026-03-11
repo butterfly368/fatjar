@@ -112,8 +112,9 @@ export async function createVault(
   unlockBlock: bigint,
   goalAmount: bigint,
   beneficiary: string,
+  description: string = '',
 ): Promise<string> {
-  return (await svc()).createVault(name, unlockBlock, goalAmount, beneficiary);
+  return (await svc()).createVault(name, unlockBlock, goalAmount, beneficiary, description);
 }
 
 export async function contribute(fundId: string, satoshis: bigint): Promise<void> {
@@ -130,4 +131,8 @@ export async function refund(fundId: string): Promise<bigint> {
 
 export async function closeFund(fundId: string): Promise<void> {
   return (await svc()).closeFund(fundId);
+}
+
+export async function deleteFund(fundId: string): Promise<void> {
+  return (await svc()).deleteFund(fundId);
 }

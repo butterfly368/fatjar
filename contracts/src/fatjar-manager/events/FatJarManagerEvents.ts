@@ -51,15 +51,32 @@ export class ContributionEvent extends NetEvent {
  */
 @final
 export class WithdrawalEvent extends NetEvent {
-    constructor(fundId: u256, creator: Address, satoshis: u256) {
+    constructor(fundId: u256, creator: Address, netAmount: u256, fee: u256) {
         const data: BytesWriter = new BytesWriter(
-            U256_BYTE_LENGTH + ADDRESS_BYTE_LENGTH + U256_BYTE_LENGTH,
+            U256_BYTE_LENGTH + ADDRESS_BYTE_LENGTH + U256_BYTE_LENGTH * 2,
         );
         data.writeU256(fundId);
         data.writeAddress(creator);
-        data.writeU256(satoshis);
+        data.writeU256(netAmount);
+        data.writeU256(fee);
 
         super('Withdrawal', data);
+    }
+}
+
+/**
+ * Emitted when a fund is deleted by its creator (no contributions).
+ */
+@final
+export class FundDeletedEvent extends NetEvent {
+    constructor(fundId: u256, creator: Address) {
+        const data: BytesWriter = new BytesWriter(
+            U256_BYTE_LENGTH + ADDRESS_BYTE_LENGTH,
+        );
+        data.writeU256(fundId);
+        data.writeAddress(creator);
+
+        super('FundDeleted', data);
     }
 }
 

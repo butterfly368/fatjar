@@ -23,6 +23,7 @@ import {
     WithdrawalEvent,
     FundClosedEvent,
     RefundEvent,
+    FundDeletedEvent,
 } from './events/FatJarManagerEvents';
 
 // =============================================================================
@@ -58,6 +59,12 @@ const fundBeneficiaryPointer: u16 = Blockchain.nextPointer;
 // Tokens earned per fund per contributor (keyed by composite fundId + contributor)
 const contributionTokensEarnedPointer: u16 = Blockchain.nextPointer;
 
+// Protocol fees accumulated from withdraw fee
+const protocolFeesPointer: u16 = Blockchain.nextPointer;
+
+// Fund deleted flag (keyed by fundId) — separate from isClosed
+const fundIsDeletedPointer: u16 = Blockchain.nextPointer;
+
 // =============================================================================
 // Constants
 // =============================================================================
@@ -67,6 +74,10 @@ const ZERO: u256 = u256.Zero;
 
 // I2: Max value that fits in a u64 for unlock timestamp validation
 const MAX_U64: u256 = u256.fromString('18446744073709551615');
+
+// Withdraw fee: 0.5% = 50 basis points out of 10,000
+const WITHDRAW_FEE_BPS: u256 = u256.fromU64(50);
+const BPS_DENOMINATOR: u256 = u256.fromU64(10000);
 
 // =============================================================================
 // Contract
@@ -101,6 +112,8 @@ export class FatJarManager extends OP_NET {
     private readonly fundGoalAmount: StoredMapU256;
     private readonly fundBeneficiary: StoredMapU256;
     private readonly contributionTokensEarned: StoredMapU256;
+    private readonly protocolFees: StoredU256;
+    private readonly fundIsDeleted: StoredMapU256;
 
     public constructor() {
         super();
@@ -124,6 +137,8 @@ export class FatJarManager extends OP_NET {
         this.fundGoalAmount = new StoredMapU256(fundGoalAmountPointer);
         this.fundBeneficiary = new StoredMapU256(fundBeneficiaryPointer);
         this.contributionTokensEarned = new StoredMapU256(contributionTokensEarnedPointer);
+        this.protocolFees = new StoredU256(protocolFeesPointer, EMPTY_POINTER);
+        this.fundIsDeleted = new StoredMapU256(fundIsDeletedPointer);
     }
 
     public override onDeployment(_calldata: Calldata): void {
@@ -273,6 +288,12 @@ export class FatJarManager extends OP_NET {
             throw new Revert('Fund does not exist');
         }
 
+        // Check fund is not deleted
+        const isDeleted: u256 = this.fundIsDeleted.get(fundId);
+        if (!u256.eq(isDeleted, ZERO)) {
+            throw new Revert('Fund is deleted');
+        }
+
         // Check fund is not closed
         const isClosed: u256 = this.fundIsClosed.get(fundId);
         if (!u256.eq(isClosed, ZERO)) {
@@ -383,12 +404,22 @@ export class FatJarManager extends OP_NET {
             throw new Revert('Nothing to withdraw');
         }
 
+        // Deduct 0.5% withdraw fee
+        const fee: u256 = SafeMath.div(SafeMath.mul(withdrawable, WITHDRAW_FEE_BPS), BPS_DENOMINATOR);
+        const netAmount: u256 = SafeMath.sub(withdrawable, fee);
+
+        // Accumulate protocol fees
+        if (!u256.eq(fee, ZERO)) {
+            const currentFees: u256 = this.protocolFees.value;
+            this.protocolFees.value = SafeMath.add(currentFees, fee);
+        }
+
         this.fundWithdrawn.set(fundId, totalRaised);
 
-        this.emitEvent(new WithdrawalEvent(fundId, sender, withdrawable));
+        this.emitEvent(new WithdrawalEvent(fundId, sender, netAmount, fee));
 
         const writer = new BytesWriter(32);
-        writer.writeU256(withdrawable);
+        writer.writeU256(netAmount);
         return writer;
     }
 
@@ -423,6 +454,49 @@ export class FatJarManager extends OP_NET {
         this.fundIsClosed.set(fundId, ONE);
 
         this.emitEvent(new FundClosedEvent(fundId, sender));
+
+        return new BytesWriter(0);
+    }
+
+    /**
+     * Delete a fund. Only creator can delete. Only works when no BTC has been contributed.
+     */
+    @method({
+        name: 'fundId',
+        type: ABIDataTypes.UINT256,
+    })
+    @emit('FundDeleted')
+    @returns()
+    public deleteFund(calldata: Calldata): BytesWriter {
+        const fundId: u256 = calldata.readU256();
+
+        const creatorU256: u256 = this.fundCreator.get(fundId);
+        if (u256.eq(creatorU256, ZERO)) {
+            throw new Revert('Fund does not exist');
+        }
+
+        // Check not already deleted
+        const isDeleted: u256 = this.fundIsDeleted.get(fundId);
+        if (!u256.eq(isDeleted, ZERO)) {
+            throw new Revert('Already deleted');
+        }
+
+        const sender: Address = Blockchain.tx.sender;
+        const senderU256: u256 = this.addressToU256(sender);
+        if (!u256.eq(creatorU256, senderU256)) {
+            throw new Revert('Only creator can delete');
+        }
+
+        // Can only delete if no contributions received
+        const totalRaised: u256 = this.fundTotalRaised.get(fundId);
+        if (!u256.eq(totalRaised, ZERO)) {
+            throw new Revert('Cannot delete fund with contributions');
+        }
+
+        this.fundIsDeleted.set(fundId, ONE);
+        this.fundIsClosed.set(fundId, ONE);
+
+        this.emitEvent(new FundDeletedEvent(fundId, sender));
 
         return new BytesWriter(0);
     }
@@ -653,6 +727,47 @@ export class FatJarManager extends OP_NET {
 
         const writer = new BytesWriter(32);
         writer.writeU256(fundId);
+        return writer;
+    }
+
+    // =========================================================================
+    // PROTOCOL FEE METHODS
+    // =========================================================================
+
+    /**
+     * Get accumulated protocol fees (in satoshis).
+     */
+    @method()
+    @returns({
+        name: 'fees',
+        type: ABIDataTypes.UINT256,
+    })
+    public getProtocolFees(calldata: Calldata): BytesWriter {
+        const writer = new BytesWriter(32);
+        writer.writeU256(this.protocolFees.value);
+        return writer;
+    }
+
+    /**
+     * Claim accumulated protocol fees. Only callable by deployer.
+     */
+    @method()
+    @returns({
+        name: 'amount',
+        type: ABIDataTypes.UINT256,
+    })
+    public claimProtocolFees(calldata: Calldata): BytesWriter {
+        this.onlyDeployer(Blockchain.tx.sender);
+
+        const fees: u256 = this.protocolFees.value;
+        if (u256.eq(fees, ZERO)) {
+            throw new Revert('No fees to claim');
+        }
+
+        this.protocolFees.value = ZERO;
+
+        const writer = new BytesWriter(32);
+        writer.writeU256(fees);
         return writer;
     }
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { getAllVaults } from '../../services/contract';
-import { getVaultMode, getVaultModeLabel, formatBtc } from '../../types';
+import { getVaultMode, getVaultModeLabel, formatBtc, getJarColor } from '../../types';
 import type { Vault } from '../../types';
 import './ActiveJars.css';
 
@@ -29,12 +29,20 @@ export function ActiveJars() {
           const modeLabel = getVaultModeLabel(mode);
           const hasGoal = vault.goalAmount > 0n;
           return (
-            <Link to={`/fund/${vault.id}`} className="jar-card" key={vault.id}>
+            <Link
+              to={`/fund/${vault.id}`}
+              className="jar-card"
+              key={vault.id}
+              style={{ borderLeftColor: getJarColor(vault.id) }}
+            >
               <div className="jar-card-label">
                 Jar #{vault.id}
                 <span className="jar-card-status">{modeLabel}</span>
               </div>
               <div className="jar-card-name">{vault.name}</div>
+              {vault.description && (
+                <div className="jar-card-desc">{vault.description}</div>
+              )}
               {hasGoal && (
                 <div className="jar-card-progress-wrap">
                   <div className="jar-card-progress-bar">
