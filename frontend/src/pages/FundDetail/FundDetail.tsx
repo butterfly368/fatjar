@@ -215,7 +215,7 @@ export function FundDetail() {
           <p className="fund-detail-desc">{vault.description}</p>
         )}
         <div className="fund-detail-badges">
-          <span className="fund-mode-badge"><ModeIcon size={11} /> {modeLabel}</span>
+          <span className="fund-mode-badge" data-mode={mode}><ModeIcon size={11} /> {modeLabel}</span>
           <span className={`fund-status-badge fund-status-${status}`}>{statusLabel}</span>
         </div>
         <div className="fund-detail-meta">

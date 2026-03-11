@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Inbox, Gift, Target, Rocket } from 'lucide-react';
+import { ArrowRight, PlusCircle, Inbox, Gift, Target, Rocket } from 'lucide-react';
+import { Button } from '../../components/ui/Button';
 import { getAllVaults } from '../../services/contract';
 import { getVaultMode, getVaultModeLabel, formatBtc, blockToDate } from '../../types';
 import type { Vault, VaultMode } from '../../types';
@@ -46,9 +47,14 @@ export function ExploreJars() {
           <div className="explore-label">Browse</div>
           <h1 className="explore-title">Active Jars</h1>
         </div>
-        <span className="explore-count">
-          {filtered.length} jar{filtered.length !== 1 ? 's' : ''}
-        </span>
+        <div className="explore-header-right">
+          <span className="explore-count">
+            {filtered.length} jar{filtered.length !== 1 ? 's' : ''}
+          </span>
+          <Button to="/create">
+            <PlusCircle size={14} /> Create a Jar
+          </Button>
+        </div>
       </div>
 
       <div className="explore-filters">
@@ -77,7 +83,7 @@ export function ExploreJars() {
               <Link to={`/fund/${vault.id}`} className="explore-card" key={vault.id}>
                 <div className="explore-card-label">
                   Jar #{vault.id}
-                  <span className="explore-card-mode">
+                  <span className="explore-card-mode" data-mode={mode}>
                     <Icon size={11} />
                     {modeLabel}
                   </span>

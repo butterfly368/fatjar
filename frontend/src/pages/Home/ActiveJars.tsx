@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Inbox, Gift, Target, Rocket } from 'lucide-react';
+import { ArrowRight, PlusCircle, Inbox, Gift, Target, Rocket } from 'lucide-react';
+import { Button } from '../../components/ui/Button';
 import { getAllVaults } from '../../services/contract';
 import { getVaultMode, getVaultModeLabel, formatBtc, blockToDate } from '../../types';
 import type { Vault, VaultMode } from '../../types';
@@ -52,7 +53,7 @@ export function ActiveJars() {
             >
               <div className="jar-card-label">
                 Jar #{vault.id}
-                <span className="jar-card-mode">
+                <span className="jar-card-mode" data-mode={mode}>
                   <Icon size={11} />
                   {modeLabel}
                 </span>
@@ -98,13 +99,16 @@ export function ActiveJars() {
           );
         })}
       </div>
-      {hasMore && (
-        <div className="jars-view-all">
+      <div className="jars-footer">
+        {hasMore && (
           <Link to="/jars" className="jars-view-all-link">
             View All {vaults.length} Jars <ArrowRight size={12} />
           </Link>
-        </div>
-      )}
+        )}
+        <Button to="/create">
+          <PlusCircle size={14} /> Create a Jar
+        </Button>
+      </div>
     </section>
   );
 }

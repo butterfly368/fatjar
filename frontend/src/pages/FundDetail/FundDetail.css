@@ -51,11 +51,26 @@
   letter-spacing: 0.08em;
   padding: 4px 12px;
   border: none;
-  background: var(--accent);
-  color: #111;
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  color: #f5f2ed;
+}
+
+.fund-mode-badge[data-mode="open-collection"] {
+  background: #2a2a2a;
+}
+
+.fund-mode-badge[data-mode="trust-fund"] {
+  background: #166534;
+}
+
+.fund-mode-badge[data-mode="all-or-nothing"] {
+  background: #c2410c;
+}
+
+.fund-mode-badge[data-mode="funded-grant"] {
+  background: #312e81;
 }
 
 .fund-status-badge {

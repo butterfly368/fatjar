@@ -88,12 +88,27 @@
   font-weight: 600;
   padding: 3px 10px;
   border: none;
-  background: var(--accent);
-  color: #111;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  color: #f5f2ed;
+}
+
+.jar-card-mode[data-mode="open-collection"] {
+  background: #2a2a2a;
+}
+
+.jar-card-mode[data-mode="trust-fund"] {
+  background: #166534;
+}
+
+.jar-card-mode[data-mode="all-or-nothing"] {
+  background: #c2410c;
+}
+
+.jar-card-mode[data-mode="funded-grant"] {
+  background: #312e81;
 }
 
 .jar-card-name {
@@ -181,9 +196,13 @@
   color: var(--accent);
 }
 
-.jars-view-all {
-  text-align: center;
+.jars-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
   padding-top: 32px;
+  flex-wrap: wrap;
 }
 
 .jars-view-all-link {

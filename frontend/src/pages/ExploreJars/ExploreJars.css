@@ -30,6 +30,12 @@
   line-height: 1;
 }
 
+.explore-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .explore-count {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 11px;
@@ -131,12 +137,27 @@
   font-weight: 600;
   padding: 3px 10px;
   border: none;
-  background: var(--accent);
-  color: #111;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  color: #f5f2ed;
+}
+
+.explore-card-mode[data-mode="open-collection"] {
+  background: #2a2a2a;
+}
+
+.explore-card-mode[data-mode="trust-fund"] {
+  background: #166534;
+}
+
+.explore-card-mode[data-mode="all-or-nothing"] {
+  background: #c2410c;
+}
+
+.explore-card-mode[data-mode="funded-grant"] {
+  background: #312e81;
 }
 
 .explore-card-name {
