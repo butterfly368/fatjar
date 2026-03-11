@@ -14,7 +14,7 @@ export function Navbar() {
       </Link>
       <div className="nav-links">
         <Link className="nav-link" to="/jars">
-          Explore
+          Active Jars
         </Link>
         {connected && (
           <Link className="nav-link" to="/dashboard">

@@ -30,7 +30,9 @@ export function ActiveJars() {
   return (
     <section className="jars" id="active-jars">
       <div className="jars-header">
-        <h2 className="jars-title">Active Jars</h2>
+        <Link to="/jars" className="jars-title-link">
+          <h2 className="jars-title">Active Jars</h2>
+        </Link>
         <span className="jars-sub">
           {vaults.length} jar{vaults.length !== 1 ? 's' : ''} filling up right now
         </span>

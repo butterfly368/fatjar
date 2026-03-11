@@ -14,12 +14,22 @@
   gap: 20px;
 }
 
+.jars-title-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.jars-title-link:hover .jars-title {
+  color: var(--accent);
+}
+
 .jars-title {
   font-family: 'Syne', sans-serif;
   font-size: clamp(28px, 4vw, 52px);
   font-weight: 700;
   letter-spacing: 0;
   line-height: 1;
+  transition: color 0.2s;
 }
 
 .jars-sub {

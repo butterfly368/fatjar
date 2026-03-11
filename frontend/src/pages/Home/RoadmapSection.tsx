@@ -7,7 +7,7 @@ const PHASES = [
     label: 'MVP Live',
     icon: Check,
     items: [
-      '4 jar types — Collect, Save, All-or-Nothing, Fund a Dream',
+      '2 jar types — Open Jar and Goal Jar, with optional beneficiary',
       'Bonding curve $FJAR rewards for every contributor',
       'Time-lock — Bitcoin enforces the unlock date',
       'All-or-nothing refund with burn-on-refund protection',

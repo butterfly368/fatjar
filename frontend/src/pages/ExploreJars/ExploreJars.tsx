@@ -43,8 +43,8 @@ export function ExploreJars() {
     <div className="explore">
       <div className="explore-header">
         <div>
-          <div className="explore-label">Explore</div>
-          <h1 className="explore-title">All Jars</h1>
+          <div className="explore-label">Browse</div>
+          <h1 className="explore-title">Active Jars</h1>
         </div>
         <span className="explore-count">
           {filtered.length} jar{filtered.length !== 1 ? 's' : ''}
