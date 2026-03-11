@@ -798,3 +798,60 @@ Design system compliance:
 - Jar 4: "Maya's Dev Bootcamp" (Goal 0.01 BTC + beneficiary, lock 2mo)
 
 **Days to deadline:** 2 (March 13, 2026)
+
+---
+
+## Session 15 — 2026-03-11 — Deployment Debugging & Contract Linking
+
+**Goal:** Deploy contracts to OPNet testnet, link them, test live flow.
+
+**What we did:**
+
+1. Diagnosed previous deployment failure — "No UTXO found (minAmount)" was due to 50,000 sat minimum threshold
+2. Lowered `minAmount` from 50,000 to 330 sats in deploy script
+3. Discovered **wallet derivation mismatch** — `mnemonic.derive(0)` uses BIP84 (`m/84'/1'/0'/0/0`), but OPWallet uses BIP86 Taproot (`m/86'/0'/0'/0/0`). This was the root cause of all previous "successful" deployments never confirming — they deployed from a different wallet with no funds.
+4. Fixed deploy script: `mnemonic.derive(0)` → `mnemonic.deriveOPWallet(AddressTypes.P2TR, 0)`
+5. Script deployments broadcast successfully but transactions never get mined (stuck in mempool)
+6. Deployed both contracts via **OPWallet UI** (Deploy button) — confirmed instantly in block 4854
+7. Recovered Manager contract address from OPScan block explorer by searching deployer address
+8. Built hex→bech32 address converter using `EcKeyPair.p2op()` (witness version 16, hash160 of seed)
+9. Fixed deploy script linking (Steps 3-4): `Address.fromString()` → raw `Uint8Array` for `writeAddress()`, strip `0x` prefix for `contract` field
+10. Fixed admin page linking: added `sender` (from OPWallet pubkeys) for deployer access check, replaced `getPublicKeyInfo()` with direct `Address` construction from pubkey bytes
+11. Successfully linked contracts via admin page (both setManager + setTokenAddress confirmed)
+12. Added `sessionStorage` persistence for live/mock mode (survives page navigation)
+13. Attempted createFund — OPWallet prompted and signed, but testnet blocks stalled at 4861
+
+**Key bugs fixed:**
+- Deploy script: wrong BIP derivation path (`derive` vs `deriveOPWallet`)
+- Deploy script: `Address.fromString()` requires EC pubkey, not raw 32-byte seed — use raw bytes with `writeAddress()`
+- Deploy script: `contract` field needs hex without `0x` prefix
+- Admin page: `getPublicKeyInfo()` doesn't work for contract addresses — use raw pubkey bytes
+- Admin page: missing `sender` on contract instance → "Only deployer can call this method"
+- Frontend: `?live=true` URL param lost on navigation → persisted via `sessionStorage`
+
+**Deployed contracts (v3 — OPWallet deployed, confirmed):**
+- Token: `opt1sqzfndaxuj5kxt38d3funqnf09p2tlxryqg0d4jtq` (pubkey: `0x61737f715467a6342379c17cf7259522ce4d30a0be676cef850718e78136cf86`)
+- Manager: `opt1sqz2xxvr8dsa0qcxk62870sf67ycy7805nyhn456m` (pubkey: `0xea7aa93c4d9e615f08c80255278264a38492f2ab0b761547d321d71e3d11b3c6`)
+- Deployer: `opt1pdhu5rz5jpwvyumjw8p5sgr44fs0plktppnkzgpdsy4ddkjpgns7qnc5wm6`
+- Contracts linked: yes (via admin page, both confirmed)
+
+**Files modified:**
+- `scripts/deploy.mjs` — fixed derivation, minAmount, address encoding, hex prefix
+- `frontend/src/services/opnet-config.ts` — new addresses + pubkeys, back to OPWallet-deployed contracts
+- `frontend/src/services/contract.ts` — sessionStorage mode persistence
+- `frontend/src/pages/Admin/Admin.tsx` — sender address, raw pubkey Address construction
+
+**BLOCKER: Testnet block production stalled**
+- Blocks stuck at 4861 for 10+ minutes
+- createFund transaction signed via OPWallet but can't confirm until blocks resume
+- Script-broadcast transactions also never mine (OPWallet deploys do — different broadcast path?)
+
+**Open items for next session:**
+- [ ] Wait for testnet to resume, verify createFund confirmed
+- [ ] Create 4 seed jars on-chain
+- [ ] Test contribute flow (Account 2 → jar)
+- [ ] Redeploy frontend to Vercel with new config
+- [ ] Record 90s demo video
+- [ ] Tweet #opnetvibecode + submit to vibecode.finance
+
+**Days to deadline:** 2 (March 13, 2026)

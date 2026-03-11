@@ -21,8 +21,17 @@ let modePromise: Promise<Mode> | null = null;
 function getUrlMode(): 'live' | 'mock' | null {
   if (typeof window === 'undefined') return null;
   const params = new URLSearchParams(window.location.search);
-  if (params.get('live') === 'true') return 'live';
-  if (params.get('mock') === 'true') return 'mock';
+  if (params.get('live') === 'true') {
+    sessionStorage.setItem('fatjar-mode', 'live');
+    return 'live';
+  }
+  if (params.get('mock') === 'true') {
+    sessionStorage.setItem('fatjar-mode', 'mock');
+    return 'mock';
+  }
+  // Check sessionStorage for persisted mode (survives navigation)
+  const stored = sessionStorage.getItem('fatjar-mode');
+  if (stored === 'live' || stored === 'mock') return stored;
   return null;
 }
 

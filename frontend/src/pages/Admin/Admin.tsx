@@ -7,8 +7,15 @@ import {
   OP_NET_ABI,
 } from 'opnet';
 import type { BitcoinInterfaceAbi } from 'opnet';
+import { Address } from '@btc-vision/transaction';
 import { OPNET_CONFIG } from '../../services/opnet-config';
 import './Admin.css';
+
+function pubKeyToAddress(hexPubKey: string): Address {
+  const hex = hexPubKey.replace(/^0x/, '');
+  const bytes = new Uint8Array(hex.match(/.{2}/g)!.map(b => parseInt(b, 16)));
+  return new Address(bytes);
+}
 
 const opnetTestnet = {
   messagePrefix: '\x18Bitcoin Signed Message:\n',
@@ -57,6 +64,18 @@ function getOPWallet(): OPWalletAPI {
   return opnet;
 }
 
+async function getSenderAddress(): Promise<Address> {
+  const wallet = getOPWallet();
+  const legacyPubKey = await wallet.getPublicKey();
+  let mldsaPubKey: string | undefined;
+  try {
+    mldsaPubKey = await wallet.web3.getMLDSAPublicKey();
+  } catch {
+    // ML-DSA not available
+  }
+  return Address.fromString(mldsaPubKey || legacyPubKey, legacyPubKey);
+}
+
 export function Admin() {
   const [status, setStatus] = useState<string>('');
   const [loading, setLoading] = useState(false);
@@ -71,14 +90,16 @@ export function Admin() {
       const accounts = await wallet.requestAccounts();
       if (!accounts.length) throw new Error('Connect wallet first');
 
-      // Resolve manager address to Address object
-      const managerAddr = await provider.getPublicKeyInfo(OPNET_CONFIG.managerAddress, true);
+      // Convert manager pubkey to Address object
+      const managerAddr = pubKeyToAddress(OPNET_CONFIG.managerPubKey);
 
+      const sender = await getSenderAddress();
       const tokenContract = getContract(
         OPNET_CONFIG.tokenAddress,
         TokenLinkAbi,
         provider,
         opnetTestnet,
+        sender,
       );
 
       // Simulate
@@ -109,14 +130,16 @@ export function Admin() {
       const accounts = await wallet.requestAccounts();
       if (!accounts.length) throw new Error('Connect wallet first');
 
-      // Resolve token address to Address object
-      const tokenAddr = await provider.getPublicKeyInfo(OPNET_CONFIG.tokenAddress, true);
+      // Convert token pubkey to Address object
+      const tokenAddr = pubKeyToAddress(OPNET_CONFIG.tokenPubKey);
 
+      const sender = await getSenderAddress();
       const managerContract = getContract(
         OPNET_CONFIG.managerAddress,
         ManagerLinkAbi,
         provider,
         opnetTestnet,
+        sender,
       );
 
       // Simulate

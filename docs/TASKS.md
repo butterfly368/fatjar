@@ -24,7 +24,8 @@
 
 ### Session 4 — Frontend
 - [x] `[frontend]` P0 — Scaffold React + TypeScript + Vite project (2026-03-10)
-- [ ] `[frontend]` P0 — OPWallet integration (connect, sign, send)
+- [x] `[frontend]` P0 — Wire frontend to real OPNet contracts (strategy pattern: mock + live) (2026-03-10)
+- [ ] `[frontend]` P2 — OPWallet write transaction signing (stretch goal)
 - [x] `[frontend]` P0 — Home page (hero, stats, how-it-works, active jars, bonding curve) (2026-03-10)
 - [x] `[frontend]` P0 — Create Fund page (form + validation + public/private toggle) (2026-03-10)
 - [x] `[frontend]` P0 — Fund Detail page (stats, contributors, contribute form, share/copy link) (2026-03-10)
@@ -35,9 +36,9 @@
 - [ ] `[frontend]` P0 — **Narrative revision** — update copy/content per direction change (pending)
 
 ### Session 5 — Polish & Submit
-- [ ] `[demo]` P0 — Deploy frontend to Vercel
+- [x] `[demo]` P0 — Deploy frontend to Vercel → https://fatjar-ten.vercel.app/ (2026-03-10)
 - [ ] `[demo]` P0 — Record 90s demo video
-- [ ] `[demo]` P0 — Write README with screenshots + instructions
+- [x] `[demo]` P0 — Write README with screenshots + instructions (2026-03-10)
 - [ ] `[demo]` P0 — Tweet with #opnetvibecode
 - [ ] `[demo]` P1 — Submit to vibecode.finance
 - [ ] `[design]` P2 — Custom OG image for social sharing
