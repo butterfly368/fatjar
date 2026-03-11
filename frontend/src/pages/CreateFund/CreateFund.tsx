@@ -20,21 +20,30 @@ const MODE_DESCRIPTIONS: Record<VaultMode, string> = {
   'funded-grant': 'Fund someone\u2019s dream. If the goal is met, the beneficiary gets it. If not, refunds.',
 };
 
-// Rough estimate: ~10 min per block
-function estimateDate(blocks: number): string {
-  if (!blocks || blocks <= 0) return '';
-  const currentBlock = 890000;
-  const blocksUntil = blocks - currentBlock;
-  if (blocksUntil <= 0) return 'Already passed';
-  const ms = blocksUntil * 10 * 60 * 1000;
-  const date = new Date(Date.now() + ms);
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+// Bitcoin averages ~10 min per block
+const CURRENT_BLOCK = 890000;
+const MINUTES_PER_BLOCK = 10;
+
+function dateToBlock(dateStr: string): number {
+  if (!dateStr) return 0;
+  const target = new Date(dateStr).getTime();
+  const now = Date.now();
+  const diffMs = target - now;
+  if (diffMs <= 0) return 0;
+  const diffBlocks = Math.ceil(diffMs / (MINUTES_PER_BLOCK * 60 * 1000));
+  return CURRENT_BLOCK + diffBlocks;
+}
+
+function getMinDate(): string {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return tomorrow.toISOString().split('T')[0];
 }
 
 export function CreateFund() {
   const navigate = useNavigate();
   const [name, setName] = useState('');
-  const [unlockBlock, setUnlockBlock] = useState('');
+  const [unlockDate, setUnlockDate] = useState('');
   const [hasGoal, setHasGoal] = useState(false);
   const [goalAmount, setGoalAmount] = useState('');
   const [hasBeneficiary, setHasBeneficiary] = useState(false);
@@ -63,20 +72,25 @@ export function CreateFund() {
   const modeLabel = getVaultModeLabel(currentMode);
   const modeDescription = MODE_DESCRIPTIONS[currentMode];
 
-  const blockEstimate = estimateDate(parseInt(unlockBlock, 10));
+  const estimatedBlock = dateToBlock(unlockDate);
 
   function validate(): boolean {
     const errs: Record<string, string> = {};
     if (!name.trim()) errs.name = 'Name is required';
     if (name.length > 64) errs.name = 'Max 64 characters';
-    if (!unlockBlock.trim()) errs.unlockBlock = 'Unlock block is required';
-    else if (parseInt(unlockBlock, 10) <= 0) errs.unlockBlock = 'Must be a positive block number';
+    if (!unlockDate) errs.unlockDate = 'Unlock date is required';
+    else if (dateToBlock(unlockDate) <= CURRENT_BLOCK) errs.unlockDate = 'Must be a future date';
     if (hasGoal) {
       if (!goalAmount.trim()) errs.goalAmount = 'Goal amount is required when enabled';
       else if (parseFloat(goalAmount) <= 0) errs.goalAmount = 'Must be greater than 0';
     }
     if (hasBeneficiary) {
       if (!beneficiary.trim()) errs.beneficiary = 'Beneficiary address is required when enabled';
+      else if (!beneficiary.startsWith('bc1') && !beneficiary.startsWith('opt1') && !beneficiary.startsWith('0x')) {
+        errs.beneficiary = 'Address must start with bc1, opt1, or 0x';
+      } else if (beneficiary.length < 20) {
+        errs.beneficiary = 'Address looks too short — double-check it';
+      }
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -88,7 +102,7 @@ export function CreateFund() {
 
     setSubmitting(true);
     try {
-      const block = BigInt(unlockBlock);
+      const block = BigInt(dateToBlock(unlockDate));
       const goal = hasGoal && goalAmount
         ? BigInt(Math.round(parseFloat(goalAmount) * 100_000_000))
         : 0n;
@@ -144,17 +158,19 @@ export function CreateFund() {
 
         <div className="input-group">
           <Input
-            label="Unlock Block"
-            type="number"
-            placeholder="e.g. 900000"
-            value={unlockBlock}
-            onChange={(e) => setUnlockBlock(e.target.value)}
-            error={errors.unlockBlock}
-            min={1}
+            label="Unlock Date"
+            type="date"
+            value={unlockDate}
+            onChange={(e) => setUnlockDate(e.target.value)}
+            error={errors.unlockDate}
+            min={getMinDate()}
           />
-          {blockEstimate && (
-            <div className="create-fund-helper">
-              Estimated unlock: ~{blockEstimate}
+          <div className="create-fund-helper">
+            No one can withdraw before this date — not even you. Pick when the jar should open.
+          </div>
+          {estimatedBlock > 0 && (
+            <div className="create-fund-helper create-fund-helper-block">
+              ≈ Bitcoin block #{estimatedBlock.toLocaleString()}
             </div>
           )}
         </div>
@@ -217,11 +233,14 @@ export function CreateFund() {
             <div className="create-fund-toggle-content">
               <Input
                 label="Beneficiary Address"
-                placeholder="bc1q..."
+                placeholder="opt1... or bc1..."
                 value={beneficiary}
                 onChange={(e) => setBeneficiary(e.target.value)}
                 error={errors.beneficiary}
               />
+              <div className="create-fund-helper create-fund-helper-warning">
+                ⚠ Double-check this address. It cannot be changed after creation. A wrong address means the funds go to someone else permanently.
+              </div>
             </div>
           )}
         </div>
@@ -237,7 +256,8 @@ export function CreateFund() {
 
         {/* Gas estimate */}
         <div className="create-fund-gas">
-          Estimated gas: ~0.0001 BTC
+          <div>Estimated creation fee: ~0.0001 BTC (gas)</div>
+          <div className="create-fund-gas-note">Contributors also pay a small gas fee on each contribution.</div>
         </div>
 
         {errors.submit && (

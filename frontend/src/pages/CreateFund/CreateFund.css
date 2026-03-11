@@ -199,6 +199,20 @@
   line-height: 1.5;
 }
 
+/* ── Helper variants ──────────────────────────────────────────────── */
+
+.create-fund-helper-block {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.create-fund-helper-warning {
+  color: #b36b00;
+  font-size: 12px;
+  line-height: 1.5;
+  font-family: 'Source Sans 3', 'Source Sans Pro', sans-serif;
+}
+
 /* ── Gas estimate ─────────────────────────────────────────────────── */
 
 .create-fund-gas {
@@ -206,6 +220,12 @@
   font-size: 12px;
   color: var(--text-muted);
   letter-spacing: 0.04em;
+}
+
+.create-fund-gas-note {
+  margin-top: 4px;
+  font-size: 11px;
+  opacity: 0.7;
 }
 
 /* ── Error message ────────────────────────────────────────────────── */
