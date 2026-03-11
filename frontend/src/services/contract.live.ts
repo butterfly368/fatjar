@@ -185,6 +185,7 @@ export async function getFundDetails(fundId: string): Promise<Vault> {
     contributorCount: Number(toBigInt(p.contributorCount)),
     goalAmount: toBigInt(p.goalAmount),
     beneficiary: toAddress(p.beneficiary),
+    isPublic: true, // on-chain vaults are always public
   };
 }
 
@@ -253,6 +254,7 @@ export async function createVault(
   _goalAmount: bigint,
   _beneficiary: string,
   _description: string = '',
+  _isPublic: boolean = true,
 ): Promise<string> {
   throw new Error('Write operations require OPWallet. Use demo mode for testing.');
 }

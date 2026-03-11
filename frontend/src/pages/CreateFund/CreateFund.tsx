@@ -49,6 +49,7 @@ export function CreateFund() {
   const [goalAmount, setGoalAmount] = useState('');
   const [hasBeneficiary, setHasBeneficiary] = useState(false);
   const [beneficiary, setBeneficiary] = useState('');
+  const [isPublic, setIsPublic] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [created, setCreated] = useState<string | null>(null);
@@ -67,6 +68,7 @@ export function CreateFund() {
       contributorCount: 0,
       goalAmount: hasGoal && goalAmount ? BigInt(Math.round(parseFloat(goalAmount) * 100_000_000)) : 0n,
       beneficiary: hasBeneficiary && beneficiary ? beneficiary : ZERO_ADDRESS,
+      isPublic: true,
     };
     return getVaultMode(tempVault);
   }, [name, hasGoal, goalAmount, hasBeneficiary, beneficiary]);
@@ -109,7 +111,7 @@ export function CreateFund() {
         : 0n;
       const ben = hasBeneficiary && beneficiary ? beneficiary : ZERO_ADDRESS;
 
-      const newId = await createVault(name, block, goal, ben, description);
+      const newId = await createVault(name, block, goal, ben, description, isPublic);
       setCreated(newId);
       navigate(`/fund/${newId}`);
     } catch {
@@ -275,6 +277,28 @@ export function CreateFund() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Visibility toggle */}
+        <div className="create-fund-toggle-section">
+          <div className="create-fund-toggle-row">
+            <div className="create-fund-toggle-info">
+              <div className="create-fund-toggle-label">Public Jar</div>
+              <div className="create-fund-toggle-hint">
+                {isPublic
+                  ? 'Listed on the Explore page for anyone to find and contribute.'
+                  : 'Only people with the direct link can see and contribute to this jar.'}
+              </div>
+            </div>
+            <button
+              type="button"
+              className={`toggle-switch${isPublic ? ' toggle-switch-active' : ''}`}
+              onClick={() => setIsPublic(!isPublic)}
+              aria-label="Toggle public visibility"
+            >
+              <span className="toggle-switch-knob" />
+            </button>
+          </div>
         </div>
 
         <div className="create-fund-divider" />

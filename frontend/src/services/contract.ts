@@ -113,8 +113,9 @@ export async function createVault(
   goalAmount: bigint,
   beneficiary: string,
   description: string = '',
+  isPublic: boolean = true,
 ): Promise<string> {
-  return (await svc()).createVault(name, unlockBlock, goalAmount, beneficiary, description);
+  return (await svc()).createVault(name, unlockBlock, goalAmount, beneficiary, description, isPublic);
 }
 
 export async function contribute(fundId: string, satoshis: bigint): Promise<void> {

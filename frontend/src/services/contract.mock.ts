@@ -29,6 +29,7 @@ vaults.set('1', {
   contributorCount: 6,
   goalAmount: 0n,
   beneficiary: ZERO_ADDRESS,
+  isPublic: true,
 });
 
 // Seed: 2) Jake's College Fund — trust-fund (Save for Someone)
@@ -44,6 +45,7 @@ vaults.set('2', {
   contributorCount: 4,
   goalAmount: 0n,
   beneficiary: 'bc1q...jake',
+  isPublic: true,
 });
 
 // Seed: 3) Community Skatepark Build — all-or-nothing
@@ -59,6 +61,7 @@ vaults.set('3', {
   contributorCount: 11,
   goalAmount: 200000000n, // 2 BTC goal
   beneficiary: ZERO_ADDRESS,
+  isPublic: true,
 });
 
 // Seed: 4) Dev Scholarship for Maya — funded-grant (Fund a Dream)
@@ -74,6 +77,7 @@ vaults.set('4', {
   contributorCount: 7,
   goalAmount: 50000000n, // 0.5 BTC goal
   beneficiary: 'bc1q...maya',
+  isPublic: true,
 });
 
 // Seed creator index
@@ -139,6 +143,7 @@ export async function createVault(
   goalAmount: bigint,
   beneficiary: string,
   description: string = '',
+  isPublic: boolean = true,
 ): Promise<string> {
   const id = String(nextVaultId++);
   const creator = 'bc1q...demo'; // stub: would come from connected wallet
@@ -155,6 +160,7 @@ export async function createVault(
     contributorCount: 0,
     goalAmount,
     beneficiary: beneficiary || ZERO_ADDRESS,
+    isPublic,
   };
 
   vaults.set(id, vault);

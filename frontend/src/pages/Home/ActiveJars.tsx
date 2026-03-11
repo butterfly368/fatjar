@@ -6,6 +6,8 @@ import { getVaultMode, getVaultModeLabel, formatBtc, blockToDate } from '../../t
 import type { Vault, VaultMode } from '../../types';
 import './ActiveJars.css';
 
+const MAX_LANDING_JARS = 4;
+
 const MODE_ICON: Record<VaultMode, typeof Inbox> = {
   'open-collection': Inbox,
   'trust-fund': Gift,
@@ -17,10 +19,13 @@ export function ActiveJars() {
   const [vaults, setVaults] = useState<Vault[]>([]);
 
   useEffect(() => {
-    getAllVaults().then((all) => setVaults(all.filter((v) => !v.isClosed)));
+    getAllVaults().then((all) => setVaults(all.filter((v) => !v.isClosed && v.isPublic)));
   }, []);
 
   if (vaults.length === 0) return null;
+
+  const displayVaults = vaults.slice(0, MAX_LANDING_JARS);
+  const hasMore = vaults.length > MAX_LANDING_JARS;
 
   return (
     <section className="jars" id="active-jars">
@@ -31,7 +36,7 @@ export function ActiveJars() {
         </span>
       </div>
       <div className="jars-grid">
-        {vaults.map((vault) => {
+        {displayVaults.map((vault) => {
           const mode = getVaultMode(vault);
           const modeLabel = getVaultModeLabel(mode);
           const Icon = MODE_ICON[mode];
@@ -91,6 +96,13 @@ export function ActiveJars() {
           );
         })}
       </div>
+      {hasMore && (
+        <div className="jars-view-all">
+          <Link to="/jars" className="jars-view-all-link">
+            View All {vaults.length} Jars <ArrowRight size={12} />
+          </Link>
+        </div>
+      )}
     </section>
   );
 }

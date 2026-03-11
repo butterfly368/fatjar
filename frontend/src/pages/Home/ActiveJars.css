@@ -171,6 +171,31 @@
   color: var(--accent);
 }
 
+.jars-view-all {
+  text-align: center;
+  padding-top: 32px;
+}
+
+.jars-view-all-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 10px 24px;
+  border: 1px solid var(--border-light);
+  transition: all 0.2s;
+}
+
+.jars-view-all-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 @media (max-width: 768px) {
   .jar-card {
     border-right: 1px solid var(--border-light);

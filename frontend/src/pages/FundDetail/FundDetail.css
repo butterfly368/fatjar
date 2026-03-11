@@ -28,6 +28,14 @@
   margin-bottom: 16px;
 }
 
+.fund-detail-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-sec);
+  margin-bottom: 16px;
+  max-width: 540px;
+}
+
 .fund-detail-badges {
   display: flex;
   align-items: center;

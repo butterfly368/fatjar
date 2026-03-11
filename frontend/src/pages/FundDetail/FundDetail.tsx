@@ -133,22 +133,36 @@ export function FundDetail() {
     }
   }
 
-  function handleCopyLink() {
-    navigator.clipboard.writeText(window.location.href);
+  async function handleCopyLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+    } catch {
+      // Fallback for non-HTTPS or denied permission
+      const textArea = document.createElement('textarea');
+      textArea.value = window.location.href;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
 
-  function handleShare() {
+  async function handleShare() {
     if (navigator.share && vault) {
-      navigator.share({
-        title: vault.name,
-        text: `Contribute BTC to "${vault.name}" on FatJar`,
-        url: window.location.href,
-      });
-    } else {
-      handleCopyLink();
+      try {
+        await navigator.share({
+          title: vault.name,
+          text: `Contribute BTC to "${vault.name}" on FatJar`,
+          url: window.location.href,
+        });
+        return;
+      } catch {
+        // User cancelled or share failed — fall through to copy
+      }
     }
+    handleCopyLink();
   }
 
   if (loading) return null;
@@ -197,6 +211,9 @@ export function FundDetail() {
           Jar #{vault.id}
         </div>
         <h1 className="fund-detail-title">{vault.name}</h1>
+        {vault.description && (
+          <p className="fund-detail-desc">{vault.description}</p>
+        )}
         <div className="fund-detail-badges">
           <span className="fund-mode-badge"><ModeIcon size={11} /> {modeLabel}</span>
           <span className={`fund-status-badge fund-status-${status}`}>{statusLabel}</span>

@@ -4,6 +4,7 @@ import { Home } from './pages/Home/Home';
 import { CreateFund } from './pages/CreateFund/CreateFund';
 import { FundDetail } from './pages/FundDetail/FundDetail';
 import { Dashboard } from './pages/Dashboard/Dashboard';
+import { ExploreJars } from './pages/ExploreJars/ExploreJars';
 export function App() {
   return (
     <Routes>
@@ -11,6 +12,7 @@ export function App() {
         <Route path="/" element={<Home />} />
         <Route path="/create" element={<CreateFund />} />
         <Route path="/fund/:id" element={<FundDetail />} />
+        <Route path="/jars" element={<ExploreJars />} />
         <Route path="/dashboard" element={<Dashboard />} />
       </Route>
     </Routes>

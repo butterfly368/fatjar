@@ -14,6 +14,7 @@ export interface Vault {
   contributorCount: number;
   goalAmount: bigint;         // satoshis, 0 = no goal
   beneficiary: string;        // zero address = no beneficiary
+  isPublic: boolean;          // true = listed on explore page, false = link-only
 }
 
 export interface Contribution {
