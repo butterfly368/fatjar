@@ -42,8 +42,8 @@ Two smart contracts on OPNet (Bitcoin L1, AssemblyScript/WASM):
 | **FatJarToken** (OP20) | $FJAR bonding curve mint, burn-on-refund, 100M cap | 37 KB |
 
 **Deployed on OPNet testnet:**
-- Token: `opt1sqpe6eu5p0x5vhljqwhwt4hy7zw2w33t69g3cqgjr`
-- Manager: `opt1sqrftj9eqnwa3gpxg5m5ulww6x5hsd4s5uup8hgzq`
+- Token: `opt1sqznxd9r5fq3kqev8rra939l386r9szhszg333mnl`
+- Manager: `opt1sqpyju3avp2h3q2hjk0evaaat8juz7vkagcuay866`
 
 **Frontend** reads from real on-chain state when the RPC is reachable, with mock fallback for demo. The LIVE/DEMO badge in the stats strip shows which mode is active.
 
