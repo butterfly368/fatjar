@@ -1,10 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Inbox, Gift, Target, Rocket } from 'lucide-react';
 import { getAllVaults } from '../../services/contract';
-import { getVaultMode, getVaultModeLabel, formatBtc, getModeStyle, blockToDate } from '../../types';
-import type { Vault } from '../../types';
+import { getVaultMode, getVaultModeLabel, formatBtc, blockToDate } from '../../types';
+import type { Vault, VaultMode } from '../../types';
 import './ActiveJars.css';
+
+const MODE_ICON: Record<VaultMode, typeof Inbox> = {
+  'open-collection': Inbox,
+  'trust-fund': Gift,
+  'all-or-nothing': Target,
+  'funded-grant': Rocket,
+};
 
 export function ActiveJars() {
   const [vaults, setVaults] = useState<Vault[]>([]);
@@ -27,7 +34,7 @@ export function ActiveJars() {
         {vaults.map((vault) => {
           const mode = getVaultMode(vault);
           const modeLabel = getVaultModeLabel(mode);
-          const style = getModeStyle(mode);
+          const Icon = MODE_ICON[mode];
           const hasGoal = vault.goalAmount > 0n;
           const progress = hasGoal ? Number((vault.totalRaised * 100n) / vault.goalAmount) : 0;
           return (
@@ -35,15 +42,12 @@ export function ActiveJars() {
               to={`/fund/${vault.id}`}
               className="jar-card"
               key={vault.id}
-              style={{ borderLeftColor: style.color }}
             >
               <div className="jar-card-label">
                 Jar #{vault.id}
-                <span
-                  className="jar-card-status"
-                  style={{ color: style.color, borderColor: style.color, background: style.bg }}
-                >
-                  {style.icon} {modeLabel}
+                <span className="jar-card-mode">
+                  <Icon size={11} />
+                  {modeLabel}
                 </span>
               </div>
               <div className="jar-card-name">{vault.name}</div>
@@ -55,10 +59,7 @@ export function ActiveJars() {
                   <div className="jar-card-progress-bar">
                     <div
                       className="jar-card-progress-fill"
-                      style={{
-                        width: `${Math.min(100, progress)}%`,
-                        background: style.color,
-                      }}
+                      style={{ width: `${Math.min(100, progress)}%` }}
                     />
                   </div>
                   <div className="jar-card-progress-text">

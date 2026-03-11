@@ -45,6 +45,9 @@
   border: 1px solid var(--border-light);
   background: var(--bg-alt);
   color: var(--text-sec);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .fund-status-badge {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowRight, Link2, Check, Share2 } from 'lucide-react';
+import { ArrowRight, Link2, Check, Share2, Inbox, Gift, Target, Rocket } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import {
@@ -14,6 +14,14 @@ import {
 } from '../../services/contract';
 import type { Vault, Contribution } from '../../types';
 import { getVaultMode, getVaultModeLabel, formatBtc, truncateAddress, ZERO_ADDRESS } from '../../types';
+import type { VaultMode } from '../../types';
+
+const MODE_ICON: Record<VaultMode, typeof Inbox> = {
+  'open-collection': Inbox,
+  'trust-fund': Gift,
+  'all-or-nothing': Target,
+  'funded-grant': Rocket,
+};
 import './FundDetail.css';
 
 // Mock current block — will be replaced with real chain data in Task 9
@@ -159,6 +167,7 @@ export function FundDetail() {
 
   const mode = getVaultMode(vault);
   const modeLabel = getVaultModeLabel(mode);
+  const ModeIcon = MODE_ICON[mode];
   const status = getVaultStatus(vault);
   const statusLabel = getStatusLabel(status);
   const hasGoal = vault.goalAmount > 0n;
@@ -189,7 +198,7 @@ export function FundDetail() {
         </div>
         <h1 className="fund-detail-title">{vault.name}</h1>
         <div className="fund-detail-badges">
-          <span className="fund-mode-badge">{modeLabel}</span>
+          <span className="fund-mode-badge"><ModeIcon size={11} /> {modeLabel}</span>
           <span className={`fund-status-badge fund-status-${status}`}>{statusLabel}</span>
         </div>
         <div className="fund-detail-meta">

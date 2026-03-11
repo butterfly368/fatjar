@@ -61,17 +61,21 @@ export function truncateAddress(address: string): string {
   return address.slice(0, 8) + '...' + address.slice(-6);
 }
 
-// Mode-specific visual identity (color, icon, background)
-const MODE_STYLES: Record<VaultMode, { color: string; bg: string; icon: string }> = {
-  'open-collection': { color: '#1a7f37', bg: '#dafbe1', icon: '\u{1F4E5}' },   // green, inbox emoji
-  'trust-fund':      { color: '#0550ae', bg: '#ddf4ff', icon: '\u{1F381}' },    // blue, gift emoji
-  'all-or-nothing':  { color: '#9a6700', bg: '#fff8c5', icon: '\u{1F3AF}' },    // amber, target emoji
-  'funded-grant':    { color: '#8250df', bg: '#fbefff', icon: '\u{1F680}' },     // purple, rocket emoji
+// Lucide icon name per mode (used by components that import from lucide-react)
+export const MODE_ICONS: Record<VaultMode, string> = {
+  'open-collection': 'Inbox',
+  'trust-fund':      'Gift',
+  'all-or-nothing':  'Target',
+  'funded-grant':    'Rocket',
 };
 
-export function getModeStyle(mode: VaultMode) {
-  return MODE_STYLES[mode];
-}
+// One-line description for each mode (used in jar type cards)
+export const MODE_ONELINER: Record<VaultMode, string> = {
+  'open-collection': 'Collect money for anything. You withdraw when the jar opens.',
+  'trust-fund':      'Save for someone you love. They open the jar.',
+  'all-or-nothing':  'Set a goal. Hit it or everyone gets refunded.',
+  'funded-grant':    'Fund someone\'s dream. Goal met = they get it.',
+};
 
 // Estimate human-readable date from block number
 export function blockToDate(block: bigint): string {

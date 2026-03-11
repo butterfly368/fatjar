@@ -33,6 +33,59 @@
   margin-top: 28px;
 }
 
+/* ── Jar Types Grid ────────────────────────────────────────────────── */
+
+.jar-types-section {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-light);
+}
+
+.jar-types-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.jar-types-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border-light);
+  border: 1px solid var(--border-light);
+}
+
+.jar-type-card {
+  padding: 20px;
+  background: var(--bg);
+}
+
+.jar-type-icon {
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.jar-type-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.jar-type-desc {
+  font-family: 'Source Sans 3', 'Source Sans Pro', sans-serif;
+  font-size: 13px;
+  color: var(--text-sec);
+  line-height: 1.5;
+}
+
 @media (max-width: 768px) {
   .features { grid-template-columns: 1fr; gap: 40px; }
+  .jar-types-grid { grid-template-columns: 1fr; }
 }
