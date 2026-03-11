@@ -547,3 +547,250 @@ frontend/
 **Days to deadline:** 3 (March 13)
 
 **Next steps:** Deploy contracts to testnet → wire frontend to real contracts → Vercel deploy → demo video → submission
+
+---
+
+## Session 11 — 2026-03-10 — Wire Frontend to Real OPNet Contracts
+
+**Goal:** Connect frontend to deployed OPNet testnet contracts using strategy pattern (mock + live).
+
+**What we did:**
+1. Installed `opnet` SDK in frontend (v1.8.3, 265 packages added)
+2. Copied ABI JSON files for FatJarManager and FatJarToken to `frontend/src/services/abis/`
+3. Created `opnet-config.ts` with deployed contract addresses:
+   - Token: `opt1sqpe6eu5p0x5vhljqwhwt4hy7zw2w33t69g3cqgjr`
+   - Manager: `opt1sqrftj9eqnwa3gpxg5m5ulww6x5hsd4s5uup8hgzq`
+4. Renamed `contract.ts` → `contract.mock.ts` (no content changes)
+5. Created `contract.live.ts` — all 11 read methods using `JSONRpcProvider` + `getContract`:
+   - getFundCount, getFundDetails, getAllVaults, getContribution, getContributionTokens,
+     getCreatorFundCount, getCreatorFundByIndex, getTokenRate, getTotalBtcContributed,
+     getTotalMinted, getVaultContributions (returns [] — no on-chain enumeration)
+   - Write methods throw ("requires OPWallet") — signing not yet wired
+   - Fund names show "Jar #N" (names stored via events only, not readable from storage)
+6. Created `contract.ts` facade — auto-detects live vs mock:
+   - Pings RPC with 3s timeout → live if reachable, mock otherwise
+   - URL params: `?live=true` or `?mock=true` force mode
+   - Same function signatures — zero page changes needed
+7. Added LIVE/DEMO badge to StatsStrip (green for live, orange for demo)
+8. Updated `vite.config.ts`: `global: 'globalThis'` polyfill, chunk size warning raised
+9. Updated `tsconfig.app.json`: added `resolveJsonModule: true`
+10. Defined `opnetTestnet` network inline (v6.5.6 of @btc-vision/bitcoin lacks it, v7.0.0 has it)
+
+**Technical notes:**
+- opnet SDK adds ~1.1MB to bundle (1.4MB total, 415KB gzipped) — heavy but acceptable for competition
+- Attempted code-splitting opnet into separate chunk — Vite's `build-import-analysis` plugin fails to parse the minified opnet output. Kept as single chunk.
+- Browser polyfills: opnet's `package.json` has `browser` field for Buffer, crypto, stream — Vite auto-resolves
+- `protobuf.js` in opnet uses `eval()` — Vite warns but doesn't block
+
+**Files created:**
+- `frontend/src/services/contract.live.ts` — live OPNet reads
+- `frontend/src/services/contract.ts` — facade with auto-detection
+- `frontend/src/services/opnet-config.ts` — addresses + RPC URL
+- `frontend/src/services/abis/FatJarManager.abi.json`
+- `frontend/src/services/abis/FatJarToken.abi.json`
+
+**Files modified:**
+- `frontend/src/services/contract.mock.ts` — renamed from contract.ts
+- `frontend/package.json` — added `opnet` dependency
+- `frontend/tsconfig.app.json` — `resolveJsonModule: true`
+- `frontend/vite.config.ts` — global polyfill + chunk limit
+- `frontend/src/pages/Home/StatsStrip.tsx` — LIVE/DEMO badge
+- `frontend/src/pages/Home/StatsStrip.css` — badge styles
+
+**Commits:**
+- `e2d9313` — feat(frontend): wire frontend to real OPNet contracts via strategy pattern
+
+**Days to deadline:** 3 (March 13, 2026)
+
+**Remaining:**
+- Deploy frontend to Vercel
+- Demo video (90s)
+- README with screenshots
+- Tweet #opnetvibecode + submission
+- OPWallet write signing (stretch goal)
+- Dark mode toggle (out of scope)
+
+---
+
+## Session 11b — 2026-03-10 — Deploy, Logo Fix, README
+
+**Goal:** Deploy to Vercel, fix logo spacing, write README, push to GitHub.
+
+**What we did:**
+1. Deployed frontend to Vercel — live at https://fatjar-ten.vercel.app/
+   - Framework: Vite, Root: `frontend`, Output: `dist`
+   - No env vars needed (contract addresses hardcoded)
+2. Verified wallet connect behavior — mock fallback works correctly when OPWallet not installed in current Chrome profile
+3. Fixed logo spacing issue — converted from HTML text (flex + span) to single SVG with `<text>` + `<tspan>` elements. Piggy icon + "FatJar." wordmark in one coordinate system, zero browser layout quirks
+4. Created prototype logo variations page (6 options), user confirmed current style is preferred
+5. Wrote README.md: architecture overview, 4 jar types table, bonding curve rates, tech stack, project structure, run instructions, security notes
+6. Switched GitHub auth from `mikazaruj` to `butterfly368` (repo owner)
+7. Pushed 4 commits to remote (contract integration, logo fix, README)
+
+**Commits:**
+- `e2d9313` — feat(frontend): wire frontend to real OPNet contracts via strategy pattern
+- `4bf6ddc` — fix(frontend): convert logo to single SVG to eliminate text spacing
+- `1af2f90` — docs: add README with architecture, bonding curve, and run instructions
+
+**Live site:** https://fatjar-ten.vercel.app/
+**GitHub:** https://github.com/butterfly368/fatjar
+
+**Days to deadline:** 3 (March 13, 2026)
+
+**Next session:** Record 90s demo video, tweet #opnetvibecode, submit to vibecode.finance
+
+---
+
+## Session 12 — 2026-03-11 — UX Fixes, Tokenomics, Revenue Model
+
+**Goal:** User-tested the app, identified UX issues, brainstormed tokenomics/revenue, implemented fixes.
+
+**Product decisions (brainstormed, approved Model A):**
+1. **Revenue model:** 0.5% withdraw fee → protocol treasury (not contribution fee)
+2. **Self-exploit solved:** contribute-to-self costs 0.5% on withdrawal = effectively buying $FJAR
+3. **$FJAR utility (future):** staking for BTC yield from protocol fees
+4. **NFT vision (future):** each contributor gets unique thank-you NFT on contribution, not years later
+5. **Delete jar:** added deleteFund() for empty jars (totalRaised == 0)
+6. **Single recipient for MVP:** creator or beneficiary withdraws. Multi-recipient/multisig = future.
+7. **Where BTC sits:** in the FatJarManager smart contract. No admin keys, no backdoor.
+
+**What we built:**
+
+Contract changes:
+- 0.5% withdraw fee (50 bps), accumulated in protocolFees storage
+- claimProtocolFees() deployer-only, getProtocolFees() view
+- deleteFund() — creator only, when totalRaised == 0
+- FundDeletedEvent, updated WithdrawalEvent with fee field
+- Both recompile clean: Token 37KB, Manager 30KB
+
+Frontend changes:
+- Wallet button: truncated address with hover tooltip
+- "Unlock Block" → date picker with auto block calculation
+- Beneficiary address validation (prefix + length + warning)
+- Gas estimate clarified: "creation fee" + contributor note
+- Description field (textarea, 200 chars) on create form + jar cards
+- 4th seed jar: Maya's Dev Bootcamp (Funded Grant mode)
+- Badges: orange bg + black text + Lucide icons (Inbox/Gift/Target/Rocket)
+- Consistent badges between preview cards and FundDetail
+- FAQ: "Zero Fees" → "Tiny Fee, Only on Withdrawal" (0.5%)
+- "Four Jar Types" accordion → scannable 2x2 grid with icons
+- Jar card dates: human-readable ("Sep 2026") instead of block numbers
+- Progress bar shown even at 0% with "just started" hint
+
+Design system compliance:
+- Emojis removed → Lucide SVG icons (per MASTER.md anti-patterns)
+- Badge style aligned across all pages
+- Orange as accent color maintained
+
+**Commits:**
+- `874e90c` — fix(frontend): UX improvements for Create Jar page
+- `1060b31` — feat: withdraw fee, deleteFund, jar descriptions, visual accents
+- `9ac2bc2` — fix(frontend): jar cards UX — badges, dates, progress, 4th seed jar
+- `587a167` — fix(frontend): align badges with editorial brutalist design system
+- `a43fb6b` — style: orange background badges with black text for warmth
+
+**Open items to continue:**
+- [ ] Add "Vision / Roadmap" section to landing page (MVP now → NFTs → staking → multi-recipient)
+- [ ] Redeploy contracts to testnet (new WASM with withdraw fee + deleteFund)
+- [ ] Record 90s demo video
+- [ ] Tweet #opnetvibecode + submit to vibecode.finance
+- [ ] Dark mode toggle (out of scope for competition)
+
+**Days to deadline:** 2 (March 13, 2026)
+
+---
+
+## Session 13 — 2026-03-11 — Polish, Consistency Audit, Redeployment
+
+**Goal:** Fix UX issues, simplify jar types, add features, audit everything, redeploy contracts.
+
+**What we did:**
+
+1. Simplified 4 jar types → 2 (Open Jar + Goal Jar) with optional beneficiary note
+2. Made time-lock optional (toggle, not required)
+3. Added Roadmap section (Now / Next / Vision)
+4. Fixed "Zero Fees" → "One Tiny Fee" in HowItWorks
+5. Added description to FundDetail page
+6. Fixed share button (clipboard fallback)
+7. Added public/private jar toggle on create form
+8. Built Active Jars page (/jars) with Open/Goal type filters
+9. Limited landing page to 4 jars with "View All" link
+10. Added "Create a Jar" CTA at bottom of Active Jars section + top of /jars page
+11. 4 distinctive badge colors per jar mode (charcoal/forest/burnt-orange/indigo)
+12. Persisted wallet connection via localStorage
+13. Full consistency audit (3 parallel agents): copy, contract↔frontend, design system
+14. Fixed blockToDate(0n) → "No lock" instead of "Unlocked"
+15. Updated CLAUDE.md + README.md (2 jar types, 0.5% fee, new addresses)
+16. Rebuilt contracts and redeployed to OPNet testnet
+17. Updated frontend config with new contract addresses
+
+**Deployed contracts (v2 — with withdraw fee + deleteFund):**
+- Token: `opt1sqznxd9r5fq3kqev8rra939l386r9szhszg333mnl`
+- Manager: `opt1sqpyju3avp2h3q2hjk0evaaat8juz7vkagcuay866`
+- Deployer: from OPWallet seed phrase
+
+**Commits:**
+- `e156f00` — feat(frontend): add Roadmap section + fix Zero Fees copy
+- `35a3f11` — simplify jar types: 4 → 2 core types + beneficiary note
+- `d82497f` — make time-lock optional with toggle
+- `5515699` — feat: description on fund detail, share fix, public/private, explore page
+- `21e0ba2` — fix: persist wallet connection across page refreshes
+- `0a90530` — fix: roadmap 2 jar types, rename Explore to Active Jars, link title
+- `fd8e20e` — feat: 4 distinctive badge colors + CTA buttons everywhere
+- `91ef0fd` — fix: consistency audit — blockToDate, docs, README
+- `a8d2463` — chore: update contract addresses after redeployment
+
+**Known gaps (acceptable for MVP):**
+- `isPublic` + `description` are frontend-only (contract uses events)
+- `getProtocolFees()` / `claimProtocolFees()` not exposed in frontend
+- Status badge colors (green/red) not in design system (functional colors)
+
+---
+
+## Session 14 — TODO — OPWallet Writes + Demo
+
+**Goal:** Wire OPWallet write transactions, create real jars, record demo video, submit.
+
+**BLOCKER: OPWallet write integration** — create/contribute/withdraw currently throw "need OPWallet". Must wire up `@btc-vision/transaction` TransactionFactory + signInteraction in contract.live.ts.
+
+**Seed jars to create on-chain (replace mock data):**
+
+### Jar 1 — "Lisa's Birthday Surprise" (Open Jar / Collect)
+- Mode: Open Jar (no goal, no beneficiary)
+- Time-lock: ~1 month from now
+- Description: "Pooling BTC from friends and family for Lisa's 30th birthday. She's been eyeing a new camera setup."
+
+### Jar 2 — "Jake's College Fund" (Open Jar + Beneficiary)
+- Mode: Open Jar with beneficiary (Save for Someone)
+- Beneficiary: second wallet address
+- Time-lock: ~3 years
+- Description: "Saving for Jake's university tuition. Family contributions locked until he turns 18."
+
+### Jar 3 — "Community Skatepark Build" (Goal Jar)
+- Mode: Goal Jar (all-or-nothing, no beneficiary)
+- Goal: 0.5 BTC (use smaller amount for testnet)
+- Time-lock: ~1 month
+- Description: "All-or-nothing fundraiser for a neighborhood skatepark. If we hit 0.5 BTC, it happens. If not, everyone gets refunded."
+
+### Jar 4 — "Maya's Dev Bootcamp" (Goal Jar + Beneficiary)
+- Mode: Goal Jar with beneficiary (Fund a Dream)
+- Goal: 0.1 BTC
+- Beneficiary: second wallet address
+- Time-lock: ~2 months
+- Description: "Funding Maya's 12-week coding bootcamp. If we hit 0.1 BTC, it goes directly to her."
+
+**Demo video script (90s):**
+1. Creator (Wallet A): connect → create "Community Skatepark Build" → get link
+2. Contributor (Wallet B): open link → see jar → contribute 0.01 BTC → see $FJAR earned
+3. Result: progress bar updates, contributor listed, Active Jars page shows it
+
+**Remaining tasks:**
+- [ ] Wire OPWallet write transactions (create, contribute, withdraw, refund, close)
+- [ ] Switch default mode to live (or auto-detect)
+- [ ] Create 4 seed jars on-chain
+- [ ] Set up second browser profile + OPWallet (Wallet B)
+- [ ] Record demo video
+- [ ] Tweet #opnetvibecode
+- [ ] Submit to vibecode.finance
+
+**Days to deadline:** 2 (March 13, 2026)
