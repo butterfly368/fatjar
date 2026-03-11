@@ -33,7 +33,7 @@
   margin-top: 28px;
 }
 
-/* ── Jar Types Grid ────────────────────────────────────────────────── */
+/* ── Jar Types ─────────────────────────────────────────────────────── */
 
 .jar-types-section {
   margin-top: 32px;
@@ -50,22 +50,25 @@
   margin-bottom: 16px;
 }
 
-.jar-types-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1px;
-  background: var(--border-light);
+.jar-types-stack {
   border: 1px solid var(--border-light);
 }
 
-.jar-type-card {
+.jar-type-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
   padding: 20px;
-  background: var(--bg);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.jar-type-row:last-child {
+  border-bottom: none;
 }
 
 .jar-type-icon {
   color: var(--text);
-  margin-bottom: 10px;
+  min-width: 18px;
 }
 
 .jar-type-name {
@@ -75,7 +78,7 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text);
-  margin-bottom: 6px;
+  margin-bottom: 2px;
 }
 
 .jar-type-desc {
@@ -85,7 +88,17 @@
   line-height: 1.5;
 }
 
+.jar-types-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
 @media (max-width: 768px) {
   .features { grid-template-columns: 1fr; gap: 40px; }
-  .jar-types-grid { grid-template-columns: 1fr; }
 }
