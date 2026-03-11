@@ -14,10 +14,10 @@ import {
 import './CreateFund.css';
 
 const MODE_DESCRIPTIONS: Record<VaultMode, string> = {
-  'open-collection': 'Collect money for anything. You withdraw when the jar unlocks.',
-  'trust-fund': 'Save for someone you love. The beneficiary opens the jar when the time comes.',
-  'all-or-nothing': 'Set a goal. If it\u2019s met, you withdraw. If not, everyone gets their BTC back.',
-  'funded-grant': 'Fund someone\u2019s dream. If the goal is met, the beneficiary gets it. If not, refunds.',
+  'open-collection': 'Collect BTC for anything. You withdraw when ready.',
+  'trust-fund': 'Save for someone you love. The beneficiary withdraws.',
+  'all-or-nothing': 'Set a goal. Hit it and you withdraw. Miss it, everyone gets refunded.',
+  'funded-grant': 'Fund someone\u2019s dream. Goal met = beneficiary gets it. Missed = refunds.',
 };
 
 // Bitcoin averages ~10 min per block
@@ -80,8 +80,7 @@ export function CreateFund() {
     const errs: Record<string, string> = {};
     if (!name.trim()) errs.name = 'Name is required';
     if (name.length > 64) errs.name = 'Max 64 characters';
-    if (!unlockDate) errs.unlockDate = 'Unlock date is required';
-    else if (dateToBlock(unlockDate) <= CURRENT_BLOCK) errs.unlockDate = 'Must be a future date';
+    if (unlockDate && dateToBlock(unlockDate) <= CURRENT_BLOCK) errs.unlockDate = 'Must be a future date';
     if (hasGoal) {
       if (!goalAmount.trim()) errs.goalAmount = 'Goal amount is required when enabled';
       else if (parseFloat(goalAmount) <= 0) errs.goalAmount = 'Must be greater than 0';
@@ -168,26 +167,47 @@ export function CreateFund() {
           rows={3}
         />
 
-        <div className="input-group">
-          <Input
-            label="Unlock Date"
-            type="date"
-            value={unlockDate}
-            onChange={(e) => setUnlockDate(e.target.value)}
-            error={errors.unlockDate}
-            min={getMinDate()}
-          />
-          <div className="create-fund-helper">
-            No one can withdraw before this date — not even you. Pick when the jar should open.
+        <div className="create-fund-divider" />
+
+        {/* Time-lock toggle */}
+        <div className="create-fund-toggle-section">
+          <div className="create-fund-toggle-row">
+            <div className="create-fund-toggle-info">
+              <div className="create-fund-toggle-label">Time-Lock</div>
+              <div className="create-fund-toggle-hint">
+                Lock the jar until a date. Without it, the creator can withdraw anytime.
+              </div>
+            </div>
+            <button
+              type="button"
+              className={`toggle-switch${unlockDate ? ' toggle-switch-active' : ''}`}
+              onClick={() => setUnlockDate(unlockDate ? '' : getMinDate())}
+              aria-label="Toggle time-lock"
+            >
+              <span className="toggle-switch-knob" />
+            </button>
           </div>
-          {estimatedBlock > 0 && (
-            <div className="create-fund-helper create-fund-helper-block">
-              ≈ Bitcoin block #{estimatedBlock.toLocaleString()}
+          {unlockDate && (
+            <div className="create-fund-toggle-content">
+              <Input
+                label="Unlock Date"
+                type="date"
+                value={unlockDate}
+                onChange={(e) => setUnlockDate(e.target.value)}
+                error={errors.unlockDate}
+                min={getMinDate()}
+              />
+              <div className="create-fund-helper">
+                No one can withdraw before this date — not even you.
+              </div>
+              {estimatedBlock > 0 && (
+                <div className="create-fund-helper create-fund-helper-block">
+                  ≈ Bitcoin block #{estimatedBlock.toLocaleString()}
+                </div>
+              )}
             </div>
           )}
         </div>
-
-        <div className="create-fund-divider" />
 
         {/* Goal Amount toggle */}
         <div className="create-fund-toggle-section">
