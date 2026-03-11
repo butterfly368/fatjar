@@ -10,23 +10,24 @@
 
 Create a jar. Share the link. Friends and family chip in with BTC.
 
-FatJar is a trustless Bitcoin vault protocol on OPNet. Anyone can create a time-locked jar, share it with their network, and collect BTC contributions. Contributors earn $FJAR tokens via a bonding curve — early backers get more. Zero platform fees.
+FatJar is a trustless Bitcoin vault protocol on OPNet. Anyone can create a jar with optional time-lock, share it with their network, and collect BTC contributions. Contributors earn $FJAR tokens via a bonding curve — early backers get more. 0.5% withdraw fee supports protocol development.
 
-### Four Jar Types from Two Parameters
+### Two Jar Types
 
-| Goal | Beneficiary | Mode | Use Case |
-|------|-------------|------|----------|
-| — | — | **Collect** | Group gifts, event funds |
-| — | Set | **Save for Someone** | College funds, trust funds |
-| Set | — | **All-or-Nothing** | Project funding with refund guarantee |
-| Set | Set | **Fund a Dream** | Milestone-based grants |
+| Type | What it does |
+|------|-------------|
+| **Open Jar** | Collect BTC. Creator withdraws when ready. |
+| **Goal Jar** | Set a target. Hit it or everyone gets refunded. |
+
+Both types support an optional **beneficiary** (someone else opens the jar) and optional **time-lock** (Bitcoin enforces the unlock date).
 
 ### Key Features
 
 - **Bonding curve tokenomics** — early contributors earn more $FJAR per BTC
-- **Time-locked vaults** — BTC is locked until the creator's chosen block height
+- **Optional time-lock** — BTC locked until the creator's chosen date
 - **Burn-on-refund** — refunding burns your $FJAR, protecting token value
-- **100% to creators** — zero platform fees on contributions
+- **0.5% withdraw fee** — contributing is free, tiny fee on withdrawal only
+- **Public or private jars** — listed on explore page or link-only
 - **Works with non-technical users** — just share a link
 
 ---

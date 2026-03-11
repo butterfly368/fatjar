@@ -5,7 +5,7 @@ Social savings protocol on Bitcoin L1 via OPNet. Competition entry for vibecode.
 
 **Product:** FatJar | **Token:** $FJAR (OP20) | **Tagline:** "The Piggy Bank for Everyone on Bitcoin."
 
-Anyone creates a jar. Family/friends contribute BTC. Contributors earn $FJAR tokens via bonding curve — early = more tokens. Four jar types from two optional params (goalAmount + beneficiary). Zero platform fees.
+Anyone creates a jar. Family/friends contribute BTC. Contributors earn $FJAR tokens via bonding curve — early = more tokens. Two jar types (Open Jar + Goal Jar) with optional beneficiary and time-lock. 0.5% withdraw fee funds protocol development.
 
 ## Stack
 - **Smart contracts:** AssemblyScript (OPNet/WASM), built with `@btc-vision/btc-runtime`
@@ -54,7 +54,7 @@ Four jar types from two optional params:
 - Product direction (narrative): `docs/plans/2026-03-10-product-direction.md`
 - Prototype is reference only — don't modify `prototype/index.html`
 - No pre-mine, no team token allocation (MVP)
-- Zero platform fees (100% BTC to fund creator)
+- 0.5% withdraw fee funds protocol development
 - Competition deadline is hard — ship MVP, defer nice-to-haves
 - Do NOT add `Co-Authored-By` lines to commit messages
 

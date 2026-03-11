@@ -80,6 +80,7 @@ export const MODE_ONELINER: Record<VaultMode, string> = {
 
 // Estimate human-readable date from block number
 export function blockToDate(block: bigint): string {
+  if (block === 0n) return 'No lock';
   const CURRENT_BLOCK = 890000;
   const MINUTES_PER_BLOCK = 10;
   const blocksUntil = Number(block) - CURRENT_BLOCK;
