@@ -1,7 +1,7 @@
 /**
- * Live contract service — reads from OPNet testnet via JSON-RPC.
+ * Live contract service — reads from OPNet testnet via JSON-RPC,
+ * writes via OPWallet Chrome extension (auto-detected by TransactionFactory).
  *
- * Write methods are stubs (throw) until OPWallet signing is wired.
  * Fund names are not stored on-chain (event-only), so we show "Jar #N".
  */
 
@@ -12,7 +12,8 @@ import {
   BitcoinAbiTypes,
   OP_NET_ABI,
 } from 'opnet';
-import type { BitcoinInterfaceAbi } from 'opnet';
+import type { BitcoinInterfaceAbi, CallResult } from 'opnet';
+import { Address } from '@btc-vision/transaction';
 import type { Vault, Contribution } from '../types';
 import { ZERO_ADDRESS } from '../types';
 import { OPNET_CONFIG } from './opnet-config';
@@ -28,8 +29,23 @@ const opnetTestnet = {
   wif: 0xef,
 };
 
-// ── ABI definitions (inline to avoid JSON import issues) ────────────
-const FatJarManagerAbi: BitcoinInterfaceAbi = [
+// ── OPWallet browser types ──────────────────────────────────────────
+interface OPWalletWeb3 {
+  signInteraction(params: unknown): Promise<unknown>;
+  signAndBroadcastInteraction(params: unknown): Promise<[unknown, unknown, unknown[], string]>;
+  getMLDSAPublicKey(): Promise<string>;
+}
+
+interface OPWalletAPI {
+  requestAccounts(): Promise<string[]>;
+  getPublicKey(): Promise<string>;
+  getNetwork(): Promise<string>;
+  web3: OPWalletWeb3;
+}
+
+// ── ABI definitions ─────────────────────────────────────────────────
+// Read methods
+const FatJarManagerReadAbi: BitcoinInterfaceAbi = [
   {
     name: 'getFundCount',
     inputs: [],
@@ -84,6 +100,59 @@ const FatJarManagerAbi: BitcoinInterfaceAbi = [
     outputs: [{ name: 'fundId', type: ABIDataTypes.UINT256 }],
     type: BitcoinAbiTypes.Function,
   },
+];
+
+// Write methods
+const FatJarManagerWriteAbi: BitcoinInterfaceAbi = [
+  {
+    name: 'createFund',
+    inputs: [
+      { name: 'name', type: ABIDataTypes.STRING },
+      { name: 'unlockTimestamp', type: ABIDataTypes.UINT256 },
+      { name: 'goalAmount', type: ABIDataTypes.UINT256 },
+      { name: 'beneficiary', type: ABIDataTypes.ADDRESS },
+    ],
+    outputs: [{ name: 'fundId', type: ABIDataTypes.UINT256 }],
+    type: BitcoinAbiTypes.Function,
+  },
+  {
+    name: 'contribute',
+    inputs: [
+      { name: 'fundId', type: ABIDataTypes.UINT256 },
+      { name: 'satoshis', type: ABIDataTypes.UINT256 },
+    ],
+    outputs: [],
+    type: BitcoinAbiTypes.Function,
+  },
+  {
+    name: 'withdraw',
+    inputs: [{ name: 'fundId', type: ABIDataTypes.UINT256 }],
+    outputs: [{ name: 'amount', type: ABIDataTypes.UINT256 }],
+    type: BitcoinAbiTypes.Function,
+  },
+  {
+    name: 'refund',
+    inputs: [{ name: 'fundId', type: ABIDataTypes.UINT256 }],
+    outputs: [{ name: 'amount', type: ABIDataTypes.UINT256 }],
+    type: BitcoinAbiTypes.Function,
+  },
+  {
+    name: 'closeFund',
+    inputs: [{ name: 'fundId', type: ABIDataTypes.UINT256 }],
+    outputs: [],
+    type: BitcoinAbiTypes.Function,
+  },
+  {
+    name: 'deleteFund',
+    inputs: [{ name: 'fundId', type: ABIDataTypes.UINT256 }],
+    outputs: [],
+    type: BitcoinAbiTypes.Function,
+  },
+];
+
+const FatJarManagerAbi: BitcoinInterfaceAbi = [
+  ...FatJarManagerReadAbi,
+  ...FatJarManagerWriteAbi,
   ...OP_NET_ABI,
 ];
 
@@ -158,6 +227,111 @@ function toBigInt(val: unknown): bigint {
 function toAddress(val: unknown): string {
   if (typeof val === 'string' && val.length > 0) return val;
   return ZERO_ADDRESS;
+}
+
+function getOPWallet(): OPWalletAPI {
+  const opnet = (window as unknown as Record<string, unknown>).opnet as OPWalletAPI | undefined;
+  if (!opnet?.web3) {
+    throw new Error('OPWallet not detected. Install the OPWallet Chrome extension to make transactions.');
+  }
+  return opnet;
+}
+
+async function getWalletAddress(): Promise<string> {
+  const wallet = getOPWallet();
+  const accounts = await wallet.requestAccounts();
+  if (!accounts || accounts.length === 0) {
+    throw new Error('No wallet accounts. Connect OPWallet first.');
+  }
+  return accounts[0];
+}
+
+/**
+ * Build sender Address from OPWallet's public keys.
+ * Used for simulation so access-controlled methods don't revert.
+ */
+async function getSenderAddress(): Promise<Address> {
+  const wallet = getOPWallet();
+  const legacyPubKey = await wallet.getPublicKey();
+
+  let mldsaPubKey: string | undefined;
+  try {
+    mldsaPubKey = await wallet.web3.getMLDSAPublicKey();
+  } catch {
+    // ML-DSA not available — fallback to legacy key as identity
+  }
+
+  return Address.fromString(mldsaPubKey || legacyPubKey, legacyPubKey);
+}
+
+/**
+ * Get a contract instance with sender set (for write simulations).
+ * Falls back to no-sender if address construction fails.
+ */
+async function getWriteManagerContract() {
+  try {
+    const sender = await getSenderAddress();
+    return getContract(
+      OPNET_CONFIG.managerAddress,
+      FatJarManagerAbi,
+      getProvider(),
+      opnetTestnet,
+      sender,
+    );
+  } catch {
+    // Fallback: contract without sender (works for createFund, contribute)
+    return getManagerContract();
+  }
+}
+
+/**
+ * Simulate a contract call and send via OPWallet.
+ * Pattern: simulate → get CallResult → sendTransaction (OPWallet auto-detected)
+ */
+async function simulateAndSend(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  callResult: CallResult<any>,
+): Promise<string> {
+  const userAddress = await getWalletAddress();
+
+  const receipt = await callResult.sendTransaction({
+    signer: null,
+    mldsaSigner: null,
+    refundTo: userAddress,
+    maximumAllowedSatToSpend: 100_000n, // generous for testnet
+    network: opnetTestnet,
+  });
+
+  return receipt.transactionId;
+}
+
+/**
+ * Fallback for access-controlled methods: encode calldata and send via
+ * OPWallet's signAndBroadcastInteraction directly (bypasses simulation).
+ */
+async function encodeAndSend(
+  methodName: string,
+  args: unknown[],
+): Promise<string> {
+  const wallet = getOPWallet();
+  const userAddress = await getWalletAddress();
+  const contract = getManagerContract();
+
+  const calldata = contract.encodeCalldata(methodName, args);
+
+  const [, interactionResult] = await wallet.web3.signAndBroadcastInteraction({
+    calldata: new Uint8Array(calldata),
+    to: OPNET_CONFIG.managerAddress,
+    from: userAddress,
+    utxos: [],  // OPWallet provides UTXOs
+    feeRate: 10,
+    priorityFee: 0n,
+    gasSatFee: 100_000n,  // generous for testnet
+  });
+
+  // Extract transaction ID from broadcast result
+  const result = interactionResult as { result?: string; transactionId?: string };
+  return result.transactionId || result.result || 'tx-submitted';
 }
 
 // ── Read methods ────────────────────────────────────────────────────
@@ -246,35 +420,122 @@ export async function getVaultContributions(_fundId: string): Promise<Contributi
   return [];
 }
 
-// ── Write stubs (need OPWallet for signing) ─────────────────────────
+// ── Write methods ───────────────────────────────────────────────────
 
+/**
+ * Create a new jar on-chain.
+ * Uses simulation path — createFund has no sender access check.
+ */
 export async function createVault(
-  _name: string,
-  _unlockBlock: bigint,
-  _goalAmount: bigint,
-  _beneficiary: string,
+  name: string,
+  unlockBlock: bigint,
+  goalAmount: bigint,
+  beneficiary: string,
   _description: string = '',
   _isPublic: boolean = true,
 ): Promise<string> {
-  throw new Error('Write operations require OPWallet. Use demo mode for testing.');
+  const contract = await getWriteManagerContract();
+
+  // Resolve beneficiary: dead address for "no beneficiary"
+  let beneficiaryAddr: Address;
+  if (beneficiary && beneficiary !== ZERO_ADDRESS && beneficiary !== '') {
+    try {
+      beneficiaryAddr = await getProvider().getPublicKeyInfo(beneficiary, true);
+    } catch {
+      throw new Error(
+        'Could not resolve beneficiary address. The address must have interacted with OPNet before.',
+      );
+    }
+  } else {
+    beneficiaryAddr = Address.dead();
+  }
+
+  // Simulate the call
+  const result = await contract.createFund(
+    name,
+    unlockBlock,
+    goalAmount,
+    beneficiaryAddr,
+  );
+
+  // Send via OPWallet
+  return simulateAndSend(result);
 }
 
-export async function contribute(_fundId: string, _satoshis: bigint): Promise<void> {
-  throw new Error('Write operations require OPWallet. Use demo mode for testing.');
+/**
+ * Contribute BTC to a jar.
+ * Uses simulation path — contribute has no sender access check.
+ */
+export async function contribute(fundId: string, satoshis: bigint): Promise<void> {
+  const contract = await getWriteManagerContract();
+
+  const result = await contract.contribute(BigInt(fundId), satoshis);
+
+  await simulateAndSend(result);
 }
 
-export async function withdraw(_fundId: string): Promise<bigint> {
-  throw new Error('Write operations require OPWallet. Use demo mode for testing.');
+/**
+ * Withdraw from a jar. Creator or beneficiary only.
+ * Uses simulation with sender first, falls back to direct OPWallet call.
+ */
+export async function withdraw(fundId: string): Promise<bigint> {
+  try {
+    // Try simulation path (needs correct sender for access check)
+    const contract = await getWriteManagerContract();
+    const result = await contract.withdraw(BigInt(fundId));
+    await simulateAndSend(result);
+    return toBigInt(result.properties?.amount ?? 0n);
+  } catch (simError) {
+    // Fallback: encode calldata and send directly via OPWallet
+    console.warn('Simulation failed, trying direct OPWallet call:', simError);
+    await encodeAndSend('withdraw', [BigInt(fundId)]);
+    return 0n; // can't get return value from direct call
+  }
 }
 
-export async function refund(_fundId: string): Promise<bigint> {
-  throw new Error('Write operations require OPWallet. Use demo mode for testing.');
+/**
+ * Refund contribution from a failed goal-based jar.
+ * Uses simulation with sender first, falls back to direct OPWallet call.
+ */
+export async function refund(fundId: string): Promise<bigint> {
+  try {
+    const contract = await getWriteManagerContract();
+    const result = await contract.refund(BigInt(fundId));
+    await simulateAndSend(result);
+    return toBigInt(result.properties?.amount ?? 0n);
+  } catch (simError) {
+    console.warn('Simulation failed, trying direct OPWallet call:', simError);
+    await encodeAndSend('refund', [BigInt(fundId)]);
+    return 0n;
+  }
 }
 
-export async function closeFund(_fundId: string): Promise<void> {
-  throw new Error('Write operations require OPWallet. Use demo mode for testing.');
+/**
+ * Close a jar (prevent new contributions). Creator only.
+ * Uses simulation with sender first, falls back to direct OPWallet call.
+ */
+export async function closeFund(fundId: string): Promise<void> {
+  try {
+    const contract = await getWriteManagerContract();
+    const result = await contract.closeFund(BigInt(fundId));
+    await simulateAndSend(result);
+  } catch (simError) {
+    console.warn('Simulation failed, trying direct OPWallet call:', simError);
+    await encodeAndSend('closeFund', [BigInt(fundId)]);
+  }
 }
 
-export async function deleteFund(_fundId: string): Promise<void> {
-  throw new Error('Write operations require OPWallet. Use demo mode for testing.');
+/**
+ * Delete an empty jar. Creator only.
+ * Uses simulation with sender first, falls back to direct OPWallet call.
+ */
+export async function deleteFund(fundId: string): Promise<void> {
+  try {
+    const contract = await getWriteManagerContract();
+    const result = await contract.deleteFund(BigInt(fundId));
+    await simulateAndSend(result);
+  } catch (simError) {
+    console.warn('Simulation failed, trying direct OPWallet call:', simError);
+    await encodeAndSend('deleteFund', [BigInt(fundId)]);
+  }
 }
