@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { getAllVaults } from '../../services/contract';
-import { getVaultMode, getVaultModeLabel, formatBtc, getJarColor } from '../../types';
+import { getVaultMode, getVaultModeLabel, formatBtc, getModeStyle, blockToDate } from '../../types';
 import type { Vault } from '../../types';
 import './ActiveJars.css';
 
@@ -27,17 +27,24 @@ export function ActiveJars() {
         {vaults.map((vault) => {
           const mode = getVaultMode(vault);
           const modeLabel = getVaultModeLabel(mode);
+          const style = getModeStyle(mode);
           const hasGoal = vault.goalAmount > 0n;
+          const progress = hasGoal ? Number((vault.totalRaised * 100n) / vault.goalAmount) : 0;
           return (
             <Link
               to={`/fund/${vault.id}`}
               className="jar-card"
               key={vault.id}
-              style={{ borderLeftColor: getJarColor(vault.id) }}
+              style={{ borderLeftColor: style.color }}
             >
               <div className="jar-card-label">
                 Jar #{vault.id}
-                <span className="jar-card-status">{modeLabel}</span>
+                <span
+                  className="jar-card-status"
+                  style={{ color: style.color, borderColor: style.color, background: style.bg }}
+                >
+                  {style.icon} {modeLabel}
+                </span>
               </div>
               <div className="jar-card-name">{vault.name}</div>
               {vault.description && (
@@ -49,12 +56,14 @@ export function ActiveJars() {
                     <div
                       className="jar-card-progress-fill"
                       style={{
-                        width: `${Math.min(100, Number((vault.totalRaised * 100n) / vault.goalAmount))}%`,
+                        width: `${Math.min(100, progress)}%`,
+                        background: style.color,
                       }}
                     />
                   </div>
                   <div className="jar-card-progress-text">
                     {formatBtc(vault.totalRaised)} / {formatBtc(vault.goalAmount)} BTC
+                    {progress === 0 ? ' — just started' : ''}
                   </div>
                 </div>
               )}
@@ -70,8 +79,8 @@ export function ActiveJars() {
                   <div className="jar-card-stat-value">{vault.contributorCount}</div>
                 </div>
                 <div>
-                  <div className="jar-card-stat-label">Unlock Block</div>
-                  <div className="jar-card-stat-value">{Number(vault.unlockBlock).toLocaleString()}</div>
+                  <div className="jar-card-stat-label">Opens</div>
+                  <div className="jar-card-stat-value">{blockToDate(vault.unlockBlock)}</div>
                 </div>
               </div>
               <div className="jar-card-arrow">

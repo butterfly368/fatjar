@@ -61,23 +61,27 @@ export function truncateAddress(address: string): string {
   return address.slice(0, 8) + '...' + address.slice(-6);
 }
 
-// Deterministic accent color for each jar (based on ID)
-const JAR_COLORS = [
-  '#F7931A', // bitcoin orange
-  '#627EEA', // ethereum blue
-  '#26A17B', // teal
-  '#E6007A', // polkadot pink
-  '#8247E5', // polygon purple
-  '#00D395', // compound green
-  '#FF6B6B', // coral red
-  '#F0B90B', // binance yellow
-  '#2775CA', // usdc blue
-  '#E84142', // avalanche red
-];
+// Mode-specific visual identity (color, icon, background)
+const MODE_STYLES: Record<VaultMode, { color: string; bg: string; icon: string }> = {
+  'open-collection': { color: '#1a7f37', bg: '#dafbe1', icon: '\u{1F4E5}' },   // green, inbox emoji
+  'trust-fund':      { color: '#0550ae', bg: '#ddf4ff', icon: '\u{1F381}' },    // blue, gift emoji
+  'all-or-nothing':  { color: '#9a6700', bg: '#fff8c5', icon: '\u{1F3AF}' },    // amber, target emoji
+  'funded-grant':    { color: '#8250df', bg: '#fbefff', icon: '\u{1F680}' },     // purple, rocket emoji
+};
 
-export function getJarColor(id: string): string {
-  const num = parseInt(id, 10) || 0;
-  return JAR_COLORS[num % JAR_COLORS.length];
+export function getModeStyle(mode: VaultMode) {
+  return MODE_STYLES[mode];
+}
+
+// Estimate human-readable date from block number
+export function blockToDate(block: bigint): string {
+  const CURRENT_BLOCK = 890000;
+  const MINUTES_PER_BLOCK = 10;
+  const blocksUntil = Number(block) - CURRENT_BLOCK;
+  if (blocksUntil <= 0) return 'Unlocked';
+  const ms = blocksUntil * MINUTES_PER_BLOCK * 60 * 1000;
+  const date = new Date(Date.now() + ms);
+  return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 }
 
 // ── Shared types ────────────────────────────────────────────────────

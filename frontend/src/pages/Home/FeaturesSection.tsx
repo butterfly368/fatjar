@@ -23,10 +23,10 @@ const FEATURES = [
     meta: '$FJAR rewards',
   },
   {
-    title: 'Zero Fees',
+    title: 'Tiny Fee, Only on Withdrawal',
     description:
-      '100% of every contribution goes into the jar. You only pay network gas.',
-    meta: '0% platform fee',
+      'Contributing is free \u2014 100% of every sat goes into the jar. When the creator withdraws, a 0.5% fee supports the protocol. You only pay network gas.',
+    meta: '0.5% withdraw fee',
   },
   {
     title: 'Four Jar Types',
@@ -36,7 +36,7 @@ const FEATURES = [
   },
 ];
 
-const TAGS = ['Bitcoin L1', 'Zero Fees', '$FJAR Rewards', 'Time-Lock'];
+const TAGS = ['Bitcoin L1', '0.5% Fee', '$FJAR Rewards', 'Time-Lock'];
 
 export function FeaturesSection() {
   const [openIndex, setOpenIndex] = useState(0);

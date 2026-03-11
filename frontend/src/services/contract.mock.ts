@@ -10,7 +10,7 @@ import { ZERO_ADDRESS } from '../types';
 
 // ── In-memory mock state ──────────────────────────────────────────
 
-let nextVaultId = 4;
+let nextVaultId = 5;
 
 const vaults: Map<string, Vault> = new Map();
 const contributions: Contribution[] = [];
@@ -61,10 +61,26 @@ vaults.set('3', {
   beneficiary: ZERO_ADDRESS,
 });
 
+// Seed: 4) Dev Scholarship for Maya — funded-grant (Fund a Dream)
+vaults.set('4', {
+  id: '4',
+  name: "Maya's Dev Bootcamp",
+  description: 'Funding Maya\'s 12-week coding bootcamp. If we hit 0.5 BTC, it goes directly to her. If not, everyone gets refunded.',
+  creator: 'bc1q...creator4',
+  totalRaised: 25000000n, // 0.25 BTC
+  unlockBlock: 910000n,
+  isClosed: false,
+  withdrawn: 0n,
+  contributorCount: 7,
+  goalAmount: 50000000n, // 0.5 BTC goal
+  beneficiary: 'bc1q...maya',
+});
+
 // Seed creator index
 creatorVaults.set('bc1q...creator1', ['1']);
 creatorVaults.set('bc1q...creator2', ['2']);
 creatorVaults.set('bc1q...creator3', ['3']);
+creatorVaults.set('bc1q...creator4', ['4']);
 
 // Seed contributions for vault 1 — Lisa's Birthday Surprise
 contributions.push(
@@ -99,8 +115,19 @@ contributions.push(
   { vaultId: '3', contributor: 'bc1q...gamma11', amount: 10000000n, tokensEarned: 1200000000000000000000n },
 );
 
+// Seed contributions for vault 4 — Maya's Dev Bootcamp
+contributions.push(
+  { vaultId: '4', contributor: 'bc1q...delta1', amount: 5000000n, tokensEarned: 600000000000000000000n },
+  { vaultId: '4', contributor: 'bc1q...delta2', amount: 3000000n, tokensEarned: 360000000000000000000n },
+  { vaultId: '4', contributor: 'bc1q...delta3', amount: 4000000n, tokensEarned: 480000000000000000000n },
+  { vaultId: '4', contributor: 'bc1q...delta4', amount: 3000000n, tokensEarned: 360000000000000000000n },
+  { vaultId: '4', contributor: 'bc1q...delta5', amount: 5000000n, tokensEarned: 600000000000000000000n },
+  { vaultId: '4', contributor: 'bc1q...delta6', amount: 2000000n, tokensEarned: 240000000000000000000n },
+  { vaultId: '4', contributor: 'bc1q...delta7', amount: 3000000n, tokensEarned: 360000000000000000000n },
+);
+
 // Platform-level mock state
-let totalPlatformBtc = 278500000n; // sum of all vault totalRaised
+let totalPlatformBtc = 303500000n; // sum of all vault totalRaised (278.5M + 25M)
 const MOCK_TOKEN_RATE = 120000n; // tokens per 1 BTC at current level
 let totalMinted = 0n; // simplified, not tracking exactly
 
