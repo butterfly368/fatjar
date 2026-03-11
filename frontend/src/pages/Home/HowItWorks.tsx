@@ -26,8 +26,8 @@ export function HowItWorks() {
   return (
     <section className="how" id="how">
       <div className="how-header">
-        <h2 className="how-title">Three Steps.<br />Zero Fees.</h2>
-        <span className="how-sub">From jar to sats — no middleman, no platform cut.</span>
+        <h2 className="how-title">Three Steps.<br />One Tiny Fee.</h2>
+        <span className="how-sub">0.5% on withdrawal only — contributing is always free.</span>
       </div>
       <div className="steps-grid">
         {STEPS.map((step) => (

@@ -4,6 +4,7 @@ import { HowItWorks } from './HowItWorks';
 import { FeaturesSection } from './FeaturesSection';
 import { ActiveJars } from './ActiveJars';
 import { BondingCurveSection } from './BondingCurveSection';
+import { RoadmapSection } from './RoadmapSection';
 
 export function Home() {
   return (
@@ -14,6 +15,7 @@ export function Home() {
       <HowItWorks />
       <FeaturesSection />
       <BondingCurveSection />
+      <RoadmapSection />
     </>
   );
 }
