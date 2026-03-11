@@ -841,13 +841,22 @@ Design system compliance:
 - `frontend/src/services/contract.ts` — sessionStorage mode persistence
 - `frontend/src/pages/Admin/Admin.tsx` — sender address, raw pubkey Address construction
 
-**BLOCKER: Testnet block production stalled**
-- Blocks stuck at 4861 for 10+ minutes
-- createFund transaction signed via OPWallet but can't confirm until blocks resume
-- Script-broadcast transactions also never mine (OPWallet deploys do — different broadcast path?)
+**Testnet resumed — createFund confirmed!**
+- Blocks unstalled, Jar #1 appeared on-chain and in frontend
+- Full pipeline verified: deploy → link → create jar → display
+- OPWallet sign + broadcast → confirmed in next block
+
+**Known display issues (polish tomorrow):**
+- Jar names show as "Jar #N" — names are event-only, not in contract state
+- Creator shows as `0x000000...000000` — needs proper address decoding
+- $FJAR rate displays raw bigint (`120,000,000,000,000,000,000,000`) — needs formatting
+- Description not shown (event-only, same as name)
+
+**Commits:**
+- `f2d9749` — fix: deployment debugging — correct derivation path, contract linking, live mode persistence
 
 **Open items for next session:**
-- [ ] Wait for testnet to resume, verify createFund confirmed
+- [ ] Fix jar name/creator/rate display (read events or add mapping)
 - [ ] Create 4 seed jars on-chain
 - [ ] Test contribute flow (Account 2 → jar)
 - [ ] Redeploy frontend to Vercel with new config
