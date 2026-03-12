@@ -89,6 +89,17 @@
   letter-spacing: 0;
 }
 
+/* ── Phase intro ─────────────────────────────────────────────── */
+
+.roadmap-phase-intro {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
 /* ── Items list ───────────────────────────────────────────────── */
 
 .roadmap-phase-list {

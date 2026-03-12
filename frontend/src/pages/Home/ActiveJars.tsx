@@ -37,7 +37,7 @@ export function ActiveJars() {
           <h2 className="jars-title">Active Jars</h2>
         </Link>
         <span className="jars-sub">
-          {vaults.length} jar{vaults.length !== 1 ? 's' : ''} filling up right now
+          College funds, birthday surprises, community goals &mdash; {vaults.length} jar{vaults.length !== 1 ? 's' : ''} filling up right now
         </span>
       </div>
       <div className="jars-grid">

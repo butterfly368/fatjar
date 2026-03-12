@@ -29,12 +29,12 @@ const PHASES = [
     phase: 'Vision',
     label: 'The Bigger Picture',
     icon: Telescope,
+    intro: 'A savings layer for Bitcoin. Every family. Every milestone. Every generation.',
     items: [
-      'Multi-recipient jars with multisig',
-      'Recurring contributions — automated savings',
-      'Corporate treasury jars',
-      'Lightning Network integration',
-      '$FJAR governance — community-directed protocol fees',
+      'Recurring contributions — set it once, save forever',
+      'Multi-recipient jars — split between siblings, partners, causes',
+      'Lightning deposits — anyone can contribute, instantly',
+      '$FJAR governance — the community shapes the protocol',
     ],
   },
 ];
@@ -53,7 +53,7 @@ export function RoadmapSection() {
       </div>
 
       <div className="roadmap-phases">
-        {PHASES.map(({ phase, label, icon: Icon, items }) => (
+        {PHASES.map(({ phase, label, icon: Icon, intro, items }) => (
           <div className="roadmap-phase" key={phase}>
             <div className="roadmap-phase-header">
               <span className="roadmap-phase-badge" data-phase={phase.toLowerCase()}>
@@ -62,6 +62,7 @@ export function RoadmapSection() {
               </span>
               <span className="roadmap-phase-label">{label}</span>
             </div>
+            {intro && <p className="roadmap-phase-intro">{intro}</p>}
             <ul className="roadmap-phase-list">
               {items.map((item) => (
                 <li key={item} className="roadmap-phase-item">

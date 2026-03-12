@@ -39,7 +39,7 @@ export function FeaturesSection() {
   return (
     <section className="features">
       <div className="features-left">
-        <div className="section-label">[01] Why FatJar</div>
+        <div className="section-label">[02] Why FatJar</div>
         <h2 className="features-title">
           What Makes<br />
           FatJar<br />

@@ -1,8 +1,9 @@
 import { HeroSection } from './HeroSection';
 import { StatsStrip } from './StatsStrip';
+import { ActiveJars } from './ActiveJars';
+import { WhySection } from './WhySection';
 import { HowItWorks } from './HowItWorks';
 import { FeaturesSection } from './FeaturesSection';
-import { ActiveJars } from './ActiveJars';
 import { BondingCurveSection } from './BondingCurveSection';
 import { RoadmapSection } from './RoadmapSection';
 
@@ -12,6 +13,7 @@ export function Home() {
       <HeroSection />
       <StatsStrip />
       <ActiveJars />
+      <WhySection />
       <HowItWorks />
       <FeaturesSection />
       <BondingCurveSection />

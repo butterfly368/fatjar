@@ -12,15 +12,13 @@ export function HeroSection() {
             Bitcoin L1 via OPNet
           </div>
           <h1 className="hero-h1">
-            A Piggy Bank That<br />
-            Actually Grows<br />
+            A Piggy Bank<br />
+            That Grows<br />
             <span className="hero-h1-highlight">With Your Child.</span>
           </h1>
           <p className="hero-tagline">
-            Create a savings jar on Bitcoin. Lock it until they're ready.<br />
-            Family and friends contribute along the way — earning $FJAR<br />
-            rewards worth more the earlier you join. No one can touch it<br />
-            early — not even you.
+            Lock Bitcoin until they're ready. Family and friends contribute<br />
+            along the way. Nobody can touch it early — not even you.
           </p>
           <div className="hero-actions">
             <Button to="/create">
