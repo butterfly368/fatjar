@@ -11,9 +11,8 @@ import {
   getContributionTokens,
   withdraw,
   refund,
-  closeFund,
 } from '../../services/contract';
-import type { Vault } from '../../types';
+import type { Vault, VaultStatus } from '../../types';
 import { getVaultMode, getVaultModeLabel, formatBtc, formatTokens, getVaultStatus, CURRENT_BLOCK } from '../../types';
 import { Button } from '../../components/ui/Button';
 import './Dashboard.css';
@@ -25,7 +24,7 @@ const SEED_CONTRIBUTOR_ADDRESS = 'bc1q...alpha1';
 interface MyVault {
   vault: Vault;
   mode: string;
-  status: 'active' | 'unlocked' | 'withdrawn';
+  status: VaultStatus;
 }
 
 interface MyContribution {
@@ -120,22 +119,6 @@ export function Dashboard() {
     }
   }
 
-  async function handleClose(fundId: string) {
-    setActionLoading(fundId);
-    try {
-      await closeFund(fundId);
-      const vault = await getFundDetails(fundId);
-      setMyVaults((prev) =>
-        prev.map((v) =>
-          v.vault.id === fundId
-            ? { ...v, vault, status: getVaultStatus(vault) }
-            : v,
-        ),
-      );
-    } finally {
-      setActionLoading(null);
-    }
-  }
 
   async function handleRefund(fundId: string) {
     setActionLoading(`refund-${fundId}`);
