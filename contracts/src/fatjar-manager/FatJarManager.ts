@@ -359,6 +359,12 @@ export class FatJarManager extends OP_NET {
             throw new Revert('Fund does not exist');
         }
 
+        // C1: Check fund is not deleted (defense-in-depth)
+        const isDeleted: u256 = this.fundIsDeleted.get(fundId);
+        if (!u256.eq(isDeleted, ZERO)) {
+            throw new Revert('Fund is deleted');
+        }
+
         const sender: Address = Blockchain.tx.sender;
         const senderU256: u256 = this.addressToU256(sender);
 

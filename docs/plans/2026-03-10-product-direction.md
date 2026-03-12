@@ -1,38 +1,49 @@
 # FatJar Product Direction
 
 Date: 2026-03-10
+Updated: 2026-03-12 (positioning sharpened)
 Status: Approved
 
 ## What FatJar Is
 
-A Bitcoin group piggy bank. Create a jar, share the link, save together. Earn $FJAR tokens for being an early user.
+Trustless Bitcoin savings jars for the people you love. Lock BTC together — the time-lock can't be broken, not even by you.
 
 ## Who It's For
 
-People collecting and saving with people they trust: families, friend groups, communities.
+**Day-1 audience:** Bitcoiners saving for their kids, families pooling BTC for milestones. People who already hold BTC and want a trustless way to save it together.
+
+**Broader audience:** Anyone collecting and saving with people they trust — families, friend groups, communities.
+
+## The Insight
+
+PayPal Money Pools does 86M pooling events/year — then got shut down in 2021, then relaunched in 2024 because demand was that strong. MoneyFellows (digital savings circles) has 8.5M users in Egypt alone. People want to save together. Every successful version is centralized and fiat-based.
+
+FatJar brings this to Bitcoin L1 with properties only Bitcoin can offer:
+- **Time-locks nobody can override** — Bitcoin enforces the unlock date. Not even the parents can touch it early.
+- **No platform risk** — PayPal shut down Money Pools once already. FatJar can't be shut down.
+- **Censorship resistance** — no government, bank, or platform can freeze a jar.
+- **BTC as generational wealth** — $6T in crypto will be inherited by 2045. "Stack sats for your kid's 18th birthday" is a real Bitcoiner behavior with no product today.
 
 ## FatJar Is For
 
-- Collecting money for a shared goal (gift, trip, emergency, celebration)
-- Saving for someone's future (child's education, a loved one's milestone)
-- Pooling funds with an all-or-nothing safety net (refund if the goal is not met)
-- Funding someone's dream with accountability (beneficiary only receives if goal is hit)
+- **Saving for someone's future** — child's education fund, locked until they turn 18
+- **Pooling BTC for a goal** — wedding, family emergency, community project
+- **All-or-nothing safety** — set a target, everyone gets refunded if it's not met
+- **Funding a dream** — a beneficiary receives the BTC only if the goal is reached
 
 ## FatJar Is NOT For
 
-- **Investment management.** FatJar collects and holds BTC. It does not manage portfolios, distribute returns, or handle ROI splits. Once the creator withdraws, the jar is done. If a group wants to invest together, they need a fund management tool — that is a different product.
-- **Strangers trusting strangers.** FatJar does not verify identities, enforce spending, or arbitrate disputes. Trust comes from knowing the creator, not from the protocol.
-- **Governance or voting.** There is no on-chain decision-making about how funds are spent. The creator or beneficiary withdraws. Period.
+- **Investment management.** FatJar collects and holds BTC. It does not manage portfolios, distribute returns, or handle ROI splits.
+- **Strangers trusting strangers.** Trust comes from knowing the creator, not from the protocol.
+- **Governance or voting.** The creator or beneficiary withdraws. Period.
 
 ## Trust Model
 
-Social, not protocol-enforced. You share the link with people who know you or your cause. The platform does not verify creators or enforce how funds are spent. That is between the humans.
-
-The smart contract provides a safety net — all-or-nothing refunds protect contributors when a goal is not met — but trust comes from relationships, not code.
+Social, not protocol-enforced. You share the link with people who know you or your cause. The smart contract provides a safety net — all-or-nothing refunds protect contributors when a goal is not met — but trust comes from relationships, not code.
 
 ## Growth Mechanic
 
-$FJAR bonding curve rewards early platform adopters. The earlier you use FatJar, the more tokens you earn per BTC contributed. This is a platform-level incentive (encourages early adoption), not a fund-level mechanic.
+$FJAR bonding curve rewards early platform adopters. The earlier you use FatJar, the more tokens you earn per BTC contributed. Platform-level incentive, not fund-level.
 
 ## Four Jar Types
 
@@ -54,31 +65,33 @@ $FJAR bonding curve rewards early platform adopters. The earlier you use FatJar,
 - Portfolio management or investment tracking
 - Multi-round deposit/withdrawal cycles
 
-## UX Notes
-
-- **Contribution visibility**: Creator should choose whether individual contribution amounts are visible to other contributors or hidden (show only total raised + contributor count). For gifts, hidden avoids awkwardness. For group pools, visible provides transparency.
-
 ## Positioning
 
-**Old framing**: Crowdfunding platform on Bitcoin.
+**Rejected framing**: "Juicebox for Bitcoin" — Juicebox is permissionless crowdfunding for strangers/DAOs. FatJar is social savings for trusted relationships. Different products.
 
-**New framing**: Bitcoin group piggy bank — save together, earn $FJAR.
+**Current framing**: A piggy bank that actually grows with your child. Powered by Bitcoin.
 
-The key insight: the biggest crypto successes (lending, staking, DEXs) work because code enforces the deal. Crowdfunding requires human trust. Rather than building complex trust infrastructure for strangers, we lean into social trust and provide simple, flexible tools.
+**Competition pitch**: "Lock Bitcoin until they're 18. Family and friends contribute along the way. Nobody can touch it early — not even you."
+
+### Competitive Landscape
+
+No live protocol on any chain combines group savings jars + beneficiary + goal-based refunds + time-locks + bonding curve rewards. On-chain attempts at similar concepts have all died (WeTrust, Bloinx, Pigzbe). FatJar's differentiation: uses BTC (real value, not a proprietary token), software-only (no hardware), targets crypto-native users first, and the time-lock IS the killer feature.
 
 ## Why This Works
 
-1. Contributors know the creator personally or through community — trust already exists
-2. All-or-nothing refunds protect against goals that fall short
-3. The $FJAR token incentivizes early platform usage regardless of fund type
-4. Four jar types cover the full spectrum from casual (birthday gift) to serious (community fundraiser)
-5. Simplicity: jar in, jar out. No governance overhead.
+1. **Demand is proven** — PayPal relaunched Pools due to demand. MoneyFellows has 8.5M users. VCs funding Tanda, WeSpare.
+2. **Bitcoin-native time-locks are the moat** — no centralized app can guarantee "nobody touches this until 2044."
+3. **Contributors know the creator** — social trust already exists, no protocol enforcement needed.
+4. **All-or-nothing refunds** protect against goals that fall short.
+5. **$FJAR bonding curve** incentivizes early platform adoption.
+6. **Simplicity** — jar in, jar out. No governance overhead.
 
 ## Decision Record
 
+- **Juicebox comparison**: Rejected. Different product, different audience, and Juicebox is essentially dead ($121K market cap).
 - **Stranger trust problem**: Not our problem to solve. We provide tools, people decide.
-- **Investment management**: Explicitly out of scope. FatJar is collect-and-save, not invest-and-return. This is a different product.
+- **Investment management**: Explicitly out of scope.
 - **Contribution visibility**: Creator's choice — show or hide individual amounts.
-- **$FJAR token**: Kept. Platform-level growth mechanic, not fund-level trust.
-- **Public/private visibility**: Kept as creator's choice. Most funds will be private (shared via link).
+- **$FJAR token**: Kept. Platform-level growth mechanic.
 - **Refund mechanic**: Kept. Useful even among friends.
+- **Target audience**: Bitcoiners first, general crypto later, non-crypto only with fiat onramp (future).

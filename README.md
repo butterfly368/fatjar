@@ -1,4 +1,4 @@
-# FatJar — The Piggy Bank for Everyone on Bitcoin
+# FatJar — A Piggy Bank That Actually Grows With Your Child
 
 **Live:** [fatjar-ten.vercel.app](https://fatjar-ten.vercel.app/)
 **Competition:** vibecode.finance Week 3 — "The Breakthrough"
@@ -8,27 +8,35 @@
 
 ## What is FatJar?
 
-Create a jar. Share the link. Friends and family chip in with BTC.
+A piggy bank that actually grows with your child. Lock Bitcoin until they're 18 — nobody can touch it early, not even you. Family and friends contribute along the way, earning $FJAR reward tokens that grow in value as more families join.
 
-FatJar is a trustless Bitcoin vault protocol on OPNet. Anyone can create a jar with optional time-lock, share it with their network, and collect BTC contributions. Contributors earn $FJAR tokens via a bonding curve — early backers get more. 0.5% withdraw fee supports protocol development.
+FatJar is the first trustless social savings protocol on Bitcoin L1. Create a savings jar with an optional time-lock and beneficiary, share the link, and collect BTC contributions. Two things grow: the Bitcoin inside (unlike traditional savings that lose value to inflation) and the $FJAR tokens every contributor earns (worth more the earlier you join, thanks to the bonding curve).
+
+No protocol on Ethereum, Solana, or any other chain does this.
 
 ### Two Jar Types
 
 | Type | What it does |
 |------|-------------|
-| **Open Jar** | Collect BTC. Creator withdraws when ready. |
-| **Goal Jar** | Set a target. Hit it or everyone gets refunded. |
+| **Open Jar** | Collect BTC. Creator withdraws when the jar unlocks. |
+| **Goal Jar** | Set a target. Hit it or everyone gets their BTC back. |
 
-Both types support an optional **beneficiary** (someone else opens the jar) and optional **time-lock** (Bitcoin enforces the unlock date).
+Both types support an optional **beneficiary** (someone else opens the jar) and optional **time-lock** (Bitcoin enforces the unlock date — nobody can override it).
 
 ### Key Features
 
-- **Bonding curve tokenomics** — early contributors earn more $FJAR per BTC
-- **Optional time-lock** — BTC locked until the creator's chosen date
-- **Burn-on-refund** — refunding burns your $FJAR, protecting token value
-- **0.5% withdraw fee** — contributing is free, tiny fee on withdrawal only
-- **Public or private jars** — listed on explore page or link-only
-- **Works with non-technical users** — just share a link
+- **Trustless time-locks** — Bitcoin enforces the unlock date. Not even the creator can withdraw early.
+- **Beneficiary support** — save for someone else. They open the jar when it unlocks.
+- **All-or-nothing goals** — set a target, miss it, everyone gets refunded automatically.
+- **Bonding curve rewards** — early contributors earn more $FJAR per BTC.
+- **Burn-on-refund** — refunding burns your $FJAR, protecting token value.
+- **0.5% withdraw fee** — contributing is free, tiny fee on withdrawal only.
+
+### Why This Belongs on Bitcoin L1
+
+This is not a webapp with a token bolted on. The time-lock is enforced by Bitcoin itself — no server, no admin, no override. The bonding curve mints $FJAR via cross-contract calls between Manager and Token contracts. Refunds trigger on-chain burns. Four vault modes emerge from two optional parameters (goal amount + beneficiary), keeping the contract surface small while covering use cases from open collections to trust funds. Every piece of state is on-chain and verifiable.
+
+No protocol on Ethereum, Solana, or any other chain combines group savings jars + beneficiary + goal-based refunds + trustless time-locks + bonding curve rewards. This is a genuinely new primitive.
 
 ---
 

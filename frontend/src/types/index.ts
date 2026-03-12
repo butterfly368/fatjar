@@ -31,7 +31,8 @@ export interface TokenInfo {
   remainingSupply: bigint;    // tokens left to mint
 }
 
-export const ZERO_ADDRESS = '0x' + '0'.repeat(40);
+// OPNet addresses are u256 (32 bytes = 64 hex chars), not EVM-style (20 bytes = 40 hex chars)
+export const ZERO_ADDRESS = '0x' + '0'.repeat(64);
 
 export function getVaultMode(vault: Vault): VaultMode {
   const hasGoal = vault.goalAmount > 0n;
@@ -95,16 +96,30 @@ export const MODE_ONELINER: Record<VaultMode, string> = {
   'funded-grant':    'Fund someone\'s dream. Goal met = they get it.',
 };
 
+// M6: Single block constant used across all pages
+// TODO: Fetch from chain when live mode is active
+export const CURRENT_BLOCK = 890000n;
+
 // Estimate human-readable date from block number
 export function blockToDate(block: bigint): string {
   if (block === 0n) return 'No lock';
-  const CURRENT_BLOCK = 890000;
   const MINUTES_PER_BLOCK = 10;
-  const blocksUntil = Number(block) - CURRENT_BLOCK;
+  const blocksUntil = Number(block) - Number(CURRENT_BLOCK);
   if (blocksUntil <= 0) return 'Unlocked';
   const ms = blocksUntil * MINUTES_PER_BLOCK * 60 * 1000;
   const date = new Date(Date.now() + ms);
   return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+}
+
+// M3: Shared vault status logic — used by Dashboard and FundDetail
+export type VaultStatus = 'active' | 'unlocked' | 'withdrawn' | 'refundable';
+
+export function getVaultStatus(vault: Vault): VaultStatus {
+  if (vault.withdrawn > 0n) return 'withdrawn';
+  const isPastUnlock = vault.unlockBlock === 0n || CURRENT_BLOCK >= vault.unlockBlock;
+  if (isPastUnlock && vault.goalAmount > 0n && vault.totalRaised < vault.goalAmount) return 'refundable';
+  if (isPastUnlock || vault.isClosed) return 'unlocked';
+  return 'active';
 }
 
 // ── Shared types ────────────────────────────────────────────────────

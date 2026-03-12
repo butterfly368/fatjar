@@ -14,7 +14,7 @@ import {
   closeFund,
 } from '../../services/contract';
 import type { Vault } from '../../types';
-import { getVaultMode, getVaultModeLabel, formatBtc, formatTokens } from '../../types';
+import { getVaultMode, getVaultModeLabel, formatBtc, formatTokens, getVaultStatus, CURRENT_BLOCK } from '../../types';
 import { Button } from '../../components/ui/Button';
 import './Dashboard.css';
 
@@ -35,21 +35,10 @@ interface MyContribution {
   status: 'active' | 'goal-met' | 'refundable';
 }
 
-// TODO: Replace with real chain data when OPWallet is integrated
-const MOCK_CURRENT_BLOCK = 860000n;
-
-function getVaultStatus(vault: Vault): 'active' | 'unlocked' | 'withdrawn' {
-  if (vault.withdrawn > 0n) return 'withdrawn';
-  const isPastUnlock = vault.unlockBlock === 0n || MOCK_CURRENT_BLOCK >= vault.unlockBlock;
-  if (isPastUnlock) return 'unlocked';
-  return 'active';
-}
-
 function getContributionStatus(vault: Vault): 'active' | 'goal-met' | 'refundable' {
   if (vault.goalAmount > 0n && vault.totalRaised >= vault.goalAmount) return 'goal-met';
-  // Refundable: goal-based vault where goal not met AND (time-lock expired OR fund closed)
   if (vault.goalAmount > 0n && vault.totalRaised < vault.goalAmount) {
-    const isPastUnlock = vault.unlockBlock === 0n || MOCK_CURRENT_BLOCK >= vault.unlockBlock;
+    const isPastUnlock = vault.unlockBlock === 0n || CURRENT_BLOCK >= vault.unlockBlock;
     if (isPastUnlock || vault.isClosed) return 'refundable';
   }
   return 'active';
@@ -245,22 +234,7 @@ export function Dashboard() {
                 </div>
                 <div className="dashboard-card-actions">
                   {status === 'active' && (
-                    <>
-                      <button
-                        className="dashboard-action-btn dashboard-action-primary"
-                        onClick={() => handleWithdraw(vault.id)}
-                        disabled={actionLoading === vault.id}
-                      >
-                        {actionLoading === vault.id ? 'Processing...' : 'Withdraw'}
-                      </button>
-                      <button
-                        className="dashboard-action-btn dashboard-action-secondary"
-                        onClick={() => handleClose(vault.id)}
-                        disabled={actionLoading === vault.id}
-                      >
-                        Close
-                      </button>
-                    </>
+                    <span className="dashboard-action-done">Time-locked</span>
                   )}
                   {status === 'unlocked' && (
                     <button

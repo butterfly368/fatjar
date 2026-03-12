@@ -11,15 +11,15 @@
 
 ## 1. Product Overview
 
-Trustless Bitcoin vaults for financial coordination on L1. Create a vault, set optional goals and time-locks. Contributors back it with BTC and earn $FJAR tokens via a bonding curve — early backers earn more. If a goal-based vault fails, contributors get BTC back and $FJAR is burned. Zero platform fees.
+Trustless Bitcoin vaults for financial coordination on L1. Create a vault, set optional goals and time-locks. Contributors back it with BTC and earn $FJAR tokens via a bonding curve — early backers earn more. If a goal-based vault fails, contributors get BTC back and $FJAR is burned. Contributing is free — 0.5% fee on withdrawal only.
 
 ### Positioning
 
-**Tagline:** "Lock Bitcoin together."
+**Tagline:** "A piggy bank that actually grows with your child."
 
-**What it is:** A crowdfunding and coordination primitive on Bitcoin L1 — "Juicebox for Bitcoin." One flexible vault contract that supports multiple use cases based on what the creator configures.
+**What it is:** Trustless Bitcoin savings jars on L1. Family and friends contribute BTC to savings jars with time-locks nobody can break — not even the creator. No protocol on any chain does this.
 
-**Target users:** Investment clubs, project treasuries, community funds, milestone-based funding, trust funds — anyone pooling 0.01+ BTC with people they don't fully trust.
+**Target users:** Bitcoiners saving for their kids' futures, families pooling BTC for milestones, communities collecting for shared goals — anyone pooling 0.01+ BTC with people they trust.
 
 **Why Bitcoin L1:**
 - $2T in BTC value, <0.5% in DeFi — the richest chain has the least infrastructure
@@ -105,14 +105,10 @@ Not claiming governance. Not claiming yield. Honest about what it is.
   - Trade-off: sell $FJAR (forfeit refund) or hold $FJAR (keep refund right)
 - Prevents gaming: can't create fake vaults to farm $FJAR risk-free
 
-### Future Monetization (post-competition)
-- Zero fees at launch — trust signal for Bitcoin community
-- Treasury proposal later via contract upgrade (`onUpdate`):
-  - Option A: 0.5-1% protocol fee on successful withdrawals
-  - Option B: Small % of $FJAR minted to treasury on each contribution
-  - Option C: Direct BTC fee on withdrawals
-- Upgrade requires deployer key — transparent, announced in advance
-- Existing vaults honor original terms; fee applies only to new vaults
+### Monetization
+- 0.5% fee on withdrawals only — contributing is free
+- Fee accumulates in protocol treasury, claimable by deployer via `claimProtocolFees()`
+- Trust signal: fee is tiny, transparent, and only charged when value is successfully delivered
 
 ---
 
@@ -305,35 +301,37 @@ Editorial Brutalist — carried over from v2 prototype:
 
 ### 90-Second Video Script
 ```
-0-10s:  "Bitcoin holds $2 trillion. But there's no way to pool it
-        trustlessly. Until now."
+0-10s:  "A piggy bank that actually grows with your child.
+        Traditional savings lose value. A FatJar holds Bitcoin."
 
-10-25s: "FatJar. Create a vault, set a goal, set a time-lock.
-        Contributors back it with BTC. Goal met — funds release.
-        Goal missed — everyone gets BTC back. No middleman.
-        No platform fees. Just Bitcoin and math."
+10-25s: "Create a savings jar. Lock it until they're ready.
+        Family and friends contribute along the way — and
+        everyone earns $FJAR rewards worth more the earlier
+        you join. Nobody can touch it early — not even you."
 
-25-40s: Demo: Create Vault (all-or-nothing mode, 1 BTC goal)
+25-40s: Demo: Create Jar — "Emma's College Fund, unlocks 2044,
+        beneficiary = Emma's wallet"
 
 40-55s: Demo: Contribute, watch $FJAR mint, bonding curve rate
 
-55-70s: Demo: Vault Detail — progress bar, contributor list,
-        time remaining
+55-70s: Demo: Jar Detail — progress bar, contributor list,
+        time remaining, time-lock badge
 
-70-80s: "Early backers earn more $FJAR. But if the vault fails,
-        tokens burn. Only successful conviction counts."
+70-80s: "Set a goal? If it's not met, every sat goes back and
+        tokens burn. Cross-contract mint, cross-contract burn.
+        Four vault modes from two parameters. All on-chain."
 
-80-90s: "Juicebox raised $100M on Ethereum. FatJar brings
-        trustless coordination to Bitcoin L1. Lock Bitcoin together."
+80-90s: "No protocol on any chain does this. FatJar — a piggy bank
+        that actually grows with your child. Built on Bitcoin L1."
 ```
 
 ### Judging Criteria Alignment (100 pts)
 | Criterion | Points | FatJar's angle |
 |---|---|---|
 | Working Product | 30 | 2 contracts on testnet + 4-page frontend on Vercel |
-| Innovation | 25 | First all-or-nothing crowdfunding on Bitcoin L1 + bonding curve commitment + burn-on-refund |
+| Innovation | 25 | First social savings protocol on Bitcoin L1 + bonding curve + burn-on-refund + trustless time-locks |
 | UX/Polish | 15 | Editorial Brutalist design, mode preview, gas estimates |
-| Mainnet Viability | 15 | Proven model (Juicebox: $100M), L1 gas justified at vault scale |
+| Mainnet Viability | 15 | Proven demand (PayPal relaunched Pools, MoneyFellows 8.5M users), L1 gas justified at vault scale |
 | OP_NET Usage | 15 | Cross-contract mint + burn, bonding curve math, composite keys, OP20 extensions |
 
 ---

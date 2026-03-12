@@ -653,7 +653,7 @@ Update feature descriptions to match vault narrative. Key features:
 - All-or-nothing guarantee
 - Time-locked by Bitcoin's blockchain
 - Bonding curve rewards early backers
-- Zero platform fees
+- 0.5% withdrawal fee (contributing is free)
 - Four flexible vault modes
 
 **Step 6: Commit**

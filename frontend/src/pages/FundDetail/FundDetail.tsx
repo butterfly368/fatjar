@@ -13,8 +13,8 @@ import {
   getVaultContributions,
 } from '../../services/contract';
 import type { Vault, Contribution } from '../../types';
-import { getVaultMode, getVaultModeLabel, formatBtc, truncateAddress, formatTokens, estimateTokensForSats, ZERO_ADDRESS } from '../../types';
-import type { VaultMode } from '../../types';
+import { getVaultMode, getVaultModeLabel, formatBtc, truncateAddress, formatTokens, estimateTokensForSats, ZERO_ADDRESS, getVaultStatus, CURRENT_BLOCK } from '../../types';
+import type { VaultMode, VaultStatus } from '../../types';
 
 const MODE_ICON: Record<VaultMode, typeof Inbox> = {
   'open-collection': Inbox,
@@ -24,20 +24,8 @@ const MODE_ICON: Record<VaultMode, typeof Inbox> = {
 };
 import './FundDetail.css';
 
-// Mock current block — will be replaced with real chain data in Task 9
-const MOCK_CURRENT_BLOCK = 860000n;
 // Mock connected wallet — will be replaced with real wallet in Task 9
 const MOCK_WALLET_ADDRESS = 'bc1q...demo';
-
-type VaultStatus = 'active' | 'unlocked' | 'withdrawn' | 'refundable';
-
-function getVaultStatus(vault: Vault): VaultStatus {
-  if (vault.withdrawn > 0n) return 'withdrawn';
-  const isPastUnlock = vault.unlockBlock > 0n && MOCK_CURRENT_BLOCK >= vault.unlockBlock;
-  if (isPastUnlock && vault.goalAmount > 0n && vault.totalRaised < vault.goalAmount) return 'refundable';
-  if (isPastUnlock || vault.isClosed) return 'unlocked';
-  return 'active';
-}
 
 function getStatusLabel(status: VaultStatus): string {
   const labels: Record<VaultStatus, string> = {
@@ -188,8 +176,8 @@ export function FundDetail() {
   const progressPct = hasGoal
     ? Math.min(100, Number((vault.totalRaised * 100n) / vault.goalAmount))
     : 0;
-  const blocksRemaining = vault.unlockBlock > MOCK_CURRENT_BLOCK
-    ? vault.unlockBlock - MOCK_CURRENT_BLOCK
+  const blocksRemaining = vault.unlockBlock > CURRENT_BLOCK
+    ? vault.unlockBlock - CURRENT_BLOCK
     : 0n;
 
   const isCreator = vault.creator === MOCK_WALLET_ADDRESS;

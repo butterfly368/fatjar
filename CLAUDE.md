@@ -3,7 +3,7 @@
 ## What This Is
 Social savings protocol on Bitcoin L1 via OPNet. Competition entry for vibecode.finance Week 3 "The Breakthrough" (deadline: **March 13, 2026**).
 
-**Product:** FatJar | **Token:** $FJAR (OP20) | **Tagline:** "The Piggy Bank for Everyone on Bitcoin."
+**Product:** FatJar | **Token:** $FJAR (OP20) | **Tagline:** "A piggy bank that actually grows with your child."
 
 Anyone creates a jar. Family/friends contribute BTC. Contributors earn $FJAR tokens via bonding curve — early = more tokens. Two jar types (Open Jar + Goal Jar) with optional beneficiary and time-lock. 0.5% withdraw fee funds protocol development.
 
