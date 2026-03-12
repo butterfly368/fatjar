@@ -2,6 +2,7 @@
   max-width: var(--max-width);
   margin: 0 auto;
   padding: clamp(40px, 6vw, 80px) var(--side-padding) 80px;
+  position: relative;
 }
 
 /* ── Header ────────────────────────────────────────────────────── */

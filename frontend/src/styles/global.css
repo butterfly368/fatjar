@@ -11,3 +11,25 @@ body {
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
+
+/* ── Toast notifications ──────────────────────────────────────── */
+
+.fund-toast {
+  padding: 14px 20px;
+  font-family: 'Source Sans 3', 'Source Sans Pro', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  cursor: pointer;
+  animation: fadeUp 0.3s ease;
+  margin-bottom: 24px;
+}
+
+.fund-toast--success {
+  background: #166534;
+  color: #f5f2ed;
+}
+
+.fund-toast--error {
+  background: #991b1b;
+  color: #f5f2ed;
+}

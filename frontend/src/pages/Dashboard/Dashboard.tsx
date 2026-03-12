@@ -51,6 +51,12 @@ export function Dashboard() {
   const [myContributions, setMyContributions] = useState<MyContribution[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  function showToast(type: 'success' | 'error', message: string) {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), type === 'error' ? 8000 : 6000);
+  }
 
   // Use connected wallet address, fall back to seeded address for demo
   const walletAddress = address ?? 'bc1q...demo';
@@ -105,7 +111,7 @@ export function Dashboard() {
     setActionLoading(fundId);
     try {
       await withdraw(fundId);
-      // Reload vault details
+      showToast('success', 'Withdrawal submitted! BTC will arrive once the transaction confirms.');
       const vault = await getFundDetails(fundId);
       setMyVaults((prev) =>
         prev.map((v) =>
@@ -114,18 +120,21 @@ export function Dashboard() {
             : v,
         ),
       );
+    } catch {
+      showToast('error', 'Withdrawal failed. The jar may still be time-locked or the transaction was rejected.');
     } finally {
       setActionLoading(null);
     }
   }
 
-
   async function handleRefund(fundId: string) {
     setActionLoading(`refund-${fundId}`);
     try {
       await refund(fundId);
-      // Remove from contributions list after refund
+      showToast('success', 'Refund submitted! Your BTC will be returned once the transaction confirms.');
       setMyContributions((prev) => prev.filter((c) => c.vault.id !== fundId));
+    } catch {
+      showToast('error', 'Refund failed. The transaction may have been rejected.');
     } finally {
       setActionLoading(null);
     }
@@ -178,6 +187,11 @@ export function Dashboard() {
 
   return (
     <div className="dashboard">
+      {toast && (
+        <div className={`fund-toast fund-toast--${toast.type}`} onClick={() => setToast(null)}>
+          {toast.message}
+        </div>
+      )}
       <div className="dashboard-header">
         <h1 className="dashboard-title">Dashboard</h1>
         <span className="dashboard-subtitle">

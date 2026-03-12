@@ -49,6 +49,12 @@ export function FundDetail() {
   const [showContributeForm, setShowContributeForm] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  function showToast(type: 'success' | 'error', message: string) {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), type === 'error' ? 8000 : 6000);
+  }
 
   const loadVault = useCallback(async () => {
     if (!id) return;
@@ -82,7 +88,10 @@ export function FundDetail() {
       await contribute(id, sats);
       setAmount('');
       setShowContributeForm(false);
+      showToast('success', `Contribution submitted! It may take a few minutes to confirm on-chain. Refresh to see updates.`);
       await loadVault();
+    } catch {
+      showToast('error', 'Contribution failed. The transaction may have been rejected or the wallet cancelled.');
     } finally {
       setContributing(false);
     }
@@ -93,7 +102,10 @@ export function FundDetail() {
     setActionLoading(true);
     try {
       await withdraw(id);
+      showToast('success', 'Withdrawal submitted! BTC will arrive in your wallet once the transaction confirms.');
       await loadVault();
+    } catch {
+      showToast('error', 'Withdrawal failed. The jar may still be time-locked or the transaction was rejected.');
     } finally {
       setActionLoading(false);
     }
@@ -104,7 +116,10 @@ export function FundDetail() {
     setActionLoading(true);
     try {
       await refund(id);
+      showToast('success', 'Refund submitted! Your BTC will be returned once the transaction confirms.');
       await loadVault();
+    } catch {
+      showToast('error', 'Refund failed. The transaction may have been rejected or you may not be eligible.');
     } finally {
       setActionLoading(false);
     }
@@ -115,7 +130,10 @@ export function FundDetail() {
     setActionLoading(true);
     try {
       await closeFund(id);
+      showToast('success', 'Jar closed. No new contributions will be accepted.');
       await loadVault();
+    } catch {
+      showToast('error', 'Failed to close jar. Only the creator can close it.');
     } finally {
       setActionLoading(false);
     }
@@ -193,6 +211,13 @@ export function FundDetail() {
 
   return (
     <div className="fund-detail">
+      {/* Toast notification */}
+      {toast && (
+        <div className={`fund-toast fund-toast--${toast.type}`} onClick={() => setToast(null)}>
+          {toast.message}
+        </div>
+      )}
+
       {/* Header */}
       <div className="fund-detail-header">
         <div className="fund-detail-label">
