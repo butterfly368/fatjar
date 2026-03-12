@@ -35,6 +35,16 @@
 - [ ] `[frontend]` P2 — Live activity feed
 - [ ] `[frontend]` P0 — **Narrative revision** — update copy/content per direction change (pending)
 
+### Session 16 — Display Bug Fixes
+- [x] `[frontend]` P0 — Fix jar name/description display (localStorage metadata cache) (2026-03-12)
+- [x] `[frontend]` P0 — Fix creator/beneficiary address display (bigint→hex) (2026-03-12)
+- [x] `[frontend]` P0 — Fix $FJAR token rate display (18-decimal formatting) (2026-03-12)
+- [x] `[frontend]` P0 — Fix contribute estimate formula (2026-03-12)
+- [x] `[frontend]` P0 — Consolidate formatTokens into shared types module (2026-03-12)
+- [ ] `[demo]` P0 — Test display fixes on Vercel with live mode
+- [ ] `[demo]` P0 — Create 4 seed jars on-chain
+- [ ] `[demo]` P0 — Test contribute flow (Account 2 → jar)
+
 ### Session 5 — Polish & Submit
 - [x] `[demo]` P0 — Deploy frontend to Vercel → https://fatjar-ten.vercel.app/ (2026-03-10)
 - [ ] `[demo]` P0 — Record 90s demo video

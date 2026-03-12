@@ -856,11 +856,51 @@ Design system compliance:
 - `f2d9749` — fix: deployment debugging — correct derivation path, contract linking, live mode persistence
 
 **Open items for next session:**
-- [ ] Fix jar name/creator/rate display (read events or add mapping)
+- [x] Fix jar name/creator/rate display (read events or add mapping) → Session 16
 - [ ] Create 4 seed jars on-chain
 - [ ] Test contribute flow (Account 2 → jar)
-- [ ] Redeploy frontend to Vercel with new config
+- [x] Redeploy frontend to Vercel with new config → Session 16
 - [ ] Record 90s demo video
 - [ ] Tweet #opnetvibecode + submit to vibecode.finance
 
 **Days to deadline:** 2 (March 13, 2026)
+
+---
+
+## Session 16 — 2026-03-12 — Display Bug Fixes
+
+**Goal:** Fix 4 frontend display bugs blocking demo readiness.
+
+**What we did:**
+
+1. **Jar names/descriptions** — Added localStorage metadata cache. `createVault` saves name+description on creation; `getFundDetails` reads cache before falling back to "Jar #N". Event-only data can't be read from contract state, so this is the pragmatic solution for the demo.
+
+2. **Creator address** — Contract stores creator as `u256.fromUint8ArrayBE(addr)`. Frontend `toAddress()` was expecting a string but receiving a bigint → always returned `0x000...000`. Fixed: `bigintToHex()` converts bigint to `0x{padded hex}` for display.
+
+3. **$FJAR token rate** — Rate from contract has 18 decimals (120,000 tokens = `120000000000000000000000n`). Was displayed raw. Added shared `formatTokens()` helper (divides by 10^18, locale formatting). Applied across FundDetail, StatsStrip, Dashboard. Replaced 2 local `formatTokens` implementations with shared version.
+
+4. **Contribute estimate formula** — Was `sats * rate` (astronomically wrong). Fixed to `(sats * rate) / SATS_PER_BTC`, then format with 18-decimal division. Added `estimateTokensForSats()` helper.
+
+5. **Mock consistency** — Updated `MOCK_TOKEN_RATE` to 18-decimal format. Fixed mock contribute formula to match.
+
+**Files modified:**
+- `frontend/src/services/contract.live.ts` — metadata cache, bigintToHex, toAddress fix
+- `frontend/src/services/contract.mock.ts` — rate + contribute formula fix
+- `frontend/src/types/index.ts` — formatTokens, estimateTokensForSats
+- `frontend/src/pages/FundDetail/FundDetail.tsx` — all token displays
+- `frontend/src/pages/Home/StatsStrip.tsx` — rate + minted displays
+- `frontend/src/pages/Dashboard/Dashboard.tsx` — shared formatTokens import
+
+**Commits:**
+- `f6a21bb` — fix(frontend): jar display bugs — names, creator address, token rate formatting
+
+**Deployed:** Pushed to main → Vercel auto-deploy at https://fatjar-ten.vercel.app/
+
+**Open items for next session:**
+- [ ] Test display fixes on Vercel (with `?live=true`)
+- [ ] Create 4 seed jars on-chain (names will cache in localStorage)
+- [ ] Test contribute flow (Account 2 → jar)
+- [ ] Record 90s demo video
+- [ ] Tweet #opnetvibecode + submit to vibecode.finance
+
+**Days to deadline:** 1 (March 13, 2026)
