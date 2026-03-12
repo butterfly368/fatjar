@@ -52,6 +52,35 @@
   color: var(--bg);
 }
 
+.nav-mode-toggle {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  border: 1px solid;
+  transition: opacity 0.2s;
+}
+
+.nav-mode-toggle:hover {
+  opacity: 0.8;
+}
+
+.nav-mode-toggle--live {
+  background: #0a2e0a;
+  color: #4ade80;
+  border-color: #16a34a;
+}
+
+.nav-mode-toggle--mock {
+  background: #2e1f0a;
+  color: #fb923c;
+  border-color: #ea580c;
+}
+
 @media (max-width: 700px) {
   .nav-link:not(.nav-cta) {
     display: none;

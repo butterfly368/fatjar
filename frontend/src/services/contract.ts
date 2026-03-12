@@ -63,6 +63,13 @@ export async function getResolvedMode(): Promise<'live' | 'mock'> {
   return mode as 'live' | 'mock';
 }
 
+/** Switch mode and reload page. Strips query params to avoid conflicts. */
+export function switchMode(newMode: 'live' | 'mock'): void {
+  sessionStorage.setItem('fatjar-mode', newMode);
+  // Navigate to same path without query params, triggers full reload
+  window.location.href = window.location.pathname;
+}
+
 // ── Delegating methods ──────────────────────────────────────────────
 
 async function svc() {
