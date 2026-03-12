@@ -410,25 +410,41 @@ export async function getAllVaults(): Promise<Vault[]> {
 }
 
 export async function getContribution(fundId: string, contributor: string): Promise<bigint> {
-  const result = await getManagerContract().getContribution(BigInt(fundId), contributor);
+  const resolved = await resolveAddress(contributor);
+  const result = await getManagerContract().getContribution(BigInt(fundId), resolved);
   if (result.revert) return 0n;
   return toBigInt(result.properties.amount);
 }
 
 export async function getContributionTokens(fundId: string, contributor: string): Promise<bigint> {
-  const result = await getManagerContract().getContributionTokens(BigInt(fundId), contributor);
+  const resolved = await resolveAddress(contributor);
+  const result = await getManagerContract().getContributionTokens(BigInt(fundId), resolved);
   if (result.revert) return 0n;
   return toBigInt(result.properties.tokens);
 }
 
+/**
+ * Resolve a bech32 wallet address to an Address object for contract queries.
+ * Falls back to raw string if resolution fails.
+ */
+async function resolveAddress(addr: string): Promise<Address | string> {
+  try {
+    return await getProvider().getPublicKeyInfo(addr, true);
+  } catch {
+    return addr;
+  }
+}
+
 export async function getCreatorFundCount(creator: string): Promise<number> {
-  const result = await getManagerContract().getCreatorFundCount(creator);
+  const resolved = await resolveAddress(creator);
+  const result = await getManagerContract().getCreatorFundCount(resolved);
   if (result.revert) return 0;
   return Number(toBigInt(result.properties.count));
 }
 
 export async function getCreatorFundByIndex(creator: string, index: number): Promise<string> {
-  const result = await getManagerContract().getCreatorFundByIndex(creator, BigInt(index));
+  const resolved = await resolveAddress(creator);
+  const result = await getManagerContract().getCreatorFundByIndex(resolved, BigInt(index));
   if (result.revert) throw new Error(`getCreatorFundByIndex reverted: ${result.revert}`);
   return String(toBigInt(result.properties.fundId));
 }
