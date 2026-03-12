@@ -54,6 +54,7 @@ export function getVaultModeLabel(mode: VaultMode): string {
 }
 
 export function formatBtc(satoshis: bigint): string {
+  if (satoshis === 0n) return '0';
   const btc = Number(satoshis) / 100_000_000;
   return btc.toFixed(btc < 0.01 ? 8 : btc < 1 ? 4 : 2);
 }
