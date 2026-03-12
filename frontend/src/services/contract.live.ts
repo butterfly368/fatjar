@@ -225,7 +225,7 @@ interface JarMeta { name: string; description: string }
 // Fallback for browsers without localStorage cache.
 const SEED_JAR_NAMES: Record<string, JarMeta> = {
   '1': { name: "Lisa's Birthday Surprise", description: "Pooling BTC from friends and family for Lisa's 30th birthday." },
-  '2': { name: "Jake's College Fund", description: "Saving for Jake's university tuition. Family contributions locked until he turns 18." },
+  '2': { name: "Dad's Retirement Stack", description: "Family pitching in BTC for dad's retirement. Locked until 2035 — no early withdrawals, no exceptions." },
   '3': { name: 'Community Skatepark Build', description: 'Community savings for a neighborhood skatepark. Hit the goal or everyone gets refunded.' },
   '4': { name: "Maya's Dev Bootcamp", description: "Funding Maya's 12-week coding bootcamp. Goal met = she gets it. Missed = refunds." },
 };
