@@ -32,11 +32,11 @@ vaults.set('1', {
   isPublic: true,
 });
 
-// Seed: 2) Jake's College Fund — trust-fund (Save for Someone)
+// Seed: 2) Dad's Retirement Stack — trust-fund (Save for Someone)
 vaults.set('2', {
   id: '2',
-  name: "Jake's College Fund",
-  description: "Saving for Jake's university tuition. Family contributions locked until he turns 18.",
+  name: "Dad's Retirement Stack",
+  description: "Family pitching in BTC for dad's retirement. Locked until 2035 — no early withdrawals, no exceptions.",
   creator: 'bc1q...creator2',
   totalRaised: 150000000n, // 1.5 BTC
   unlockBlock: 1050000n,
@@ -44,7 +44,7 @@ vaults.set('2', {
   withdrawn: 0n,
   contributorCount: 4,
   goalAmount: 0n,
-  beneficiary: 'bc1q...jake',
+  beneficiary: 'bc1q...dad',
   isPublic: true,
 });
 
@@ -96,7 +96,7 @@ contributions.push(
   { vaultId: '1', contributor: 'bc1q...alpha6', amount: 1500000n, tokensEarned: 180000000000000000000n },
 );
 
-// Seed contributions for vault 2 — Jake's College Fund
+// Seed contributions for vault 2 — Dad's Retirement Stack
 contributions.push(
   { vaultId: '2', contributor: 'bc1q...beta1', amount: 50000000n, tokensEarned: 6000000000000000000000n },
   { vaultId: '2', contributor: 'bc1q...beta2', amount: 30000000n, tokensEarned: 3600000000000000000000n },

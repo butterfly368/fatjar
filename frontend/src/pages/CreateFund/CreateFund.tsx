@@ -113,7 +113,6 @@ export function CreateFund() {
 
       const newId = await createVault(name, block, goal, ben, description, isPublic);
       setCreated(newId);
-      navigate(`/fund/${newId}`);
     } catch {
       setErrors({ submit: 'Failed to create jar. Please try again.' });
     } finally {
@@ -130,7 +129,7 @@ export function CreateFund() {
             Jar Created
           </div>
           <p className="create-fund-success-desc">
-            Your jar "{name}" has been created. Share the link with your people to start collecting.
+            Your jar "{name}" has been submitted to the network. It may take a few minutes to confirm on-chain. Share the link with your people to start collecting.
           </p>
           <Button to={`/fund/${created}`}>
             View Your Jar <ArrowRight size={14} />
