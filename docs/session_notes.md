@@ -904,3 +904,62 @@ Design system compliance:
 - [ ] Tweet #opnetvibecode + submit to vibecode.finance
 
 **Days to deadline:** 1 (March 13, 2026)
+
+---
+
+## Session 17 — 2026-03-12 — Pre-Submission Review & Positioning
+
+**Goal:** Full project review before competition submission.
+
+**What we did:**
+
+1. **Code review** (5 parallel agents) — found 3 critical, 4 high, 7 medium issues across contracts + frontend
+2. **OPNet vision alignment** — scored 77-89/100 for competition. Strong whitespace positioning (only social savings among 354 dApps). OPNet mainnet launches March 17.
+3. **Token strategy** — decided: mint on testnet (proves end-to-end), do NOT pair with MOTO/PILL (bonding curve IS the pricing mechanism)
+4. **Transition strategy** — BSL license for contracts after competition. Fresh mainnet deploy March 17. Decision gate at Week 6.
+5. **Fiat onramp analysis** — thesis is correct but OPNet lacks account abstraction. Add `contributeOnBehalfOf()` to contract later. Post-mainnet play.
+6. **Competitive landscape research** — no live protocol on any chain combines group savings + beneficiary + time-locks + bonding curve. On-chain attempts all died (WeTrust, Bloinx, Pigzbe). Demand proven by fintech (PayPal relaunched Pools, MoneyFellows 8.5M users).
+
+**Positioning sharpened:**
+- Rejected "Juicebox for Bitcoin" — Juicebox is crowdfunding for strangers/DAOs, essentially dead ($121K market cap). FatJar is social savings for trusted relationships.
+- New tagline: "A piggy bank that actually grows with your child"
+- Double growth story: Bitcoin appreciates + $FJAR rewards grow with adoption
+- Two-layer messaging: consumer hook (family savings) + DeFi-native depth (cross-contract bonding curve, burn-on-refund, four modes from two params)
+- Competition pitch: "The only way to lock BTC until your kid turns 18 — with family and friends contributing along the way"
+
+**Code fixes applied:**
+- C1: Added `isDeleted` check to `withdraw` in FatJarManager.ts (defense-in-depth)
+- M2: Dashboard hides Withdraw button on time-locked vaults (shows "Time-locked" instead)
+- M3: Unified `getVaultStatus` into shared utility in types/index.ts
+- M6: Consolidated 3 different block constants (860000, 860000, 890000) into single `CURRENT_BLOCK = 890000n`
+- M7: Fixed `ZERO_ADDRESS` from 40 chars (EVM) to 64 chars (OPNet u256) — would have broken vault mode detection on live data
+- H4: Updated all "zero fees" references in docs to "0.5% withdrawal fee"
+
+**Contract redeployment:** Not needed. `isDeleted` check is defense-in-depth (deleted funds have zero balance). Testnet contracts work for demo. Fresh deploy on mainnet March 17.
+
+**Builds verified:** TypeScript `tsc --noEmit` clean, contracts `build:fatjar` clean.
+
+**Files modified:**
+- `CLAUDE.md` — new tagline
+- `README.md` — title, pitch, features, "Why This Belongs on Bitcoin L1" section
+- `contracts/src/fatjar-manager/FatJarManager.ts` — isDeleted check in withdraw
+- `docs/plans/2026-03-10-product-direction.md` — full positioning rewrite
+- `docs/plans/2026-03-10-vault-implementation.md` — fee fix
+- `docs/plans/2026-03-10-vault-redesign.md` — positioning, demo script, fee fixes
+- `docs/plans/2026-03-12-pre-submission-review.md` — new: full review doc
+- `frontend/src/pages/Dashboard/Dashboard.tsx` — shared utility, M2 fix
+- `frontend/src/pages/FundDetail/FundDetail.tsx` — shared utility
+- `frontend/src/pages/Home/HeroSection.tsx` — new headline + tagline
+- `frontend/src/types/index.ts` — ZERO_ADDRESS fix, shared CURRENT_BLOCK, shared getVaultStatus
+
+**Commits:**
+- `f33807e` — pre-submission review: positioning, code fixes, fee docs
+
+**Open items for next session:**
+- [ ] Create 4 seed jars on-chain
+- [ ] Test contribute flow (Account 2 → jar)
+- [ ] Record 90s demo video
+- [ ] Tweet #opnetvibecode + submit to vibecode.finance
+- [ ] Update LICENSE copyright from "ORANGE PILLS INC" to own entity
+
+**Days to deadline:** 1 (March 13, 2026)

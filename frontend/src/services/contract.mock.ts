@@ -52,7 +52,7 @@ vaults.set('2', {
 vaults.set('3', {
   id: '3',
   name: 'Community Skatepark Build',
-  description: 'All-or-nothing fundraiser for a neighborhood skatepark. If we hit 2 BTC, it happens. If not, everyone gets refunded.',
+  description: 'Community savings for a neighborhood skatepark. If we hit the 2 BTC goal, it happens. If not, everyone gets refunded.',
   creator: 'bc1q...creator3',
   totalRaised: 120000000n, // 1.2 BTC
   unlockBlock: 920000n,
