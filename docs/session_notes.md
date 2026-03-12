@@ -963,3 +963,67 @@ Design system compliance:
 - [ ] Update LICENSE copyright from "ORANGE PILLS INC" to own entity
 
 **Days to deadline:** 1 (March 13, 2026)
+
+---
+
+## Session 21 — 2026-03-12 — Narrative, UX Fixes & Submission
+
+**Goal:** Strengthen landing page narrative, fix UX issues, submit to competition.
+
+**What we did:**
+1. Audited landing page against brainstorming docs — identified narrative gap (page was feature-heavy, story-light)
+2. Added `[01] Why This Exists` section — three blocks: The Insight (market validation), The Opportunity ($6T stat), The Story (Emma's College Fund)
+3. Shortened hero tagline — removed $FJAR mention and "actually", cleaner headline
+4. Updated Active Jars subtitle with emotional framing
+5. Rewrote Roadmap Vision column — "A savings layer for Bitcoin. Every family. Every milestone. Every generation."
+6. Reframed competitors: "Ethereum validated the market, FatJar brings it to the right chain" instead of "everyone died"
+7. Added `vercel.json` rewrite — fixed 404 on page refresh (SPA routing)
+8. Fixed jar creation UX — show success screen instead of navigating to non-existent jar
+9. Added toast notifications for all money actions (contribute, withdraw, refund, close) — success + error feedback
+10. Renamed Jake's College Fund → Dad's Retirement Stack (free up Emma for demo)
+11. Documented event indexer needs in TASKS.md (jar names, contributor list, activity feed)
+12. Tested on-chain jar creation + contribution — bonding curve rate changed from 120,000 to 119,404 (minting works!)
+13. Wrote competition description + tweet copy
+14. **Submitted to vibecode.finance Week 3**
+
+**Decisions:**
+- Removed "actually" from hero headline — more confident without it
+- Reframed competitor narrative for competition judges — validation, not failure
+- PayPal 86M stat kept in docs but removed from public-facing copy (unverified primary source)
+- No demo video needed for submission
+- Contract address left optional in submission
+- No project socials created — GitHub repo is sufficient
+
+**Known issues (post-competition):**
+- Contributor list not displayed in live mode (`getVaultContributions` returns `[]` — needs event indexer)
+- No pending/confirming transaction state — user must manually refresh
+- Only Account 1 can create jars (sufficient funds?)
+
+**Commits:**
+- `7ba8d88` — feat: add narrative section, sharpen hero and roadmap vision
+- `f5cadd4` — fix: resolve bech32 addresses before contract queries
+- `f88ecbc` — fix: SPA routing on Vercel, jar creation UX, rename Jake to Dad's Retirement
+- `3772921` — feat: add toast notifications for all user actions
+
+**Files created:**
+- `frontend/src/pages/Home/WhySection.tsx` — new narrative section
+- `frontend/src/pages/Home/WhySection.css` — styling for narrative section
+- `frontend/vercel.json` — SPA rewrite rule
+
+**Files modified:**
+- `frontend/src/pages/Home/Home.tsx` — added WhySection to page flow
+- `frontend/src/pages/Home/HeroSection.tsx` — shorter tagline, removed "actually"
+- `frontend/src/pages/Home/ActiveJars.tsx` — emotional subtitle
+- `frontend/src/pages/Home/FeaturesSection.tsx` — label [01] → [02]
+- `frontend/src/pages/Home/RoadmapSection.tsx` — vision intro + rewritten items
+- `frontend/src/pages/Home/RoadmapSection.css` — phase intro style
+- `frontend/src/pages/FundDetail/FundDetail.tsx` — toast notifications, error handling
+- `frontend/src/pages/FundDetail/FundDetail.css` — removed duplicate toast styles
+- `frontend/src/pages/Dashboard/Dashboard.tsx` — toast notifications, error handling
+- `frontend/src/pages/CreateFund/CreateFund.tsx` — success screen instead of navigate
+- `frontend/src/services/contract.mock.ts` — renamed Jake → Dad's Retirement
+- `frontend/src/services/contract.live.ts` — renamed Jake, address resolution fix
+- `frontend/src/styles/global.css` — shared toast styles
+- `docs/TASKS.md` — post-competition indexer section
+
+**Status:** Submitted to vibecode.finance Week 3. Can continue pushing updates to GitHub/Vercel.

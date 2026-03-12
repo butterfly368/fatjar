@@ -59,6 +59,14 @@
 - Reason: OPNet contracts deployed manually via OPWallet, no programmatic contract deployment
 - Fund names stored via events (indexed off-chain), not on-chain string storage
 
+## Post-Competition — Event Indexer
+
+All three require an indexer that listens to contract events and stores data in an off-chain DB:
+
+- [ ] `[infra]` P1 — **Jar name/description indexing** — `FundCreatedEvent` includes name + description as event data, but not stored on-chain. Currently using localStorage cache + hardcoded fallback. Indexer needed for any user to see jar names.
+- [ ] `[infra]` P1 — **Contributor list indexing** — `ContributionEvent` emits contributor address + amount + tokens minted. Contract only stores per-address lookups (`getContribution(fundId, addr)`), not an iterable list. `getVaultContributions()` in live mode is a stub returning `[]`. Indexer needed to display contributor table.
+- [ ] `[infra]` P2 — **Activity feed** — index all events (create, contribute, withdraw, refund) for a live activity feed on homepage.
+
 ## Completed
 - [x] FatJarToken.wasm compiled (37KB) — OP20 + bonding curve + authorized minter
 - [x] FatJarManager.wasm compiled (24KB) — fund CRUD, contributions, time-lock, withdrawals
