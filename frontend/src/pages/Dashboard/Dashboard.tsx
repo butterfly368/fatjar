@@ -61,39 +61,42 @@ export function Dashboard() {
   useEffect(() => {
     async function load() {
       setLoading(true);
-
-      // Load vaults created by the wallet address
-      const creatorCount = await getCreatorFundCount(creatorAddr);
-      const vaultResults: MyVault[] = [];
-      for (let i = 0; i < creatorCount; i++) {
-        const fundId = await getCreatorFundByIndex(creatorAddr, i);
-        const vault = await getFundDetails(fundId);
-        vaultResults.push({
-          vault,
-          mode: getVaultModeLabel(getVaultMode(vault)),
-          status: getVaultStatus(vault),
-        });
-      }
-      setMyVaults(vaultResults);
-
-      // Load contributions from the mock contributor address
-      const allVaults = await getAllVaults();
-      const contribResults: MyContribution[] = [];
-      for (const vault of allVaults) {
-        const amount = await getContribution(vault.id, contributorAddr);
-        if (amount > 0n) {
-          const tokensEarned = await getContributionTokens(vault.id, contributorAddr);
-          contribResults.push({
+      try {
+        // Load vaults created by the wallet address
+        const creatorCount = await getCreatorFundCount(creatorAddr);
+        const vaultResults: MyVault[] = [];
+        for (let i = 0; i < creatorCount; i++) {
+          const fundId = await getCreatorFundByIndex(creatorAddr, i);
+          const vault = await getFundDetails(fundId);
+          vaultResults.push({
             vault,
-            amount,
-            tokensEarned,
-            status: getContributionStatus(vault),
+            mode: getVaultModeLabel(getVaultMode(vault)),
+            status: getVaultStatus(vault),
           });
         }
-      }
-      setMyContributions(contribResults);
+        setMyVaults(vaultResults);
 
-      setLoading(false);
+        // Load contributions for this wallet address
+        const allVaults = await getAllVaults();
+        const contribResults: MyContribution[] = [];
+        for (const vault of allVaults) {
+          const amount = await getContribution(vault.id, contributorAddr);
+          if (amount > 0n) {
+            const tokensEarned = await getContributionTokens(vault.id, contributorAddr);
+            contribResults.push({
+              vault,
+              amount,
+              tokensEarned,
+              status: getContributionStatus(vault),
+            });
+          }
+        }
+        setMyContributions(contribResults);
+      } catch (err) {
+        console.error('Dashboard load failed:', err);
+      } finally {
+        setLoading(false);
+      }
     }
 
     load();
