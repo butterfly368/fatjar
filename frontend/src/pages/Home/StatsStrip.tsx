@@ -15,23 +15,29 @@ export function StatsStrip() {
 
   useEffect(() => {
     async function load() {
-      const [vaults, rate, totalBtc, totalMinted, resolvedMode] = await Promise.all([
-        getAllVaults(),
-        getTokenRate(),
-        getTotalBtcContributed(),
-        getTotalMinted(),
-        getResolvedMode(),
-      ]);
-      setMode(resolvedMode);
-      const activeCount = vaults.filter((v) => !v.isClosed).length;
-      const rateDisplay = formatTokens(rate);
+      try {
+        const [vaults, rate, totalBtc, totalMinted, resolvedMode] = await Promise.all([
+          getAllVaults(),
+          getTokenRate(),
+          getTotalBtcContributed(),
+          getTotalMinted(),
+          getResolvedMode(),
+        ]);
+        setMode(resolvedMode);
+        const activeCount = vaults.filter((v) => !v.isClosed).length;
+        const rateDisplay = formatTokens(rate);
 
-      setStats([
-        { label: 'Total BTC Locked', value: formatBtc(totalBtc), accent: 'BTC' },
-        { label: 'Active Jars', value: String(activeCount) },
-        { label: '$FJAR Minted', value: formatTokens(totalMinted) },
-        { label: 'Current Rate', value: rateDisplay, accent: '/BTC' },
-      ]);
+        setStats([
+          { label: 'Total BTC Locked', value: formatBtc(totalBtc), accent: 'BTC' },
+          { label: 'Active Jars', value: String(activeCount) },
+          { label: '$FJAR Minted', value: formatTokens(totalMinted) },
+          { label: 'Current Rate', value: rateDisplay, accent: '/BTC' },
+        ]);
+      } catch (err) {
+        console.error('StatsStrip load failed:', err);
+        const resolvedMode = await getResolvedMode().catch(() => 'mock' as const);
+        setMode(resolvedMode);
+      }
     }
     load();
   }, []);

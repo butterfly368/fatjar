@@ -20,7 +20,9 @@ export function ActiveJars() {
   const [vaults, setVaults] = useState<Vault[]>([]);
 
   useEffect(() => {
-    getAllVaults().then((all) => setVaults(all.filter((v) => !v.isClosed && v.isPublic)));
+    getAllVaults()
+      .then((all) => setVaults(all.filter((v) => !v.isClosed && v.isPublic)))
+      .catch((err) => console.error('ActiveJars load failed:', err));
   }, []);
 
   if (vaults.length === 0) return null;

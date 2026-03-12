@@ -28,10 +28,12 @@ export function ExploreJars() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getAllVaults().then((all) => {
-      setVaults(all.filter((v) => !v.isClosed && v.isPublic));
-      setLoading(false);
-    });
+    getAllVaults()
+      .then((all) => {
+        setVaults(all.filter((v) => !v.isClosed && v.isPublic));
+      })
+      .catch((err) => console.error('ExploreJars load failed:', err))
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = vaults.filter((vault) => {
