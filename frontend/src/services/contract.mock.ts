@@ -132,7 +132,7 @@ contributions.push(
 
 // Platform-level mock state
 let totalPlatformBtc = 303500000n; // sum of all vault totalRaised (278.5M + 25M)
-const MOCK_TOKEN_RATE = 120000n; // tokens per 1 BTC at current level
+const MOCK_TOKEN_RATE = 120000000000000000000000n; // 120,000 tokens per 1 BTC (18 decimals)
 let totalMinted = 0n; // simplified, not tracking exactly
 
 // ── Write methods ─────────────────────────────────────────────────
@@ -178,7 +178,7 @@ export async function contribute(fundId: string, satoshis: bigint): Promise<void
   if (vault.isClosed) throw new Error(`Vault ${fundId} is closed`);
 
   const contributor = 'bc1q...demo'; // stub: would come from connected wallet
-  const tokensEarned = satoshis * MOCK_TOKEN_RATE; // simplified
+  const tokensEarned = (satoshis * MOCK_TOKEN_RATE) / 100_000_000n; // rate is per 1 BTC
 
   vault.totalRaised += satoshis;
   vault.contributorCount += 1;

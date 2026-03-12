@@ -62,6 +62,23 @@ export function truncateAddress(address: string): string {
   return address.slice(0, 8) + '...' + address.slice(-6);
 }
 
+const DECIMALS_18 = 10n ** 18n;
+const SATS_PER_BTC = 100_000_000n;
+
+/** Format a raw token amount (18 decimals) to human-readable string */
+export function formatTokens(raw: bigint): string {
+  const whole = raw / DECIMALS_18;
+  if (whole >= 1_000_000n) return `${(Number(whole) / 1_000_000).toFixed(1)}M`;
+  if (whole >= 1_000n) return Number(whole).toLocaleString();
+  return whole.toString();
+}
+
+/** Estimate tokens for a contribution. Rate is tokens-per-1-BTC with 18 decimals. */
+export function estimateTokensForSats(satoshis: bigint, ratePerBtc: bigint): bigint {
+  if (satoshis <= 0n || ratePerBtc <= 0n) return 0n;
+  return (satoshis * ratePerBtc) / SATS_PER_BTC;
+}
+
 // Lucide icon name per mode (used by components that import from lucide-react)
 export const MODE_ICONS: Record<VaultMode, string> = {
   'open-collection': 'Inbox',

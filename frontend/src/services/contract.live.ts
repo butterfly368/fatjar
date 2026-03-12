@@ -216,6 +216,25 @@ function getTokenContract() {
   return tokenContract;
 }
 
+// ── Jar metadata cache (names & descriptions are event-only) ────────
+const JAR_METADATA_KEY = 'fatjar-metadata';
+
+interface JarMeta { name: string; description: string }
+
+function getMetadataCache(): Record<string, JarMeta> {
+  try {
+    return JSON.parse(localStorage.getItem(JAR_METADATA_KEY) || '{}');
+  } catch {
+    return {};
+  }
+}
+
+function saveMetadata(fundId: string, name: string, description: string): void {
+  const cache = getMetadataCache();
+  cache[fundId] = { name, description };
+  localStorage.setItem(JAR_METADATA_KEY, JSON.stringify(cache));
+}
+
 // ── Helpers ─────────────────────────────────────────────────────────
 function toBigInt(val: unknown): bigint {
   if (typeof val === 'bigint') return val;
@@ -224,7 +243,14 @@ function toBigInt(val: unknown): bigint {
   return 0n;
 }
 
+function bigintToHex(val: bigint): string {
+  if (val === 0n) return ZERO_ADDRESS;
+  const hex = val.toString(16).padStart(64, '0');
+  return '0x' + hex;
+}
+
 function toAddress(val: unknown): string {
+  if (typeof val === 'bigint' && val !== 0n) return bigintToHex(val);
   if (typeof val === 'string' && val.length > 0) return val;
   return ZERO_ADDRESS;
 }
@@ -347,10 +373,11 @@ export async function getFundDetails(fundId: string): Promise<Vault> {
   const result = await getManagerContract().getFundDetails(BigInt(fundId));
   if (result.revert) throw new Error(`getFundDetails reverted: ${result.revert}`);
   const p = result.properties;
+  const meta = getMetadataCache()[fundId];
   return {
     id: fundId,
-    name: `Jar #${fundId}`, // names stored via events only
-    description: '', // descriptions stored via events only
+    name: meta?.name || `Jar #${fundId}`,
+    description: meta?.description || '',
     creator: toAddress(p.creator),
     totalRaised: toBigInt(p.totalRaised),
     unlockBlock: toBigInt(p.unlockTimestamp),
@@ -459,7 +486,18 @@ export async function createVault(
   );
 
   // Send via OPWallet
-  return simulateAndSend(result);
+  const txId = await simulateAndSend(result);
+
+  // Cache name & description locally (event-only data, not in contract state)
+  // Use fund count as a best-guess for the new ID
+  try {
+    const count = await getFundCount();
+    saveMetadata(String(count), name, _description);
+  } catch {
+    // Non-critical — jar will show as "Jar #N" if this fails
+  }
+
+  return txId;
 }
 
 /**

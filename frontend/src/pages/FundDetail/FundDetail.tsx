@@ -13,7 +13,7 @@ import {
   getVaultContributions,
 } from '../../services/contract';
 import type { Vault, Contribution } from '../../types';
-import { getVaultMode, getVaultModeLabel, formatBtc, truncateAddress, ZERO_ADDRESS } from '../../types';
+import { getVaultMode, getVaultModeLabel, formatBtc, truncateAddress, formatTokens, estimateTokensForSats, ZERO_ADDRESS } from '../../types';
 import type { VaultMode } from '../../types';
 
 const MODE_ICON: Record<VaultMode, typeof Inbox> = {
@@ -55,7 +55,7 @@ export function FundDetail() {
   const [vault, setVault] = useState<Vault | null>(null);
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tokenRate, setTokenRate] = useState<bigint>(120000n);
+  const [tokenRate, setTokenRate] = useState<bigint>(120000000000000000000000n);
   const [amount, setAmount] = useState('');
   const [contributing, setContributing] = useState(false);
   const [showContributeForm, setShowContributeForm] = useState(false);
@@ -198,9 +198,9 @@ export function FundDetail() {
   // Estimate tokens for the contribute form
   // In the mock, tokensEarned = satoshis * MOCK_TOKEN_RATE
   const estimateSats = amount ? BigInt(Math.floor(Number(amount) * 100_000_000)) : 0n;
-  const estimateTokens = estimateSats > 0n ? estimateSats * tokenRate : 0n;
-  const estimateDisplay = estimateTokens > 0n
-    ? Number(estimateTokens).toLocaleString()
+  const estimateTokensRaw = estimateTokensForSats(estimateSats, tokenRate);
+  const estimateDisplay = estimateTokensRaw > 0n
+    ? formatTokens(estimateTokensRaw)
     : '';
 
   return (
@@ -295,7 +295,7 @@ export function FundDetail() {
             <div className="fund-stat">
               <div className="fund-stat-label">$FJAR Rate</div>
               <div className="fund-stat-value">
-                <span className="fund-stat-accent">{Number(tokenRate).toLocaleString()}</span> / BTC
+                <span className="fund-stat-accent">{formatTokens(tokenRate)}</span> / BTC
               </div>
             </div>
             <div className="fund-stat">
@@ -320,7 +320,7 @@ export function FundDetail() {
                   <span className="fund-contributor-addr">{truncateAddress(c.contributor)}</span>
                   <span className="fund-contributor-amount">{formatBtc(c.amount)}</span>
                   <span className="fund-contributor-tokens">
-                    {Number(c.tokensEarned).toLocaleString()}
+                    {formatTokens(c.tokensEarned)}
                   </span>
                 </div>
               ))}
@@ -334,7 +334,7 @@ export function FundDetail() {
           <div className="fund-curve-card">
             <h3 className="fund-curve-title">Bonding Curve</h3>
             <p className="fund-curve-desc">
-              Current rate: <strong>{Number(tokenRate).toLocaleString()} $FJAR</strong> per 1 BTC.
+              Current rate: <strong>{formatTokens(tokenRate)} $FJAR</strong> per 1 BTC.
               Early contributors earn more tokens.
             </p>
           </div>

@@ -14,7 +14,7 @@ import {
   closeFund,
 } from '../../services/contract';
 import type { Vault } from '../../types';
-import { getVaultMode, getVaultModeLabel, formatBtc } from '../../types';
+import { getVaultMode, getVaultModeLabel, formatBtc, formatTokens } from '../../types';
 import { Button } from '../../components/ui/Button';
 import './Dashboard.css';
 
@@ -55,13 +55,7 @@ function getContributionStatus(vault: Vault): 'active' | 'goal-met' | 'refundabl
   return 'active';
 }
 
-function formatTokens(tokens: bigint): string {
-  // Tokens have 18 decimals
-  const whole = tokens / 1_000_000_000_000_000_000n;
-  if (whole >= 1_000_000n) return `${(Number(whole) / 1_000_000).toFixed(1)}M`;
-  if (whole >= 1_000n) return `${(Number(whole) / 1_000).toFixed(1)}K`;
-  return whole.toString();
-}
+
 
 export function Dashboard() {
   const { connected, connect, address } = useWallet();

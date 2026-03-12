@@ -1,15 +1,8 @@
 import { useEffect, useState } from 'react';
 import { StatBlock } from '../../components/ui/StatBlock';
 import { getAllVaults, getTokenRate, getTotalBtcContributed, getTotalMinted, getResolvedMode } from '../../services/contract';
-import { formatBtc } from '../../types';
+import { formatBtc, formatTokens } from '../../types';
 import './StatsStrip.css';
-
-function formatTokens(tokens: bigint): string {
-  const whole = tokens / 1_000_000_000_000_000_000n;
-  if (whole >= 1_000_000n) return `${(Number(whole) / 1_000_000).toFixed(1)}M`;
-  if (whole >= 1_000n) return `${(Number(whole) / 1_000).toFixed(0)}K`;
-  return whole.toString();
-}
 
 export function StatsStrip() {
   const [mode, setMode] = useState<'live' | 'mock' | null>(null);
@@ -31,7 +24,7 @@ export function StatsStrip() {
       ]);
       setMode(resolvedMode);
       const activeCount = vaults.filter((v) => !v.isClosed).length;
-      const rateDisplay = rate >= 1000n ? `${Number(rate / 1000n)}K` : String(rate);
+      const rateDisplay = formatTokens(rate);
 
       setStats([
         { label: 'Total BTC Locked', value: formatBtc(totalBtc), accent: 'BTC' },
