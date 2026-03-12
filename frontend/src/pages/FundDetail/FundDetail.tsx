@@ -320,7 +320,11 @@ export function FundDetail() {
           {/* Contributors table */}
           <h3 className="fund-contributors-title">Contributors</h3>
           {contributions.length === 0 ? (
-            <p className="fund-no-contributors">No contributions yet.</p>
+            <p className="fund-no-contributors">
+              {vault.contributorCount > 0
+                ? `${vault.contributorCount} contributor${vault.contributorCount > 1 ? 's' : ''} on-chain. Detailed list requires an event indexer (coming soon).`
+                : 'No contributions yet.'}
+            </p>
           ) : (
             <div className="fund-contributors-table">
               <div className="fund-contributors-thead">

@@ -9,6 +9,7 @@ import './Navbar.css';
 export function Navbar() {
   const { connected } = useWallet();
   const [mode, setMode] = useState<'live' | 'mock' | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     getResolvedMode().then(setMode).catch(() => setMode('mock'));
@@ -24,17 +25,26 @@ export function Navbar() {
       <Link to="/" className="nav-logo">
         <Logo />
       </Link>
-      <div className="nav-links">
-        <Link className="nav-link" to="/jars">
+      <button
+        className={`nav-hamburger${menuOpen ? ' nav-hamburger--open' : ''}`}
+        onClick={() => setMenuOpen(!menuOpen)}
+        aria-label="Toggle menu"
+      >
+        <span />
+        <span />
+        <span />
+      </button>
+      <div className={`nav-links${menuOpen ? ' nav-links--open' : ''}`}>
+        <Link className="nav-link" to="/jars" onClick={() => setMenuOpen(false)}>
           Active Jars
         </Link>
         {connected && (
-          <Link className="nav-link" to="/dashboard">
+          <Link className="nav-link" to="/dashboard" onClick={() => setMenuOpen(false)}>
             My Jars
           </Link>
         )}
         {connected && (
-          <Link className="nav-link" to="/create">
+          <Link className="nav-link" to="/create" onClick={() => setMenuOpen(false)}>
             Create a Jar
           </Link>
         )}

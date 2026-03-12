@@ -128,6 +128,19 @@ Early contributors are rewarded. No pre-mine, no team allocation.
 
 ---
 
+## MVP Scope & Known Limitations
+
+This is a competition MVP (vibecode.finance Week 3, deadline March 13 2026). Core protocol and frontend are complete and deployed. The following are documented architectural trade-offs, not bugs:
+
+- **Jar names are event-only** — names are stored in transaction calldata (events), not contract state. The frontend caches names locally; other users see "Jar #N" until an off-chain event indexer is built.
+- **Contributor lists** — individual contribution amounts are on-chain and queryable per-address, but there is no on-chain enumeration of all contributors for a given jar. The detail page shows contributor count but not the full list in live mode.
+- **Write transactions** — the architecture supports OPWallet signing (simulate → send pattern), but the full signing UX flow requires OPWallet extension + testnet BTC. Demo mode simulates all write actions.
+- **No event indexer** — activity feed and cross-user jar discovery depend on indexing contract events. This is planned infrastructure, not an MVP deliverable.
+
+**Deferred to v2:** dark mode, search/filter, activity feed, milestone-based partial unlocks, fiat onramp.
+
+---
+
 ## License
 
 MIT

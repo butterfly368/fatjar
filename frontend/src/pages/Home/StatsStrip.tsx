@@ -37,6 +37,14 @@ export function StatsStrip() {
         console.error('StatsStrip load failed:', err);
         const resolvedMode = await getResolvedMode().catch(() => 'mock' as const);
         setMode(resolvedMode);
+        if (resolvedMode === 'live') {
+          setStats([
+            { label: 'Total BTC Locked', value: 'Connect wallet', accent: '' },
+            { label: 'Active Jars', value: 'to see live data' },
+            { label: '$FJAR Minted', value: '—' },
+            { label: 'Current Rate', value: '—', accent: '' },
+          ]);
+        }
       }
     }
     load();
