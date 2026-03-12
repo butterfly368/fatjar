@@ -5,3 +5,5 @@ dist/
 .DS_Store
 *.log
 .vercel
+frontend/test-screenshots/
+frontend/tests/

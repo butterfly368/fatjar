@@ -23,9 +23,6 @@ export function Footer() {
         <a className="footer-link" href="https://opnet.org" target="_blank" rel="noopener noreferrer">
           OPNet
         </a>
-        <a className="footer-link" href="https://x.com/search?q=%23opnetvibecode%20fatjar" target="_blank" rel="noopener noreferrer">
-          Twitter
-        </a>
       </div>
     </footer>
   );
