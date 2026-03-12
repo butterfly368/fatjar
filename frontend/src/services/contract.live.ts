@@ -221,6 +221,15 @@ const JAR_METADATA_KEY = 'fatjar-metadata';
 
 interface JarMeta { name: string; description: string }
 
+// Seed jar names — calldata contains these but no indexer exists yet.
+// Fallback for browsers without localStorage cache.
+const SEED_JAR_NAMES: Record<string, JarMeta> = {
+  '1': { name: "Lisa's Birthday Surprise", description: "Pooling BTC from friends and family for Lisa's 30th birthday." },
+  '2': { name: "Jake's College Fund", description: "Saving for Jake's university tuition. Family contributions locked until he turns 18." },
+  '3': { name: 'Community Skatepark Build', description: 'Community savings for a neighborhood skatepark. Hit the goal or everyone gets refunded.' },
+  '4': { name: "Maya's Dev Bootcamp", description: "Funding Maya's 12-week coding bootcamp. Goal met = she gets it. Missed = refunds." },
+};
+
 function getMetadataCache(): Record<string, JarMeta> {
   try {
     return JSON.parse(localStorage.getItem(JAR_METADATA_KEY) || '{}');
@@ -373,7 +382,7 @@ export async function getFundDetails(fundId: string): Promise<Vault> {
   const result = await getManagerContract().getFundDetails(BigInt(fundId));
   if (result.revert) throw new Error(`getFundDetails reverted: ${result.revert}`);
   const p = result.properties;
-  const meta = getMetadataCache()[fundId];
+  const meta = getMetadataCache()[fundId] || SEED_JAR_NAMES[fundId];
   return {
     id: fundId,
     name: meta?.name || `Jar #${fundId}`,
