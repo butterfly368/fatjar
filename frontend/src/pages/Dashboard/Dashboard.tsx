@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Clock } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useWallet } from '../../hooks/useWallet';
 import {
   getAllVaults,
   getFundDetails,
+  getCreatorFundCount,
+  getCreatorFundByIndex,
   getContribution,
   getContributionTokens,
   getResolvedMode,
@@ -17,10 +19,10 @@ import { getVaultMode, getVaultModeLabel, formatBtc, formatTokens, getVaultStatu
 import { Button } from '../../components/ui/Button';
 import './Dashboard.css';
 
-// Seeded addresses that match mock data — used as fallback when wallet is 'bc1q...demo'
+const SEED_CREATOR_ADDRESS = 'bc1q...creator1';
 const SEED_CONTRIBUTOR_ADDRESS = 'bc1q...alpha1';
 
-interface DashboardVault {
+interface MyVault {
   vault: Vault;
   mode: string;
   status: VaultStatus;
@@ -45,7 +47,7 @@ function getContributionStatus(vault: Vault): 'active' | 'goal-met' | 'refundabl
 
 export function Dashboard() {
   const { connected, connect, address } = useWallet();
-  const [allVaults, setAllVaults] = useState<DashboardVault[]>([]);
+  const [myVaults, setMyVaults] = useState<MyVault[]>([]);
   const [myContributions, setMyContributions] = useState<MyContribution[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -57,28 +59,41 @@ export function Dashboard() {
   }
 
   const walletAddress = address ?? 'bc1q...demo';
+  const creatorAddr = walletAddress === 'bc1q...demo' ? SEED_CREATOR_ADDRESS : walletAddress;
   const contributorAddr = walletAddress === 'bc1q...demo' ? SEED_CONTRIBUTOR_ADDRESS : walletAddress;
 
   useEffect(() => {
     async function load() {
       setLoading(true);
       try {
-        // Load ALL on-chain vaults (reliable path — avoids buggy creator tracking)
-        const vaults = await getAllVaults();
-        const vaultResults: DashboardVault[] = vaults
-          .filter((v) => v.isPublic)
-          .map((vault) => ({
-            vault,
-            mode: getVaultModeLabel(getVaultMode(vault)),
-            status: getVaultStatus(vault),
-          }));
+        // Load vaults created by this wallet
+        const vaultResults: MyVault[] = [];
+        try {
+          const creatorCount = await getCreatorFundCount(creatorAddr);
+          for (let i = 0; i < creatorCount; i++) {
+            const fundId = await getCreatorFundByIndex(creatorAddr, i);
+            if (fundId === '0') continue; // Skip ghost fund 0 (contract is 1-indexed)
+            try {
+              const vault = await getFundDetails(fundId);
+              vaultResults.push({
+                vault,
+                mode: getVaultModeLabel(getVaultMode(vault)),
+                status: getVaultStatus(vault),
+              });
+            } catch {
+              console.warn(`Skipping vault ${fundId}: fetch failed`);
+            }
+          }
+        } catch (err) {
+          console.warn('Creator fund tracking failed, skipping My Jars:', err);
+        }
 
         // In live mode, prepend pending jars (skip confirmed)
         const mode = await getResolvedMode();
         if (mode === 'live') {
           const confirmedNames = new Set(vaultResults.map((v) => v.vault.name));
           const pending = getPendingJars().filter((p) => !confirmedNames.has(p.name));
-          const pendingVaults: DashboardVault[] = pending.map((p) => ({
+          const pendingVaults: MyVault[] = pending.map((p) => ({
             vault: pendingToVault(p),
             mode: getVaultModeLabel(getVaultMode(pendingToVault(p))),
             status: 'active' as VaultStatus,
@@ -87,11 +102,12 @@ export function Dashboard() {
           vaultResults.unshift(...pendingVaults);
         }
 
-        setAllVaults(vaultResults);
+        setMyVaults(vaultResults);
 
-        // Load contributions for this wallet address
+        // Load contributions for this wallet
+        const allVaults = await getAllVaults();
         const contribResults: MyContribution[] = [];
-        for (const vault of vaults) {
+        for (const vault of allVaults) {
           const amount = await getContribution(vault.id, contributorAddr);
           if (amount > 0n) {
             const tokensEarned = await getContributionTokens(vault.id, contributorAddr);
@@ -112,7 +128,7 @@ export function Dashboard() {
     }
 
     load();
-  }, [contributorAddr]);
+  }, [creatorAddr, contributorAddr]);
 
   async function handleWithdraw(fundId: string) {
     setActionLoading(fundId);
@@ -120,7 +136,7 @@ export function Dashboard() {
       await withdraw(fundId);
       showToast('success', 'Withdrawal submitted! BTC will arrive once the transaction confirms.');
       const vault = await getFundDetails(fundId);
-      setAllVaults((prev) =>
+      setMyVaults((prev) =>
         prev.map((v) =>
           v.vault.id === fundId
             ? { ...v, vault, status: getVaultStatus(vault) }
@@ -147,7 +163,6 @@ export function Dashboard() {
     }
   }
 
-  // Wallet not connected
   if (!connected) {
     return (
       <div className="dashboard">
@@ -172,20 +187,19 @@ export function Dashboard() {
     );
   }
 
-  // Empty state
-  if (allVaults.length === 0 && myContributions.length === 0) {
+  if (myVaults.length === 0 && myContributions.length === 0) {
     return (
       <div className="dashboard">
         <div className="dashboard-header">
           <h1 className="dashboard-title">Dashboard</h1>
         </div>
         <div className="dashboard-empty">
-          <h2 className="dashboard-empty-title">No Jars Yet</h2>
+          <h2 className="dashboard-empty-title">Nothing Here Yet</h2>
           <p className="dashboard-empty-desc">
-            No jars yet. Create one or contribute to an existing jar.
+            Create a jar or contribute to an existing one to see it here.
           </p>
-          <Button to="/create">
-            Create a Jar <ArrowRight size={14} />
+          <Button to="/jars">
+            Browse Jars <ArrowRight size={14} />
           </Button>
         </div>
       </div>
@@ -202,19 +216,17 @@ export function Dashboard() {
       <div className="dashboard-header">
         <h1 className="dashboard-title">Dashboard</h1>
         <span className="dashboard-subtitle">
-          {allVaults.length} jar{allVaults.length !== 1 ? 's' : ''} on-chain
-          {myContributions.length > 0 && (
-            <>{' / '}{myContributions.length} contribution{myContributions.length !== 1 ? 's' : ''}</>
-          )}
+          {myVaults.length > 0 && <>{myVaults.length} jar{myVaults.length !== 1 ? 's' : ''} created</>}
+          {myVaults.length > 0 && myContributions.length > 0 && ' / '}
+          {myContributions.length > 0 && <>{myContributions.length} contribution{myContributions.length !== 1 ? 's' : ''}</>}
         </span>
       </div>
 
-      {/* All Jars Section */}
-      {allVaults.length > 0 && (
+      {myVaults.length > 0 && (
         <section className="dashboard-section">
-          <h2 className="dashboard-section-title">All Jars</h2>
+          <h2 className="dashboard-section-title">My Jars</h2>
           <div className="dashboard-cards">
-            {allVaults.map(({ vault, mode, status, isPending }) => (
+            {myVaults.map(({ vault, mode, status, isPending }) => (
               <div className={`dashboard-card${isPending ? ' dashboard-card--pending' : ''}`} key={vault.id}>
                 <div className="dashboard-card-top">
                   {isPending ? (
@@ -230,7 +242,7 @@ export function Dashboard() {
                   {isPending ? (
                     <div className="dashboard-card-stat" style={{ gridColumn: '1 / -1' }}>
                       <span className="dashboard-pending-label">
-                        <Clock size={12} /> Confirming on-chain...
+                        Confirming on-chain...
                       </span>
                     </div>
                   ) : (
@@ -282,7 +294,6 @@ export function Dashboard() {
         </section>
       )}
 
-      {/* My Contributions Section */}
       {myContributions.length > 0 && (
         <section className="dashboard-section">
           <h2 className="dashboard-section-title">My Contributions</h2>
