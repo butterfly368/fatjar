@@ -7,7 +7,7 @@ export function WhySection() {
         <div className="section-label">[01] Why This Exists</div>
         <h2 className="why-title">
           People Already<br />
-          Save Together.
+          Pool Money.
         </h2>
       </div>
 
@@ -16,17 +16,21 @@ export function WhySection() {
         <div className="why-block">
           <div className="why-block-label">The Insight</div>
           <p className="why-block-lead">
-            PayPal launched Money Pools. MoneyFellows hit 8.5 million users.
-            Fintech proved people save together.
+            Americans pool money 86 million times a year &mdash; for group
+            gifts, travel, shared goals (PayPal, 2024). 11 million South
+            Africans save through stokvels. 8.5 million Egyptians use
+            MoneyFellows. US families hold $525 billion in college funds
+            for their children.
           </p>
           <p className="why-block-body">
-            Ethereum saw it too &mdash; WeTrust, Bloinx, Pigzbe all built
-            social savings on-chain. The demand was real. But none of them
-            built on the chain that holds real wealth.
+            Savings circles. Group goals. Children&rsquo;s futures. The
+            instinct to pool money is older than banks. PoolTogether proved
+            it works on-chain &mdash; 88,000 wallets, $17.8M deposited.
+            But it runs on Ethereum. Nobody built where real wealth sits.
           </p>
           <p className="why-block-punch">
-            $2 trillion sits in Bitcoin. Less than 0.5% is in DeFi.
-            FatJar unlocks it.
+            $1.4 trillion sits in Bitcoin. Less than 1% touches DeFi.
+            FatJar opens the door.
           </p>
         </div>
 
@@ -34,13 +38,13 @@ export function WhySection() {
         <div className="why-block">
           <div className="why-block-label">The Opportunity</div>
           <p className="why-block-stat">
-            $6 trillion in crypto will be inherited by 2045.
+            VanEck estimates $6 trillion in crypto will change hands by 2045.
           </p>
           <p className="why-block-body">
             Traditional savings lose value to inflation every year.
             A FatJar holds Bitcoin &mdash; and the time-lock can&rsquo;t be
             broken, not even by you. No platform can shut it down.
-            No government can freeze it.
+            No middleman can freeze it.
           </p>
         </div>
 
