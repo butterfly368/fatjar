@@ -333,7 +333,7 @@ async function getWriteManagerContract() {
  * Pattern: simulate → get CallResult → sendTransaction (OPWallet auto-detected)
  */
 async function simulateAndSend(
-  callResult: CallResult<Record<string, unknown>>,
+  callResult: CallResult,
 ): Promise<string> {
   const userAddress = await getWalletAddress();
 
