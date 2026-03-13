@@ -1027,3 +1027,66 @@ Design system compliance:
 - `docs/TASKS.md` — post-competition indexer section
 
 **Status:** Submitted to vibecode.finance Week 3. Can continue pushing updates to GitHub/Vercel.
+
+---
+
+## Session 22 — 2026-03-13 — Live Mode Polish & Bug Fixes
+
+**Goal:** Make live mode (OPNet testnet) work smoothly for judges. Fix UX gaps, CORS issues, and data display bugs.
+
+**What we did:**
+1. Fixed CORS blocking — RPC calls to `testnet.opnet.org` were blocked from localhost/Vercel. Added Vite proxy (dev) and Vercel rewrite (prod) routing all `/api/v1/*` through same-origin.
+2. Added retry logic (2 retries with backoff) and sessionStorage vault cache (2-min TTL) for flaky testnet resilience.
+3. Fixed fund ID indexing — discovered contract uses 1-indexed IDs. `getAllVaults` loop corrected from `0..count` to `1..count`. Ghost fund ID 0 returns zeroed data without reverting; filtered out.
+4. Fixed `getAllVaults` error handling — `Promise.all` replaced with per-vault catch so one failure doesn't kill all results.
+5. Removed hardcoded seed jar names (were wrong). Added correct seeds for Emma's College Fund (#1) and Dad's Retirement Stack (#2). New jars get names from localStorage metadata cache saved during creation.
+6. Fixed metadata save ID — `saveMetadata(String(count + 1), ...)` for 1-indexed IDs.
+7. Fixed Dashboard "My Jars" — creator tracking via `getCreatorFundByIndex` was returning ghost ID 0 and wrong attributions (likely due to CORS breaking `resolveAddress`). Added ID 0 filter and graceful fallback.
+8. Fixed pending jar dedup — pending jars in localStorage no longer show alongside their confirmed on-chain versions.
+9. Broadened hero copy — "Every Reason to Save Together" replacing children-only framing.
+10. Added live mode info banner, wallet error dropdown, specific error messages (OPWallet missing, insufficient UTXOs, beneficiary not found).
+11. Dynamic bonding curve in mock data — `computeTokenRate(totalBtcSats)` using `K / sqrt(total_btc + 1)`.
+12. Human-readable time-lock dates via `blockToDate()`.
+13. Fixed vault status — no-lock jars return 'active' not 'unlocked'.
+
+**Key discoveries:**
+- OPNet testnet RPC is flaky — intermittent 520s, CORS inconsistency, timeouts. Proxy + cache essential.
+- Contract fund IDs are 1-indexed. `getFundDetails(0)` returns zeroed data without reverting — subtle bug source.
+- Contract's `getCreatorFundByIndex` is unreliable when `resolveAddress` fails (CORS). With proxy fix, it works correctly.
+- On-chain jar names are event-only (not in contract state) — no indexer means names rely on client-side cache/seeds.
+
+**On-chain jars (OPNet testnet):**
+- Jar #1: Emma's College Fund (Collect)
+- Jar #2: Dad's Retirement Stack (Save for Someone)
+- Jar #3: Community Skatepark Build (Fund a Dream)
+- Jar #3+: Maya's Dev Bootcamp (Fund a Dream) — created during session
+
+**Commits:**
+- `3f15a53` — copy: broaden hero text beyond children-only framing
+- `d6cdb85` — fix: live mode UX — CORS proxy, retry logic, error messages, pending jars
+- `901becd` — fix: Dashboard uses getAllVaults instead of buggy creator tracking
+- `6baf575` — fix: rename nav link 'My Jars' to 'Dashboard' for consistency
+- `a421edf` — fix: Dashboard shows My Jars (creator tracking) + My Contributions
+
+**Files created:**
+- `frontend/src/components/layout/LiveBanner.css`
+- `frontend/src/services/pending-jars.ts`
+
+**Files modified:**
+- `frontend/vite.config.ts` — Vite proxy for `/api/v1` → OPNet testnet
+- `frontend/vercel.json` — Vercel rewrite for `/api/v1/:path*`
+- `frontend/src/services/opnet-config.ts` — rpcUrl changed to `''` (relative, goes through proxy)
+- `frontend/src/services/contract.live.ts` — retry logic, vault cache, 1-indexed IDs, per-vault error handling, seed names, metadata priority
+- `frontend/src/services/contract.mock.ts` — dynamic bonding curve rates
+- `frontend/src/pages/Dashboard/Dashboard.tsx` — My Jars with ID 0 filter + My Contributions
+- `frontend/src/pages/Home/ActiveJars.tsx` — loading/error states, pending jar dedup
+- `frontend/src/pages/Home/HeroSection.tsx` — broadened hero copy
+- `frontend/src/pages/FundDetail/FundDetail.tsx` — specific error messages, blockToDate
+- `frontend/src/pages/CreateFund/CreateFund.tsx` — pending jar save, specific errors
+- `frontend/src/components/layout/Layout.tsx` — live mode banner
+- `frontend/src/components/layout/Navbar.tsx` — "Dashboard" nav label
+- `frontend/src/components/ui/WalletButton.tsx` — wallet error dropdown
+- `frontend/src/hooks/useWallet.ts` — live mode wallet detection, error state
+- `frontend/src/types/index.ts` — vault status fix, blockToDate, walletError
+
+**Status:** Live mode functional. Jars created/contributed on testnet successfully. Vercel deploying with CORS proxy.
