@@ -1,0 +1,47 @@
+.live-banner {
+  background: #0a2e0a;
+  color: #4ade80;
+  border-bottom: 1px solid #16a34a;
+  padding: 8px var(--side-padding);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.live-banner strong {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.live-banner-dot {
+  width: 6px;
+  height: 6px;
+  background: #4ade80;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.live-banner-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #4ade80;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 4px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.live-banner-close:hover {
+  opacity: 1;
+}

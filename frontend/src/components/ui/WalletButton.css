@@ -1,3 +1,7 @@
+.wallet-btn-wrap {
+  position: relative;
+}
+
 .wallet-btn {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 11px;
@@ -28,4 +32,28 @@
 .wallet-btn-connected:hover {
   background: var(--accent);
   color: var(--text);
+}
+
+.wallet-error {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: #2e1f0a;
+  color: #fb923c;
+  border: 1px solid #ea580c;
+  padding: 8px 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  line-height: 1.4;
+  width: 280px;
+  z-index: 100;
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.wallet-error svg {
+  flex-shrink: 0;
+  margin-top: 1px;
 }

@@ -107,9 +107,13 @@ export function blockToDate(block: bigint): string {
   const MINUTES_PER_BLOCK = 10;
   const blocksUntil = Number(block) - Number(CURRENT_BLOCK);
   if (blocksUntil <= 0) return 'Unlocked';
+  const days = Math.ceil((blocksUntil * MINUTES_PER_BLOCK) / (60 * 24));
   const ms = blocksUntil * MINUTES_PER_BLOCK * 60 * 1000;
   const date = new Date(Date.now() + ms);
-  return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  if (days <= 1) return 'Tomorrow';
+  if (days <= 30) return `~${days} days (${dateStr})`;
+  return dateStr;
 }
 
 // M3: Shared vault status logic — used by Dashboard and FundDetail
@@ -117,9 +121,12 @@ export type VaultStatus = 'active' | 'unlocked' | 'withdrawn' | 'refundable';
 
 export function getVaultStatus(vault: Vault): VaultStatus {
   if (vault.withdrawn > 0n) return 'withdrawn';
-  const isPastUnlock = vault.unlockBlock === 0n || CURRENT_BLOCK >= vault.unlockBlock;
+  if (vault.isClosed) return 'unlocked';
+  const hasLock = vault.unlockBlock > 0n;
+  const isPastUnlock = hasLock && CURRENT_BLOCK >= vault.unlockBlock;
   if (isPastUnlock && vault.goalAmount > 0n && vault.totalRaised < vault.goalAmount) return 'refundable';
-  if (isPastUnlock || vault.isClosed) return 'unlocked';
+  if (isPastUnlock) return 'unlocked';
+  // No lock or lock hasn't expired yet — jar is active and accepting contributions
   return 'active';
 }
 
@@ -138,4 +145,5 @@ export interface WalletState {
   balance: number | null; // satoshis
   connect: () => Promise<void>;
   disconnect: () => void;
+  walletError?: string | null;
 }

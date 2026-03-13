@@ -70,6 +70,26 @@
   background: var(--bg-alt);
 }
 
+.dashboard-card--pending {
+  opacity: 0.7;
+  border-style: dashed;
+}
+
+.dashboard-pending-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--accent);
+  animation: pendingPulse 2s ease-in-out infinite;
+}
+
+@keyframes pendingPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
 .dashboard-card-top {
   display: flex;
   align-items: center;

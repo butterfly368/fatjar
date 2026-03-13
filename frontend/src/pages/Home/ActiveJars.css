@@ -196,6 +196,30 @@
   color: var(--accent);
 }
 
+.jar-card--pending {
+  opacity: 0.7;
+  border-style: dashed;
+  cursor: default;
+}
+
+.jar-card-pending-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--accent);
+  animation: pendingPulse 2s ease-in-out infinite;
+}
+
+@keyframes pendingPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.jar-card-arrow--pending {
+  font-style: italic;
+  color: var(--text-muted);
+}
+
 .jars-footer {
   display: flex;
   align-items: center;

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Clock } from 'lucide-react';
 import { useWallet } from '../../hooks/useWallet';
 import {
   getAllVaults,
@@ -9,9 +9,11 @@ import {
   getCreatorFundByIndex,
   getContribution,
   getContributionTokens,
+  getResolvedMode,
   withdraw,
   refund,
 } from '../../services/contract';
+import { getPendingJars, pendingToVault } from '../../services/pending-jars';
 import type { Vault, VaultStatus } from '../../types';
 import { getVaultMode, getVaultModeLabel, formatBtc, formatTokens, getVaultStatus, CURRENT_BLOCK } from '../../types';
 import { Button } from '../../components/ui/Button';
@@ -25,6 +27,7 @@ interface MyVault {
   vault: Vault;
   mode: string;
   status: VaultStatus;
+  isPending?: boolean;
 }
 
 interface MyContribution {
@@ -79,6 +82,20 @@ export function Dashboard() {
             status: getVaultStatus(vault),
           });
         }
+        // In live mode, prepend pending jars (skip any already confirmed on-chain)
+        const mode = await getResolvedMode();
+        if (mode === 'live') {
+          const confirmedNames = new Set(vaultResults.map((v) => v.vault.name));
+          const pending = getPendingJars().filter((p) => !confirmedNames.has(p.name));
+          const pendingVaults: MyVault[] = pending.map((p) => ({
+            vault: pendingToVault(p),
+            mode: getVaultModeLabel(getVaultMode(pendingToVault(p))),
+            status: 'active' as VaultStatus,
+            isPending: true,
+          }));
+          vaultResults.unshift(...pendingVaults);
+        }
+
         setMyVaults(vaultResults);
 
         // Load contributions for this wallet address
@@ -165,7 +182,7 @@ export function Dashboard() {
     );
   }
 
-  // Empty state — no vaults and no contributions
+  // Empty state — no vaults (including pending) and no contributions
   if (myVaults.length === 0 && myContributions.length === 0) {
     return (
       <div className="dashboard">
@@ -206,49 +223,68 @@ export function Dashboard() {
         <section className="dashboard-section">
           <h2 className="dashboard-section-title">My Jars</h2>
           <div className="dashboard-cards">
-            {myVaults.map(({ vault, mode, status }) => (
-              <div className="dashboard-card" key={vault.id}>
+            {myVaults.map(({ vault, mode, status, isPending }) => (
+              <div className={`dashboard-card${isPending ? ' dashboard-card--pending' : ''}`} key={vault.id}>
                 <div className="dashboard-card-top">
-                  <Link to={`/fund/${vault.id}`} className="dashboard-card-name">
-                    {vault.name}
-                  </Link>
+                  {isPending ? (
+                    <span className="dashboard-card-name">{vault.name}</span>
+                  ) : (
+                    <Link to={`/fund/${vault.id}`} className="dashboard-card-name">
+                      {vault.name}
+                    </Link>
+                  )}
                   <span className="dashboard-mode-badge">{mode}</span>
                 </div>
                 <div className="dashboard-card-stats">
-                  <div className="dashboard-card-stat">
-                    <span className="dashboard-card-stat-label">Raised</span>
-                    <span className="dashboard-card-stat-value">
-                      <span className="dashboard-accent">{formatBtc(vault.totalRaised)}</span> BTC
-                    </span>
-                  </div>
-                  <div className="dashboard-card-stat">
-                    <span className="dashboard-card-stat-label">Contributors</span>
-                    <span className="dashboard-card-stat-value">{vault.contributorCount}</span>
-                  </div>
-                  <div className="dashboard-card-stat">
-                    <span className="dashboard-card-stat-label">Status</span>
-                    <span className={`dashboard-status-badge dashboard-status-${status}`}>
-                      {status === 'active' ? 'Active' : status === 'unlocked' ? 'Unlocked' : 'Withdrawn'}
-                    </span>
-                  </div>
-                </div>
-                <div className="dashboard-card-actions">
-                  {status === 'active' && (
-                    <span className="dashboard-action-done">Time-locked</span>
-                  )}
-                  {status === 'unlocked' && (
-                    <button
-                      className="dashboard-action-btn dashboard-action-primary"
-                      onClick={() => handleWithdraw(vault.id)}
-                      disabled={actionLoading === vault.id}
-                    >
-                      {actionLoading === vault.id ? 'Processing...' : 'Withdraw'}
-                    </button>
-                  )}
-                  {status === 'withdrawn' && (
-                    <span className="dashboard-action-done">Funds withdrawn</span>
+                  {isPending ? (
+                    <div className="dashboard-card-stat" style={{ gridColumn: '1 / -1' }}>
+                      <span className="dashboard-pending-label">
+                        <Clock size={12} /> Confirming on-chain...
+                      </span>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="dashboard-card-stat">
+                        <span className="dashboard-card-stat-label">Raised</span>
+                        <span className="dashboard-card-stat-value">
+                          <span className="dashboard-accent">{formatBtc(vault.totalRaised)}</span> BTC
+                        </span>
+                      </div>
+                      <div className="dashboard-card-stat">
+                        <span className="dashboard-card-stat-label">Contributors</span>
+                        <span className="dashboard-card-stat-value">{vault.contributorCount}</span>
+                      </div>
+                      <div className="dashboard-card-stat">
+                        <span className="dashboard-card-stat-label">Status</span>
+                        <span className={`dashboard-status-badge dashboard-status-${status}`}>
+                          {status === 'active' ? 'Active' : status === 'unlocked' ? 'Unlocked' : 'Withdrawn'}
+                        </span>
+                      </div>
+                    </>
                   )}
                 </div>
+                {!isPending && (
+                  <div className="dashboard-card-actions">
+                    {status === 'active' && vault.unlockBlock > 0n && (
+                      <span className="dashboard-action-done">Time-locked</span>
+                    )}
+                    {status === 'active' && vault.unlockBlock === 0n && (
+                      <span className="dashboard-action-done">Open — accepting contributions</span>
+                    )}
+                    {status === 'unlocked' && (
+                      <button
+                        className="dashboard-action-btn dashboard-action-primary"
+                        onClick={() => handleWithdraw(vault.id)}
+                        disabled={actionLoading === vault.id}
+                      >
+                        {actionLoading === vault.id ? 'Processing...' : 'Withdraw'}
+                      </button>
+                    )}
+                    {status === 'withdrawn' && (
+                      <span className="dashboard-action-done">Funds withdrawn</span>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>

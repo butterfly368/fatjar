@@ -8,6 +8,24 @@
 import type { Vault, Contribution } from '../types';
 import { ZERO_ADDRESS } from '../types';
 
+// ── Bonding curve ────────────────────────────────────────────────
+const K = 120_000; // base rate: 120,000 $FJAR per 1 BTC at platform start
+const DECIMALS_18 = 10n ** 18n;
+const SATS_PER_BTC = 100_000_000n;
+
+/** Compute token rate (tokens per 1 BTC, 18 decimals) based on total platform BTC. */
+function computeTokenRate(totalBtcSats: bigint): bigint {
+  const totalBtc = Number(totalBtcSats) / 100_000_000;
+  const rate = K / Math.sqrt(totalBtc + 1);
+  return BigInt(Math.floor(rate)) * DECIMALS_18;
+}
+
+/** Compute tokens earned for a contribution at a given platform total. */
+function computeTokens(satoshis: bigint, totalBtcSats: bigint): bigint {
+  const rate = computeTokenRate(totalBtcSats);
+  return (satoshis * rate) / SATS_PER_BTC;
+}
+
 // ── In-memory mock state ──────────────────────────────────────────
 
 let nextVaultId = 5;
@@ -16,7 +34,23 @@ const vaults: Map<string, Vault> = new Map();
 const contributions: Contribution[] = [];
 const creatorVaults: Map<string, string[]> = new Map();
 
+// Platform BTC tracks cumulative total as contributions are added
+let totalPlatformBtc = 0n;
+let totalMinted = 0n;
+
+// ── Seed data with bonding curve applied ─────────────────────────
+// Contributions are added in order: vault 1 → 2 → 3 → 4.
+// Rate decreases as totalPlatformBtc grows.
+
+function seedContribution(vaultId: string, contributor: string, sats: bigint): void {
+  const tokens = computeTokens(sats, totalPlatformBtc);
+  contributions.push({ vaultId, contributor, amount: sats, tokensEarned: tokens });
+  totalPlatformBtc += sats;
+  totalMinted += tokens;
+}
+
 // Seed: 1) Lisa's Birthday Surprise — open-collection (Collect)
+// Platform BTC starts at 0 → rate ≈ 120,000/BTC
 vaults.set('1', {
   id: '1',
   name: "Lisa's Birthday Surprise",
@@ -31,8 +65,15 @@ vaults.set('1', {
   beneficiary: ZERO_ADDRESS,
   isPublic: true,
 });
+seedContribution('1', 'bc1q...alpha1', 2000000n);
+seedContribution('1', 'bc1q...alpha2', 1500000n);
+seedContribution('1', 'bc1q...alpha3', 1000000n);
+seedContribution('1', 'bc1q...alpha4', 1500000n);
+seedContribution('1', 'bc1q...alpha5', 1000000n);
+seedContribution('1', 'bc1q...alpha6', 1500000n);
 
 // Seed: 2) Dad's Retirement Stack — trust-fund (Save for Someone)
+// Platform BTC ≈ 0.085 → rate ≈ 115,000/BTC
 vaults.set('2', {
   id: '2',
   name: "Dad's Retirement Stack",
@@ -47,8 +88,13 @@ vaults.set('2', {
   beneficiary: 'bc1q...dad',
   isPublic: true,
 });
+seedContribution('2', 'bc1q...beta1', 50000000n);
+seedContribution('2', 'bc1q...beta2', 30000000n);
+seedContribution('2', 'bc1q...beta3', 50000000n);
+seedContribution('2', 'bc1q...beta4', 20000000n);
 
 // Seed: 3) Community Skatepark Build — all-or-nothing
+// Platform BTC ≈ 1.585 → rate ≈ 74,600/BTC
 vaults.set('3', {
   id: '3',
   name: 'Community Skatepark Build',
@@ -63,8 +109,20 @@ vaults.set('3', {
   beneficiary: ZERO_ADDRESS,
   isPublic: true,
 });
+seedContribution('3', 'bc1q...gamma1', 15000000n);
+seedContribution('3', 'bc1q...gamma2', 10000000n);
+seedContribution('3', 'bc1q...gamma3', 12000000n);
+seedContribution('3', 'bc1q...gamma4', 8000000n);
+seedContribution('3', 'bc1q...gamma5', 15000000n);
+seedContribution('3', 'bc1q...gamma6', 10000000n);
+seedContribution('3', 'bc1q...gamma7', 8000000n);
+seedContribution('3', 'bc1q...gamma8', 12000000n);
+seedContribution('3', 'bc1q...gamma9', 10000000n);
+seedContribution('3', 'bc1q...gamma10', 10000000n);
+seedContribution('3', 'bc1q...gamma11', 10000000n);
 
 // Seed: 4) Dev Scholarship for Maya — funded-grant (Fund a Dream)
+// Platform BTC ≈ 2.785 → rate ≈ 61,700/BTC
 vaults.set('4', {
   id: '4',
   name: "Maya's Dev Bootcamp",
@@ -79,61 +137,19 @@ vaults.set('4', {
   beneficiary: 'bc1q...maya',
   isPublic: true,
 });
+seedContribution('4', 'bc1q...delta1', 5000000n);
+seedContribution('4', 'bc1q...delta2', 3000000n);
+seedContribution('4', 'bc1q...delta3', 4000000n);
+seedContribution('4', 'bc1q...delta4', 3000000n);
+seedContribution('4', 'bc1q...delta5', 5000000n);
+seedContribution('4', 'bc1q...delta6', 2000000n);
+seedContribution('4', 'bc1q...delta7', 3000000n);
 
 // Seed creator index
 creatorVaults.set('bc1q...creator1', ['1']);
 creatorVaults.set('bc1q...creator2', ['2']);
 creatorVaults.set('bc1q...creator3', ['3']);
 creatorVaults.set('bc1q...creator4', ['4']);
-
-// Seed contributions for vault 1 — Lisa's Birthday Surprise
-contributions.push(
-  { vaultId: '1', contributor: 'bc1q...alpha1', amount: 2000000n, tokensEarned: 240000000000000000000n },
-  { vaultId: '1', contributor: 'bc1q...alpha2', amount: 1500000n, tokensEarned: 180000000000000000000n },
-  { vaultId: '1', contributor: 'bc1q...alpha3', amount: 1000000n, tokensEarned: 120000000000000000000n },
-  { vaultId: '1', contributor: 'bc1q...alpha4', amount: 1500000n, tokensEarned: 180000000000000000000n },
-  { vaultId: '1', contributor: 'bc1q...alpha5', amount: 1000000n, tokensEarned: 120000000000000000000n },
-  { vaultId: '1', contributor: 'bc1q...alpha6', amount: 1500000n, tokensEarned: 180000000000000000000n },
-);
-
-// Seed contributions for vault 2 — Dad's Retirement Stack
-contributions.push(
-  { vaultId: '2', contributor: 'bc1q...beta1', amount: 50000000n, tokensEarned: 6000000000000000000000n },
-  { vaultId: '2', contributor: 'bc1q...beta2', amount: 30000000n, tokensEarned: 3600000000000000000000n },
-  { vaultId: '2', contributor: 'bc1q...beta3', amount: 50000000n, tokensEarned: 6000000000000000000000n },
-  { vaultId: '2', contributor: 'bc1q...beta4', amount: 20000000n, tokensEarned: 2400000000000000000000n },
-);
-
-// Seed contributions for vault 3 — Community Skatepark Build
-contributions.push(
-  { vaultId: '3', contributor: 'bc1q...gamma1', amount: 15000000n, tokensEarned: 1800000000000000000000n },
-  { vaultId: '3', contributor: 'bc1q...gamma2', amount: 10000000n, tokensEarned: 1200000000000000000000n },
-  { vaultId: '3', contributor: 'bc1q...gamma3', amount: 12000000n, tokensEarned: 1440000000000000000000n },
-  { vaultId: '3', contributor: 'bc1q...gamma4', amount: 8000000n, tokensEarned: 960000000000000000000n },
-  { vaultId: '3', contributor: 'bc1q...gamma5', amount: 15000000n, tokensEarned: 1800000000000000000000n },
-  { vaultId: '3', contributor: 'bc1q...gamma6', amount: 10000000n, tokensEarned: 1200000000000000000000n },
-  { vaultId: '3', contributor: 'bc1q...gamma7', amount: 8000000n, tokensEarned: 960000000000000000000n },
-  { vaultId: '3', contributor: 'bc1q...gamma8', amount: 12000000n, tokensEarned: 1440000000000000000000n },
-  { vaultId: '3', contributor: 'bc1q...gamma9', amount: 10000000n, tokensEarned: 1200000000000000000000n },
-  { vaultId: '3', contributor: 'bc1q...gamma10', amount: 10000000n, tokensEarned: 1200000000000000000000n },
-  { vaultId: '3', contributor: 'bc1q...gamma11', amount: 10000000n, tokensEarned: 1200000000000000000000n },
-);
-
-// Seed contributions for vault 4 — Maya's Dev Bootcamp
-contributions.push(
-  { vaultId: '4', contributor: 'bc1q...delta1', amount: 5000000n, tokensEarned: 600000000000000000000n },
-  { vaultId: '4', contributor: 'bc1q...delta2', amount: 3000000n, tokensEarned: 360000000000000000000n },
-  { vaultId: '4', contributor: 'bc1q...delta3', amount: 4000000n, tokensEarned: 480000000000000000000n },
-  { vaultId: '4', contributor: 'bc1q...delta4', amount: 3000000n, tokensEarned: 360000000000000000000n },
-  { vaultId: '4', contributor: 'bc1q...delta5', amount: 5000000n, tokensEarned: 600000000000000000000n },
-  { vaultId: '4', contributor: 'bc1q...delta6', amount: 2000000n, tokensEarned: 240000000000000000000n },
-  { vaultId: '4', contributor: 'bc1q...delta7', amount: 3000000n, tokensEarned: 360000000000000000000n },
-);
-
-// Platform-level mock state
-let totalPlatformBtc = 303500000n; // sum of all vault totalRaised (278.5M + 25M)
-const MOCK_TOKEN_RATE = 120000000000000000000000n; // 120,000 tokens per 1 BTC (18 decimals)
-let totalMinted = 0n; // simplified, not tracking exactly
 
 // ── Write methods ─────────────────────────────────────────────────
 
@@ -178,7 +194,7 @@ export async function contribute(fundId: string, satoshis: bigint): Promise<void
   if (vault.isClosed) throw new Error(`Vault ${fundId} is closed`);
 
   const contributor = 'bc1q...demo'; // stub: would come from connected wallet
-  const tokensEarned = (satoshis * MOCK_TOKEN_RATE) / 100_000_000n; // rate is per 1 BTC
+  const tokensEarned = computeTokens(satoshis, totalPlatformBtc);
 
   vault.totalRaised += satoshis;
   vault.contributorCount += 1;
@@ -264,11 +280,11 @@ export async function getContributionTokens(fundId: string, contributor: string)
 }
 
 export async function getTokenRate(): Promise<bigint> {
-  return MOCK_TOKEN_RATE;
+  return computeTokenRate(totalPlatformBtc);
 }
 
 export async function getTotalMinted(): Promise<bigint> {
-  return contributions.reduce((sum, c) => sum + c.tokensEarned, 0n);
+  return totalMinted;
 }
 
 export async function getTotalBtcContributed(): Promise<bigint> {

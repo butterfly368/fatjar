@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { PiggyBank, ArrowRight } from 'lucide-react';
 import { Input, TextArea } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
-import { createVault } from '../../services/contract';
+import { createVault, getResolvedMode } from '../../services/contract';
+import { savePendingJar } from '../../services/pending-jars';
 import {
   ZERO_ADDRESS,
   getVaultMode,
@@ -112,9 +113,34 @@ export function CreateFund() {
       const ben = hasBeneficiary && beneficiary ? beneficiary : ZERO_ADDRESS;
 
       const newId = await createVault(name, block, goal, ben, description, isPublic);
+
+      // In live mode, save as pending jar so it shows while confirming on-chain
+      const mode = await getResolvedMode();
+      if (mode === 'live') {
+        savePendingJar({
+          txId: newId,
+          name,
+          description,
+          goalAmount: goal,
+          beneficiary: ben,
+          unlockBlock: block,
+          isPublic,
+          createdAt: Date.now(),
+        });
+      }
+
       setCreated(newId);
-    } catch {
-      setErrors({ submit: 'Failed to create jar. Please try again.' });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '';
+      if (msg.includes('OPWallet not detected')) {
+        setErrors({ submit: 'OPWallet extension not found. Install OPWallet to create jars in Live mode.' });
+      } else if (msg.includes('Could not resolve beneficiary')) {
+        setErrors({ submit: 'Beneficiary address not found on OPNet. The address must have interacted with OPNet at least once.' });
+      } else if (msg.includes('No wallet accounts')) {
+        setErrors({ submit: 'Wallet not connected. Click Connect in the navbar first.' });
+      } else {
+        setErrors({ submit: 'Failed to create jar. ' + (msg || 'Please try again.') });
+      }
     } finally {
       setSubmitting(false);
     }
@@ -129,11 +155,31 @@ export function CreateFund() {
             Jar Created
           </div>
           <p className="create-fund-success-desc">
-            Your jar "{name}" has been submitted to the network. It may take a few minutes to confirm on-chain. Share the link with your people to start collecting.
+            Your jar "<strong>{name}</strong>" has been submitted to the network.
+            It may take a few minutes to confirm on-chain.
           </p>
-          <Button to={`/fund/${created}`}>
-            View Your Jar <ArrowRight size={14} />
-          </Button>
+          <div className="create-fund-success-meta">
+            <div className="create-fund-success-mode">
+              Mode: <strong>{modeLabel}</strong>
+            </div>
+            {hasGoal && goalAmount && (
+              <div>Goal: <strong>{goalAmount} BTC</strong></div>
+            )}
+            {unlockDate && (
+              <div>Unlock: <strong>{unlockDate}</strong></div>
+            )}
+          </div>
+          <p className="create-fund-success-hint">
+            Your jar will appear on the Active Jars page once confirmed. Share the page link with your people to start collecting.
+          </p>
+          <div className="create-fund-success-actions">
+            <Button to="/">
+              Back to Home <ArrowRight size={14} />
+            </Button>
+            <Button variant="secondary" to="/dashboard">
+              My Dashboard
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -203,7 +249,7 @@ export function CreateFund() {
               </div>
               {estimatedBlock > 0 && (
                 <div className="create-fund-helper create-fund-helper-block">
-                  ≈ Bitcoin block #{estimatedBlock.toLocaleString()}
+                  On-chain lock until ≈ block #{estimatedBlock.toLocaleString()}
                 </div>
               )}
             </div>

@@ -10,4 +10,12 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 1500,
   },
+  server: {
+    proxy: {
+      '/api/v1': {
+        target: 'https://testnet.opnet.org',
+        changeOrigin: true,
+      },
+    },
+  },
 })

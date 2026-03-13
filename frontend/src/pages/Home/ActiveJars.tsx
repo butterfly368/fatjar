@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, PlusCircle, Inbox, Gift, Target, Rocket } from 'lucide-react';
+import { ArrowRight, PlusCircle, Inbox, Gift, Target, Rocket, Clock } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
-import { getAllVaults } from '../../services/contract';
+import { getAllVaults, getResolvedMode } from '../../services/contract';
+import { getPendingJars, pendingToVault } from '../../services/pending-jars';
 import { getVaultMode, getVaultModeLabel, formatBtc, blockToDate } from '../../types';
 import type { Vault, VaultMode } from '../../types';
 import './ActiveJars.css';
@@ -18,12 +19,64 @@ const MODE_ICON: Record<VaultMode, typeof Inbox> = {
 
 export function ActiveJars() {
   const [vaults, setVaults] = useState<Vault[]>([]);
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    getAllVaults()
-      .then((all) => setVaults(all.filter((v) => !v.isClosed && v.isPublic)))
-      .catch((err) => console.error('ActiveJars load failed:', err));
+    async function load() {
+      setLoading(true);
+      setError(null);
+      try {
+        const all = await getAllVaults();
+        console.log('[ActiveJars] fetched', all.length, 'vaults');
+        const active = all.filter((v) => !v.isClosed && v.isPublic);
+
+        // In live mode, merge pending jars (skip any already confirmed on-chain)
+        const mode = await getResolvedMode();
+        if (mode === 'live') {
+          const confirmedNames = new Set(active.map((v) => v.name));
+          const pending = getPendingJars().filter((p) => p.isPublic && !confirmedNames.has(p.name));
+          const pendingVaults = pending.map(pendingToVault);
+          const ids = new Set(pendingVaults.map((v) => v.id));
+          setPendingIds(ids);
+          setVaults([...pendingVaults, ...active]);
+        } else {
+          setVaults(active);
+        }
+      } catch (err) {
+        console.error('ActiveJars load failed:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load jars');
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
   }, []);
+
+  if (loading) {
+    return (
+      <section className="jars" id="active-jars">
+        <div className="jars-header">
+          <h2 className="jars-title">Active Jars</h2>
+          <span className="jars-sub">Loading jars...</span>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="jars" id="active-jars">
+        <div className="jars-header">
+          <h2 className="jars-title">Active Jars</h2>
+          <span className="jars-sub" style={{ color: '#c0392b' }}>
+            Failed to load: {error}
+          </span>
+        </div>
+      </section>
+    );
+  }
 
   if (vaults.length === 0) return null;
 
@@ -47,14 +100,19 @@ export function ActiveJars() {
           const Icon = MODE_ICON[mode];
           const hasGoal = vault.goalAmount > 0n;
           const progress = hasGoal ? Number((vault.totalRaised * 100n) / vault.goalAmount) : 0;
+          const isPending = pendingIds.has(vault.id);
+          const CardTag = isPending ? 'div' : Link;
+          const cardProps = isPending
+            ? { className: 'jar-card jar-card--pending', key: vault.id }
+            : { to: `/fund/${vault.id}`, className: 'jar-card', key: vault.id };
           return (
-            <Link
-              to={`/fund/${vault.id}`}
-              className="jar-card"
-              key={vault.id}
-            >
+            <CardTag {...(cardProps as React.ComponentProps<typeof Link>)}>
               <div className="jar-card-label">
-                Jar #{vault.id}
+                {isPending ? (
+                  <span className="jar-card-pending-badge"><Clock size={11} /> Confirming...</span>
+                ) : (
+                  <>Jar #{vault.id}</>
+                )}
                 <span className="jar-card-mode" data-mode={mode}>
                   <Icon size={11} />
                   {modeLabel}
@@ -94,10 +152,17 @@ export function ActiveJars() {
                   <div className="jar-card-stat-value">{blockToDate(vault.unlockBlock)}</div>
                 </div>
               </div>
-              <div className="jar-card-arrow">
-                View Jar <ArrowRight size={12} />
-              </div>
-            </Link>
+              {!isPending && (
+                <div className="jar-card-arrow">
+                  View Jar <ArrowRight size={12} />
+                </div>
+              )}
+              {isPending && (
+                <div className="jar-card-arrow jar-card-arrow--pending">
+                  Waiting for on-chain confirmation...
+                </div>
+              )}
+            </CardTag>
           );
         })}
       </div>

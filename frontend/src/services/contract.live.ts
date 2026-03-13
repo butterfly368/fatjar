@@ -223,12 +223,9 @@ interface JarMeta { name: string; description: string }
 
 // Seed jar names — calldata contains these but no indexer exists yet.
 // Fallback for browsers without localStorage cache.
-const SEED_JAR_NAMES: Record<string, JarMeta> = {
-  '1': { name: "Lisa's Birthday Surprise", description: "Pooling BTC from friends and family for Lisa's 30th birthday." },
-  '2': { name: "Dad's Retirement Stack", description: "Family pitching in BTC for dad's retirement. Locked until 2035 — no early withdrawals, no exceptions." },
-  '3': { name: 'Community Skatepark Build', description: 'Community savings for a neighborhood skatepark. Hit the goal or everyone gets refunded.' },
-  '4': { name: "Maya's Dev Bootcamp", description: "Funding Maya's 12-week coding bootcamp. Goal met = she gets it. Missed = refunds." },
-};
+// Seed names removed — names are cached from createVault calls.
+// Jars without cached metadata show as "Jar #N".
+const SEED_JAR_NAMES: Record<string, JarMeta> = {};
 
 function getMetadataCache(): Record<string, JarMeta> {
   try {
@@ -369,17 +366,81 @@ async function encodeAndSend(
   return result.transactionId || result.result || 'tx-submitted';
 }
 
+// ── Retry helper ─────────────────────────────────────────────────────
+
+async function withRetry<T>(fn: () => Promise<T>, retries = 2, delayMs = 1000): Promise<T> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (attempt === retries) throw err;
+      console.warn(`[opnet] Retry ${attempt + 1}/${retries}...`, err);
+      await new Promise((r) => setTimeout(r, delayMs * (attempt + 1)));
+    }
+  }
+  throw new Error('unreachable');
+}
+
+// ── Vault cache (survives page navigation, not tab close) ────────────
+
+const VAULT_CACHE_KEY = 'fatjar-vault-cache';
+
+interface VaultCacheEntry {
+  vaults: Array<{
+    id: string; name: string; description: string; creator: string;
+    totalRaised: string; unlockBlock: string; isClosed: boolean;
+    withdrawn: string; contributorCount: number; goalAmount: string;
+    beneficiary: string; isPublic: boolean;
+  }>;
+  timestamp: number;
+}
+
+function getCachedVaults(): Vault[] | null {
+  try {
+    const raw = sessionStorage.getItem(VAULT_CACHE_KEY);
+    if (!raw) return null;
+    const entry: VaultCacheEntry = JSON.parse(raw);
+    // Cache valid for 2 minutes
+    if (Date.now() - entry.timestamp > 120_000) return null;
+    return entry.vaults.map((v) => ({
+      ...v,
+      totalRaised: BigInt(v.totalRaised),
+      unlockBlock: BigInt(v.unlockBlock),
+      withdrawn: BigInt(v.withdrawn),
+      goalAmount: BigInt(v.goalAmount),
+    }));
+  } catch {
+    return null;
+  }
+}
+
+function cacheVaults(vaults: Vault[]): void {
+  try {
+    const entry: VaultCacheEntry = {
+      vaults: vaults.map((v) => ({
+        ...v,
+        totalRaised: v.totalRaised.toString(),
+        unlockBlock: v.unlockBlock.toString(),
+        withdrawn: v.withdrawn.toString(),
+        goalAmount: v.goalAmount.toString(),
+      })),
+      timestamp: Date.now(),
+    };
+    sessionStorage.setItem(VAULT_CACHE_KEY, JSON.stringify(entry));
+  } catch { /* sessionStorage full or unavailable */ }
+}
+
 // ── Read methods ────────────────────────────────────────────────────
 
 export async function getFundCount(): Promise<number> {
-  const result = await getManagerContract().getFundCount();
+  const result = await withRetry(() => getManagerContract().getFundCount());
   if (result.revert) throw new Error(`getFundCount reverted: ${result.revert}`);
   const count = toBigInt(result.properties.count);
   return Number(count);
 }
 
 export async function getFundDetails(fundId: string): Promise<Vault> {
-  const result = await getManagerContract().getFundDetails(BigInt(fundId));
+  const result = await withRetry(() => getManagerContract().getFundDetails(BigInt(fundId)));
   if (result.revert) throw new Error(`getFundDetails reverted: ${result.revert}`);
   const p = result.properties;
   const meta = getMetadataCache()[fundId] || SEED_JAR_NAMES[fundId];
@@ -400,13 +461,34 @@ export async function getFundDetails(fundId: string): Promise<Vault> {
 }
 
 export async function getAllVaults(): Promise<Vault[]> {
-  const count = await getFundCount();
-  if (count === 0) return [];
-  const promises: Promise<Vault>[] = [];
-  for (let i = 1; i <= count; i++) {
-    promises.push(getFundDetails(String(i)));
+  // Try fresh RPC fetch — fund IDs are 1-indexed on-chain
+  try {
+    const count = await getFundCount();
+    if (count === 0) return [];
+    const promises: Promise<Vault | null>[] = [];
+    for (let i = 1; i <= count; i++) {
+      promises.push(
+        getFundDetails(String(i)).catch((err) => {
+          console.warn(`Failed to fetch vault ${i}:`, err);
+          return null;
+        }),
+      );
+    }
+    const results = await Promise.all(promises);
+    const vaults = results.filter((v): v is Vault => v !== null);
+    if (vaults.length > 0) {
+      cacheVaults(vaults);
+    }
+    return vaults;
+  } catch (err) {
+    // RPC down — fall back to cached data
+    const cached = getCachedVaults();
+    if (cached) {
+      console.warn('[opnet] RPC failed, using cached vault data', err);
+      return cached;
+    }
+    throw err;
   }
-  return Promise.all(promises);
 }
 
 export async function getContribution(fundId: string, contributor: string): Promise<bigint> {
@@ -514,10 +596,10 @@ export async function createVault(
   const txId = await simulateAndSend(result);
 
   // Cache name & description locally (event-only data, not in contract state)
-  // Use fund count as a best-guess for the new ID
+  // IDs are 1-indexed; count before confirmation = last existing ID, so new ID = count + 1
   try {
     const count = await getFundCount();
-    saveMetadata(String(count), name, _description);
+    saveMetadata(String(count + 1), name, _description);
   } catch {
     // Non-critical — jar will show as "Jar #N" if this fails
   }

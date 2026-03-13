@@ -13,7 +13,7 @@ import {
   getVaultContributions,
 } from '../../services/contract';
 import type { Vault, Contribution } from '../../types';
-import { getVaultMode, getVaultModeLabel, formatBtc, truncateAddress, formatTokens, estimateTokensForSats, ZERO_ADDRESS, getVaultStatus, CURRENT_BLOCK } from '../../types';
+import { getVaultMode, getVaultModeLabel, formatBtc, truncateAddress, formatTokens, estimateTokensForSats, ZERO_ADDRESS, getVaultStatus, CURRENT_BLOCK, blockToDate } from '../../types';
 import type { VaultMode, VaultStatus } from '../../types';
 
 const MODE_ICON: Record<VaultMode, typeof Inbox> = {
@@ -90,8 +90,15 @@ export function FundDetail() {
       setShowContributeForm(false);
       showToast('success', `Contribution submitted! It may take a few minutes to confirm on-chain. Refresh to see updates.`);
       await loadVault();
-    } catch {
-      showToast('error', 'Contribution failed. The transaction may have been rejected or the wallet cancelled.');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '';
+      if (msg.includes('OPWallet not detected')) {
+        showToast('error', 'OPWallet extension not found. Install OPWallet to contribute in Live mode.');
+      } else if (msg.includes('No wallet accounts')) {
+        showToast('error', 'Wallet not connected. Click Connect in the navbar first.');
+      } else {
+        showToast('error', 'Contribution failed. ' + (msg || 'The transaction may have been rejected.'));
+      }
     } finally {
       setContributing(false);
     }
@@ -194,10 +201,6 @@ export function FundDetail() {
   const progressPct = hasGoal
     ? Math.min(100, Number((vault.totalRaised * 100n) / vault.goalAmount))
     : 0;
-  const blocksRemaining = vault.unlockBlock > CURRENT_BLOCK
-    ? vault.unlockBlock - CURRENT_BLOCK
-    : 0n;
-
   const isCreator = vault.creator === MOCK_WALLET_ADDRESS;
   const isBeneficiary = vault.beneficiary === MOCK_WALLET_ADDRESS;
 
@@ -296,13 +299,9 @@ export function FundDetail() {
             <div className="fund-stat">
               <div className="fund-stat-label">Time-Lock</div>
               <div className="fund-stat-value">
-                {vault.unlockBlock > 0n ? (
-                  blocksRemaining > 0n
-                    ? `${blocksRemaining.toLocaleString()} blocks`
-                    : 'Unlocked'
-                ) : (
-                  'None'
-                )}
+                {vault.unlockBlock > 0n
+                  ? blockToDate(vault.unlockBlock)
+                  : 'None'}
               </div>
             </div>
             <div className="fund-stat">
