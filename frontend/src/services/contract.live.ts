@@ -245,6 +245,15 @@ function saveMetadata(fundId: string, name: string, description: string): void {
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────
+
+function parseFundId(fundId: string): bigint {
+  try {
+    return BigInt(fundId);
+  } catch {
+    throw new Error(`Invalid fund ID: ${fundId}`);
+  }
+}
+
 function toBigInt(val: unknown): bigint {
   if (typeof val === 'bigint') return val;
   if (typeof val === 'number') return BigInt(val);
@@ -324,8 +333,7 @@ async function getWriteManagerContract() {
  * Pattern: simulate → get CallResult → sendTransaction (OPWallet auto-detected)
  */
 async function simulateAndSend(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  callResult: CallResult<any>,
+  callResult: CallResult<Record<string, unknown>>,
 ): Promise<string> {
   const userAddress = await getWalletAddress();
 
@@ -436,16 +444,18 @@ function cacheVaults(vaults: Vault[]): void {
 // ── Read methods ────────────────────────────────────────────────────
 
 export async function getFundCount(): Promise<number> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result: any = await withRetry(() => getManagerContract().getFundCount());
+  const result = await withRetry(() => getManagerContract().getFundCount()) as CallResult<{ count: bigint }>;
   if (result.revert) throw new Error(`getFundCount reverted: ${result.revert}`);
   const count = toBigInt(result.properties.count);
   return Number(count);
 }
 
 export async function getFundDetails(fundId: string): Promise<Vault> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result: any = await withRetry(() => getManagerContract().getFundDetails(BigInt(fundId)));
+  const id = parseFundId(fundId);
+  const result = await withRetry(() => getManagerContract().getFundDetails(id)) as CallResult<{
+    creator: bigint; totalRaised: bigint; unlockTimestamp: bigint; isClosed: bigint;
+    withdrawn: bigint; contributorCount: bigint; goalAmount: bigint; beneficiary: bigint;
+  }>;
   if (result.revert) throw new Error(`getFundDetails reverted: ${result.revert}`);
   const p = result.properties;
   const meta = getMetadataCache()[fundId] || SEED_JAR_NAMES[fundId];
@@ -498,14 +508,14 @@ export async function getAllVaults(): Promise<Vault[]> {
 
 export async function getContribution(fundId: string, contributor: string): Promise<bigint> {
   const resolved = await resolveAddress(contributor);
-  const result = await getManagerContract().getContribution(BigInt(fundId), resolved);
+  const result = await getManagerContract().getContribution(parseFundId(fundId), resolved);
   if (result.revert) return 0n;
   return toBigInt(result.properties.amount);
 }
 
 export async function getContributionTokens(fundId: string, contributor: string): Promise<bigint> {
   const resolved = await resolveAddress(contributor);
-  const result = await getManagerContract().getContributionTokens(BigInt(fundId), resolved);
+  const result = await getManagerContract().getContributionTokens(parseFundId(fundId), resolved);
   if (result.revert) return 0n;
   return toBigInt(result.properties.tokens);
 }
@@ -589,6 +599,16 @@ export async function createVault(
     beneficiaryAddr = Address.dead();
   }
 
+  // Cache name before sending — fund count is known pre-tx, avoids race condition
+  let nextId: string | undefined;
+  try {
+    const count = await getFundCount();
+    nextId = String(count + 1);
+    saveMetadata(nextId, name, _description);
+  } catch {
+    // Non-critical — jar will show as "Jar #N" if this fails
+  }
+
   // Simulate the call
   const result = await contract.createFund(
     name,
@@ -598,18 +618,7 @@ export async function createVault(
   );
 
   // Send via OPWallet
-  const txId = await simulateAndSend(result);
-
-  // Cache name & description locally (event-only data, not in contract state)
-  // IDs are 1-indexed; count before confirmation = last existing ID, so new ID = count + 1
-  try {
-    const count = await getFundCount();
-    saveMetadata(String(count + 1), name, _description);
-  } catch {
-    // Non-critical — jar will show as "Jar #N" if this fails
-  }
-
-  return txId;
+  return simulateAndSend(result);
 }
 
 /**
@@ -619,7 +628,7 @@ export async function createVault(
 export async function contribute(fundId: string, satoshis: bigint): Promise<void> {
   const contract = await getWriteManagerContract();
 
-  const result = await contract.contribute(BigInt(fundId), satoshis);
+  const result = await contract.contribute(parseFundId(fundId), satoshis);
 
   await simulateAndSend(result);
 }
@@ -632,13 +641,13 @@ export async function withdraw(fundId: string): Promise<bigint> {
   try {
     // Try simulation path (needs correct sender for access check)
     const contract = await getWriteManagerContract();
-    const result = await contract.withdraw(BigInt(fundId));
+    const result = await contract.withdraw(parseFundId(fundId));
     await simulateAndSend(result);
     return toBigInt(result.properties?.amount ?? 0n);
   } catch (simError) {
     // Fallback: encode calldata and send directly via OPWallet
     console.warn('Simulation failed, trying direct OPWallet call:', simError);
-    await encodeAndSend('withdraw', [BigInt(fundId)]);
+    await encodeAndSend('withdraw', [parseFundId(fundId)]);
     return 0n; // can't get return value from direct call
   }
 }
@@ -650,12 +659,12 @@ export async function withdraw(fundId: string): Promise<bigint> {
 export async function refund(fundId: string): Promise<bigint> {
   try {
     const contract = await getWriteManagerContract();
-    const result = await contract.refund(BigInt(fundId));
+    const result = await contract.refund(parseFundId(fundId));
     await simulateAndSend(result);
     return toBigInt(result.properties?.amount ?? 0n);
   } catch (simError) {
     console.warn('Simulation failed, trying direct OPWallet call:', simError);
-    await encodeAndSend('refund', [BigInt(fundId)]);
+    await encodeAndSend('refund', [parseFundId(fundId)]);
     return 0n;
   }
 }
@@ -667,11 +676,11 @@ export async function refund(fundId: string): Promise<bigint> {
 export async function closeFund(fundId: string): Promise<void> {
   try {
     const contract = await getWriteManagerContract();
-    const result = await contract.closeFund(BigInt(fundId));
+    const result = await contract.closeFund(parseFundId(fundId));
     await simulateAndSend(result);
   } catch (simError) {
     console.warn('Simulation failed, trying direct OPWallet call:', simError);
-    await encodeAndSend('closeFund', [BigInt(fundId)]);
+    await encodeAndSend('closeFund', [parseFundId(fundId)]);
   }
 }
 
@@ -682,10 +691,10 @@ export async function closeFund(fundId: string): Promise<void> {
 export async function deleteFund(fundId: string): Promise<void> {
   try {
     const contract = await getWriteManagerContract();
-    const result = await contract.deleteFund(BigInt(fundId));
+    const result = await contract.deleteFund(parseFundId(fundId));
     await simulateAndSend(result);
   } catch (simError) {
     console.warn('Simulation failed, trying direct OPWallet call:', simError);
-    await encodeAndSend('deleteFund', [BigInt(fundId)]);
+    await encodeAndSend('deleteFund', [parseFundId(fundId)]);
   }
 }
