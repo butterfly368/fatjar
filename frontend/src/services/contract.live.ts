@@ -219,7 +219,7 @@ function getTokenContract() {
 // ── Jar metadata cache (names & descriptions are event-only) ────────
 const JAR_METADATA_KEY = 'fatjar-metadata';
 
-interface JarMeta { name: string; description: string }
+interface JarMeta { name: string; description: string; creatorAddress?: string }
 
 // Seed jar names — calldata contains these but no indexer exists yet.
 // Fallback for browsers without localStorage cache.
@@ -238,10 +238,21 @@ function getMetadataCache(): Record<string, JarMeta> {
   }
 }
 
-function saveMetadata(fundId: string, name: string, description: string): void {
+function saveMetadata(fundId: string, name: string, description: string, creatorAddress?: string): void {
   const cache = getMetadataCache();
-  cache[fundId] = { name, description };
+  cache[fundId] = { name, description, creatorAddress };
   localStorage.setItem(JAR_METADATA_KEY, JSON.stringify(cache));
+}
+
+/**
+ * Get fund IDs created by a specific wallet address (from metadata cache).
+ * Fallback for when getCreatorFundCount fails due to address resolution.
+ */
+export function getMyCreatedFundIds(walletAddress: string): string[] {
+  const cache = getMetadataCache();
+  return Object.entries(cache)
+    .filter(([, meta]) => meta.creatorAddress === walletAddress)
+    .map(([id]) => id);
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────
@@ -615,12 +626,13 @@ export async function createVault(
     beneficiaryAddr = Address.dead();
   }
 
-  // Cache name before sending — fund count is known pre-tx, avoids race condition
+  // Cache name + creator before sending — fund count is known pre-tx, avoids race condition
   let nextId: string | undefined;
   try {
     const count = await getFundCount();
+    const walletAddr = await getWalletAddress();
     nextId = String(count + 1);
-    saveMetadata(nextId, name, _description);
+    saveMetadata(nextId, name, _description, walletAddr);
   } catch {
     // Non-critical — jar will show as "Jar #N" if this fails
   }

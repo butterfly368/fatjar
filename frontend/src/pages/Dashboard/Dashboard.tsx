@@ -10,6 +10,7 @@ import {
   getContribution,
   getContributionTokens,
   getResolvedMode,
+  getMyCreatedFundIds,
   withdraw,
   refund,
 } from '../../services/contract';
@@ -68,6 +69,7 @@ export function Dashboard() {
       try {
         // Load vaults created by this wallet
         const vaultResults: MyVault[] = [];
+        const trackedFundIds = new Set<string>();
         try {
           const creatorCount = await getCreatorFundCount(creatorAddr);
           for (let i = 0; i < creatorCount; i++) {
@@ -75,6 +77,7 @@ export function Dashboard() {
             if (fundId === '0') continue; // Skip ghost fund 0 (contract is 1-indexed)
             try {
               const vault = await getFundDetails(fundId);
+              trackedFundIds.add(fundId);
               vaultResults.push({
                 vault,
                 mode: getVaultModeLabel(getVaultMode(vault)),
@@ -90,6 +93,21 @@ export function Dashboard() {
 
         // Load all vaults (used for contributions AND pending jar dedup)
         const allVaults = await getAllVaults();
+
+        // Fallback: check metadata cache for jars created by this wallet
+        // (covers cases where getCreatorFundCount fails due to address resolution)
+        const cachedIds = await getMyCreatedFundIds(walletAddress);
+        for (const fundId of cachedIds) {
+          if (trackedFundIds.has(fundId)) continue; // already found via creator tracking
+          const vault = allVaults.find((v) => v.id === fundId);
+          if (vault) {
+            vaultResults.push({
+              vault,
+              mode: getVaultModeLabel(getVaultMode(vault)),
+              status: getVaultStatus(vault),
+            });
+          }
+        }
 
         // In live mode, prepend pending jars (skip confirmed)
         // Check both creator-tracked vaults AND all on-chain vaults for dedup

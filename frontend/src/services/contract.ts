@@ -121,6 +121,12 @@ export async function getCreatorFundByIndex(creator: string, index: number): Pro
   return (await svc()).getCreatorFundByIndex(creator, index);
 }
 
+export async function getMyCreatedFundIds(walletAddress: string): Promise<string[]> {
+  const mode = await ensureMode();
+  if (mode === 'live') return live.getMyCreatedFundIds(walletAddress);
+  return [];
+}
+
 // ── Write methods (mock handles them; live throws until OPWallet) ───
 
 export async function createVault(
