@@ -24,8 +24,8 @@ const MODE_ICON: Record<VaultMode, typeof Inbox> = {
 };
 import './FundDetail.css';
 
-// Mock connected wallet — will be replaced with real wallet in Task 9
-const MOCK_WALLET_ADDRESS = 'bc1q...demo';
+// In demo mode, pretend we're the creator of jar #1 so Withdraw/Close are visible
+const MOCK_WALLET_ADDRESS = 'bc1q...creator1';
 
 function getStatusLabel(status: VaultStatus): string {
   const labels: Record<VaultStatus, string> = {

@@ -9,3 +9,4 @@ frontend/test-screenshots/
 frontend/test-results/
 frontend/tests/
 frontend/playwright.config.ts
+scripts/deployed-addresses.json

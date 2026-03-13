@@ -16,9 +16,8 @@ export function WhySection() {
         <div className="why-block">
           <div className="why-block-label">The Insight</div>
           <p className="why-block-lead">
-            PayPal Money Pools &mdash; 86 million pooling events per year.
-            MoneyFellows &mdash; 8.5 million users. Fintech proved people
-            save together.
+            PayPal launched Money Pools. MoneyFellows hit 8.5 million users.
+            Fintech proved people save together.
           </p>
           <p className="why-block-body">
             Ethereum saw it too &mdash; WeTrust, Bloinx, Pigzbe all built

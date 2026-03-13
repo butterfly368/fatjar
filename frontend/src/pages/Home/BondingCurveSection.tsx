@@ -5,9 +5,9 @@ import './BondingCurveSection.css';
 
 const TIERS: BondingCurveTier[] = [
   { label: 'Early', threshold: '(now)', rate: '120K' },
-  { label: 'After', threshold: '5 BTC', rate: '80K', change: '-33%' },
-  { label: 'After', threshold: '20 BTC', rate: '40K', change: '-67%' },
-  { label: 'After', threshold: '100 BTC', rate: '15K', change: '-88%' },
+  { label: 'After', threshold: '3 BTC', rate: '60K', change: '-50%' },
+  { label: 'After', threshold: '15 BTC', rate: '30K', change: '-75%' },
+  { label: 'After', threshold: '99 BTC', rate: '12K', change: '-90%' },
 ];
 
 export function BondingCurveSection() {
