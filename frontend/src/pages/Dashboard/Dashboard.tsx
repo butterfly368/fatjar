@@ -72,9 +72,9 @@ export function Dashboard() {
         const trackedFundIds = new Set<string>();
         try {
           const creatorCount = await getCreatorFundCount(creatorAddr);
-          for (let i = 0; i < creatorCount; i++) {
+          for (let i = 1; i <= creatorCount; i++) {
             const fundId = await getCreatorFundByIndex(creatorAddr, i);
-            if (fundId === '0') continue; // Skip ghost fund 0 (contract is 1-indexed)
+            if (fundId === '0') continue; // Skip ghost fund 0
             try {
               const vault = await getFundDetails(fundId);
               trackedFundIds.add(fundId);
