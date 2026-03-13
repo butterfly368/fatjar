@@ -1090,3 +1090,63 @@ Design system compliance:
 - `frontend/src/types/index.ts` — vault status fix, blockToDate, walletError
 
 **Status:** Live mode functional. Jars created/contributed on testnet successfully. Vercel deploying with CORS proxy.
+
+---
+
+## Session 23 — 2026-03-13 — On-Chain Verification & Data Accuracy Audit
+
+**Goal:** Verify frontend displays match actual on-chain data. Fix hardcoded inaccuracies before competition deadline.
+
+**What we did:**
+
+1. **On-chain verification via RPC** — queried both contract address sets directly from OPNet testnet:
+   - `opnet-config.ts` addresses: **3 jars, real contributions** (correct deployment)
+   - `scripts/deployed-addresses.json`: **1 empty jar** (stale/different deployment)
+2. **Verified on-chain jar data:**
+   - Jar #1: open-collection, 0.01 BTC raised, 1 contributor, unlock block 894,493
+   - Jar #2: trust-fund, 0.001 BTC raised, 1 contributor, unlock block 1,521,225
+   - Jar #3: funded-grant, 0 BTC raised, 0 contributors, unlock block 898,876, goal 0.01 BTC
+   - Jar #4: **does not exist** (session 22 notes were wrong — Maya's Dev Bootcamp was never confirmed)
+3. **Token contract state:** rate 119,345/BTC, total 0.011 BTC contributed, 1,319.40 $FJAR minted
+4. **Current testnet block: 5,863** — CURRENT_BLOCK=890000n is a Bitcoin mainnet estimate, not testnet. Dates display correctly (same constant used in blockToDate), but on-chain time-locks are ~888K blocks in the future (functionally broken on testnet, cosmetically fine for demo).
+5. **Fixed seed jar names** — added jar #3 "Community Skatepark Build" to SEED_JAR_NAMES. Removed phantom jar #4.
+6. **Fixed bonding curve tiers** — were 80K/40K/15K at 5/20/100 BTC (completely wrong). Now 60K/30K/12K at 3/15/99 BTC, matching formula K/sqrt(total+1) exactly.
+7. **Removed unverified PayPal 86M stat** from WhySection (session 21 decision, was still in code).
+8. **Fixed demo wallet** — MOCK_WALLET_ADDRESS changed from `bc1q...demo` to `bc1q...creator1` so Withdraw/Close buttons are visible for jar #1 in demo mode.
+9. **Gitignored stale deployed-addresses.json** — prevents confusion with the correct opnet-config.ts addresses.
+
+**Key discoveries:**
+- OPNet testnet block height is ~5,863 (not ~890K like Bitcoin mainnet). All jars have unlock blocks calculated from 890K assumption — they won't actually unlock for ~17 years on testnet.
+- Session 22 noted "Jar #3+: Maya's Dev Bootcamp" but on-chain fundCount is 3. Jar #4 was never confirmed.
+- Mock jar #3 mode (all-or-nothing) differs from on-chain jar #3 (funded-grant). Left mock as-is since it demonstrates all 4 modes.
+- Bonding curve tier table was illustrative marketing numbers, not derived from formula. Fixed to match.
+
+**Commits:**
+- `915786a` — fix: add seed name for on-chain jar #3 (Community Skatepark Build)
+- `8364feb` — fix: correct hardcoded data — bonding tiers, unverified stat, demo wallet
+
+**Files modified:**
+- `.gitignore` — added scripts/deployed-addresses.json
+- `frontend/src/services/contract.live.ts` — SEED_JAR_NAMES: added jar #3, removed phantom #4
+- `frontend/src/pages/Home/BondingCurveSection.tsx` — tiers corrected to match formula
+- `frontend/src/pages/Home/WhySection.tsx` — removed unverified 86M stat
+- `frontend/src/pages/FundDetail/FundDetail.tsx` — mock wallet set to creator1
+
+**Verified on Vercel:**
+- Build passes, HTTP 200, RPC proxy returns data, contract calls work end-to-end through proxy.
+
+**Contract addresses (for competition submission):**
+- FatJarManager: `opt1sqz2xxvr8dsa0qcxk62870sf67ycy7805nyhn456m`
+- FatJarToken: `opt1sqzfndaxuj5kxt38d3funqnf09p2tlxryqg0d4jtq`
+
+**Security audit (dual review):**
+- Manual code review (find-bugs skill): reviewed all 30+ source files, full OWASP checklist
+- opnet-bob MCP audit (parallel session): 27-pattern OPNet-specific security scan
+- Consolidated findings in `docs/audit-notes.md`:
+  - 3 Critical: no BTC verification in contribute(), no BTC transfer in withdraw/refund(), missing ReentrancyGuard + CEI violation
+  - 4 High: fund name not in event, custom network object, encodeAndSend bypasses simulation, JSONRpcProvider args
+  - 4 Medium: withdraw doesn't close fund, boolean storage as u256, hardcoded CURRENT_BLOCK, compositeKey 128-bit truncation
+  - 8 Low/informational items
+- **Verdict:** Architecture is solid for competition testnet demo. Core gap is contracts are an accounting layer without real BTC movement enforcement — acceptable for demo, must fix before mainnet.
+
+**Status:** Competition submission ready. Audit documented for mainnet roadmap.
