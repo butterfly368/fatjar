@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowRight, Link2, Check, Share2, Inbox, Gift, Target, Rocket } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { useWallet } from '../../hooks/useWallet';
 import {
   getFundDetails,
   contribute,
@@ -11,6 +12,7 @@ import {
   closeFund,
   getTokenRate,
   getVaultContributions,
+  getResolvedMode,
 } from '../../services/contract';
 import type { Vault, Contribution } from '../../types';
 import { getVaultMode, getVaultModeLabel, formatBtc, truncateAddress, formatTokens, estimateTokensForSats, ZERO_ADDRESS, getVaultStatus, blockToDate } from '../../types';
@@ -40,6 +42,7 @@ function getStatusLabel(status: VaultStatus): string {
 export function FundDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { connected } = useWallet();
   const [vault, setVault] = useState<Vault | null>(null);
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,6 +84,11 @@ export function FundDetail() {
   async function handleContribute(e: React.FormEvent) {
     e.preventDefault();
     if (!id) return;
+    const mode = await getResolvedMode();
+    if (mode === 'live' && !connected) {
+      showToast('error', 'Wallet not connected. Click Connect in the navbar first.');
+      return;
+    }
     const sats = BigInt(Math.floor(Number(amount) * 100_000_000));
     if (sats <= 0n) return;
     setContributing(true);
