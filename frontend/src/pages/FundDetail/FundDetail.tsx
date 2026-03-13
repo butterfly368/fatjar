@@ -13,7 +13,7 @@ import {
   getVaultContributions,
 } from '../../services/contract';
 import type { Vault, Contribution } from '../../types';
-import { getVaultMode, getVaultModeLabel, formatBtc, truncateAddress, formatTokens, estimateTokensForSats, ZERO_ADDRESS, getVaultStatus, CURRENT_BLOCK, blockToDate } from '../../types';
+import { getVaultMode, getVaultModeLabel, formatBtc, truncateAddress, formatTokens, estimateTokensForSats, ZERO_ADDRESS, getVaultStatus, blockToDate } from '../../types';
 import type { VaultMode, VaultStatus } from '../../types';
 
 const MODE_ICON: Record<VaultMode, typeof Inbox> = {

@@ -435,14 +435,16 @@ function cacheVaults(vaults: Vault[]): void {
 // ── Read methods ────────────────────────────────────────────────────
 
 export async function getFundCount(): Promise<number> {
-  const result = await withRetry(() => getManagerContract().getFundCount());
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result: any = await withRetry(() => getManagerContract().getFundCount());
   if (result.revert) throw new Error(`getFundCount reverted: ${result.revert}`);
   const count = toBigInt(result.properties.count);
   return Number(count);
 }
 
 export async function getFundDetails(fundId: string): Promise<Vault> {
-  const result = await withRetry(() => getManagerContract().getFundDetails(BigInt(fundId)));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result: any = await withRetry(() => getManagerContract().getFundDetails(BigInt(fundId)));
   if (result.revert) throw new Error(`getFundDetails reverted: ${result.revert}`);
   const p = result.properties;
   const meta = getMetadataCache()[fundId] || SEED_JAR_NAMES[fundId];

@@ -101,12 +101,8 @@ export function ActiveJars() {
           const hasGoal = vault.goalAmount > 0n;
           const progress = hasGoal ? Number((vault.totalRaised * 100n) / vault.goalAmount) : 0;
           const isPending = pendingIds.has(vault.id);
-          const CardTag = isPending ? 'div' : Link;
-          const cardProps = isPending
-            ? { className: 'jar-card jar-card--pending', key: vault.id }
-            : { to: `/fund/${vault.id}`, className: 'jar-card', key: vault.id };
-          return (
-            <CardTag {...(cardProps as React.ComponentProps<typeof Link>)}>
+          const cardContent = (
+            <>
               <div className="jar-card-label">
                 {isPending ? (
                   <span className="jar-card-pending-badge"><Clock size={11} /> Confirming...</span>
@@ -162,7 +158,12 @@ export function ActiveJars() {
                   Waiting for on-chain confirmation...
                 </div>
               )}
-            </CardTag>
+            </>
+          );
+          return isPending ? (
+            <div className="jar-card jar-card--pending" key={vault.id}>{cardContent}</div>
+          ) : (
+            <Link to={`/fund/${vault.id}`} className="jar-card" key={vault.id}>{cardContent}</Link>
           );
         })}
       </div>
