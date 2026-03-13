@@ -9,16 +9,20 @@ export function HeroSection() {
         <div className="hero-left">
           <div className="hero-label">
             <span className="hero-dot" />
-            Bitcoin L1 via OPNet
+            Savings Jars on Bitcoin
           </div>
           <h1 className="hero-h1">
-            A Piggy Bank<br />
-            That Grows<br />
-            <span className="hero-h1-highlight">With Your Child.</span>
+            Every Reason<br />
+            to Save<br />
+            <span className="hero-h1-highlight">Together.</span>
           </h1>
           <p className="hero-tagline">
-            Lock Bitcoin until they're ready. Family and friends contribute<br />
-            along the way. Nobody can touch it early — not even you.
+            People have pooled money together for centuries —<br />
+            for family, friends, and community.
+          </p>
+          <p className="hero-desc">
+            FatJar is the first time it's trustless.<br />
+            No platform can shut this down.
           </p>
           <div className="hero-actions">
             <Button to="/create">
