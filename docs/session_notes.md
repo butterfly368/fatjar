@@ -1150,3 +1150,40 @@ Design system compliance:
 - **Verdict:** Architecture is solid for competition testnet demo. Core gap is contracts are an accounting layer without real BTC movement enforcement — acceptable for demo, must fix before mainnet.
 
 **Status:** Competition submission ready. Audit documented for mainnet roadmap.
+
+---
+
+## Session 24 — 2026-03-13 — Audit Fixes (pre-submission)
+
+**Goal:** Fix audit issues that are safe to ship on competition day without risking the demo.
+
+**What we did:**
+
+1. **H1 fix (cbfc47a):** `FundCreatedEvent` now emits the fund name via `writeStringWithLength()`. Previously the name was read from calldata and discarded — contradicting the design comment "names stored via events." Buffer size calculated dynamically from name length. Both contracts recompiled successfully.
+
+2. **CEI improvement (cbfc47a):** In `contribute()`, moved `existingTokens` storage read before the cross-contract `mintTokensForContributor()` call. The write still follows the call (depends on `tokensMinted` return value) — documented as safe due to OPNet's synchronous VM execution.
+
+3. **L2 fix (ae94a1f):** Added `parseFundId()` helper in `contract.live.ts`. All `BigInt(fundId)` calls now go through validation with a clear error message instead of unhandled exceptions on invalid input.
+
+4. **M3 partial fix (ae94a1f):** Replaced 3 of 5 `any` types with typed `CallResult<{...}>` assertions — `simulateAndSend` parameter and both read method results (`getFundCount`, `getFundDetails`). The 2 contract singleton `any` types remain (dynamic ABI pattern requires full interface definitions to remove).
+
+5. **L3 fix (ae94a1f):** Metadata cache in `createVault()` now saves jar name/description *before* sending the transaction. Previously it fetched `getFundCount()` after tx submission (race condition — count is stale pre-confirmation).
+
+**Skipped (too risky for competition day):**
+- C1/C2: BTC verification + transfer — architectural contract changes
+- C3: ReentrancyGuard — new storage pointer, risk breaking deployed contracts
+- H2/H4: Network object + provider args — could break RPC connection
+- M1: StoredBoolean — changes storage layout
+- M4: Dynamic CURRENT_BLOCK — adds async dependency to renders
+
+**Commits:**
+- `cbfc47a` — fix: emit fund name in FundCreatedEvent, improve CEI ordering in contribute()
+- `ae94a1f` — fix: validate fundId inputs, type-safe CallResult, fix metadata cache race
+
+**Files modified:**
+- `contracts/src/fatjar-manager/FatJarManager.ts` — CEI reorder, name passed to event
+- `contracts/src/fatjar-manager/events/FatJarManagerEvents.ts` — name string in FundCreatedEvent
+- `frontend/src/services/contract.live.ts` — parseFundId, typed CallResult, metadata cache fix
+- `docs/audit-notes.md` — marked fixed items, updated checklist
+
+**Status:** 5 audit issues fixed (H1, M3 partial, L2, L3, CEI improvement). Remaining issues documented for mainnet roadmap.

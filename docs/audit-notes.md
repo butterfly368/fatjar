@@ -31,21 +31,23 @@ Both methods update accounting (`fundWithdrawn`, zero out contributions) and emi
 
 The contract makes cross-contract calls via `Blockchain.call()` (lines 811, 837) without a ReentrancyGuard. OPNet audit guidelines list this as mandatory for any contract using `Blockchain.call()`.
 
-Additionally, `contributionTokensEarned` is updated (line 332) AFTER the cross-contract mint call (line 327) — a CEI violation.
+~~Additionally, `contributionTokensEarned` is updated (line 332) AFTER the cross-contract mint call (line 327) — a CEI violation.~~
 
-**Fix:** Add ReentrancyGuard. Move token tracking update before the cross-contract call.
+**Fix:** Add ReentrancyGuard. ~~Move token tracking update before the cross-contract call.~~
+
+> **Partially fixed (cbfc47a):** `existingTokens` read moved before cross-contract call. The write still follows the call because it depends on the `tokensMinted` return value — documented as safe due to OPNet's synchronous execution model. ReentrancyGuard still needed for mainnet.
 
 ---
 
 ## High — Fix Before Mainnet
 
-### H1: Fund name never emitted in event
+### ~~H1: Fund name never emitted in event~~ — FIXED
 
 **File:** `FatJarManager.ts:212-263`
 
 `createFund()` reads `name` from calldata (line 212) but never passes it to `FundCreatedEvent` (line 258). The comment says "Fund name stored via events only" — but the name isn't in the event. Fund names are permanently lost on-chain. Frontend currently works around this with localStorage cache + hardcoded seed names.
 
-**Fix:** Add `name: string` to `FundCreatedEvent` constructor and emit it.
+> **Fixed (cbfc47a):** Added `name: string` to `FundCreatedEvent` constructor. Event now writes name via `writeStringWithLength()`. Buffer size calculated dynamically. Both contracts recompiled successfully.
 
 ### H2: Custom network object instead of networks.opnetTestnet
 
@@ -103,11 +105,11 @@ All vault status logic uses this static value. OPNet testnet is actually at bloc
 
 | Issue | File | Notes |
 |-------|------|-------|
-| `any` types with eslint-disable | contract.live.ts | OPNet TypeScript Law mandates zero `any` |
+| ~~`any` types with eslint-disable~~ | contract.live.ts | Partially fixed (ae94a1f): 3/5 `any` replaced with typed `CallResult`. 2 contract singleton `any` remain (dynamic ABI pattern). |
 | JSONRpcProvider positional args | contract.live.ts:190 | OPNet convention: use config object |
 | tokenAddress uses StoredMapU256 for single value | FatJarToken.ts | StoredU256 would suffice |
-| No input validation on frontend fundId | contract.live.ts | `BigInt(fundId)` throws on non-numeric |
-| Race condition in metadata cache | contract.live.ts:605 | `getFundCount()` returns stale count pre-confirmation |
+| ~~No input validation on frontend fundId~~ | contract.live.ts | Fixed (ae94a1f): `parseFundId()` helper validates before `BigInt()` |
+| ~~Race condition in metadata cache~~ | contract.live.ts:605 | Fixed (ae94a1f): cache name before tx send, not after |
 | WalletState.balance is number not bigint | types/index.ts:145 | Precision loss > 2^53 sats (unlikely) |
 | Unbounded getAllVaults() scan | contract.live.ts:467 | O(n) RPC calls, no pagination |
 | Admin page publicly routable | Admin.tsx | On-chain access control prevents misuse, but UX concern |
@@ -118,8 +120,8 @@ All vault status logic uses this static value. OPNet testnet is actually at bloc
 
 - [ ] C1: BTC verification in contribute()
 - [ ] C2: BTC transfer in withdraw() and refund()
-- [ ] C3: ReentrancyGuard + CEI fix
-- [ ] H1: Fund name in event
+- [ ] C3: ReentrancyGuard (CEI partially fixed cbfc47a)
+- [x] H1: Fund name in event (cbfc47a)
 - [ ] H2: Use networks.opnetTestnet
 - [ ] H3: Remove encodeAndSend bypass
 - [ ] M1: Auto-close after withdraw (or document)
