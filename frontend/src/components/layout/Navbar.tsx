@@ -40,7 +40,7 @@ export function Navbar() {
         </Link>
         {connected && (
           <Link className="nav-link" to="/dashboard" onClick={() => setMenuOpen(false)}>
-            My Jars
+            Dashboard
           </Link>
         )}
         {connected && (
