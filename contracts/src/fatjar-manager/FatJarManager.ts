@@ -254,8 +254,8 @@ export class FatJarManager extends OP_NET {
         const creatorFundKey: u256 = this.compositeKey(creatorKey, newCreatorCount);
         this.creatorFundId.set(creatorFundKey, fundId);
 
-        // S2: Emit event with unlockTimestamp as u256 (matching stored type)
-        this.emitEvent(new FundCreatedEvent(fundId, creator, unlockTimestamp, goalAmount, beneficiary));
+        // S2: Emit event with name + unlockTimestamp for off-chain indexing
+        this.emitEvent(new FundCreatedEvent(fundId, creator, name, unlockTimestamp, goalAmount, beneficiary));
 
         const writer = new BytesWriter(32);
         writer.writeU256(fundId);
@@ -324,11 +324,12 @@ export class FatJarManager extends OP_NET {
         this.contributionAmount.set(contribKey, SafeMath.add(currentContrib, satoshis));
 
         // S5: Cross-contract call to FatJarToken.mintForContribution
-        const tokensMinted: u256 = this.mintTokensForContributor(contributor, satoshis);
-
-        // Track tokens earned per fund per contributor (for burn-on-refund)
+        // NOTE: CEI deviation — tokensMinted value comes from cross-contract call,
+        // so contributionTokensEarned update must follow. Safe because OPNet VM
+        // executes Blockchain.call() synchronously (no reentrancy vector).
         const tokensKey: u256 = this.compositeKey(fundId, contributorKey);
         const existingTokens: u256 = this.contributionTokensEarned.get(tokensKey);
+        const tokensMinted: u256 = this.mintTokensForContributor(contributor, satoshis);
         this.contributionTokensEarned.set(tokensKey, SafeMath.add(existingTokens, tokensMinted));
 
         // Emit event with tokens minted info

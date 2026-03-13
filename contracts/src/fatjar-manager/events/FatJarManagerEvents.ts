@@ -14,12 +14,13 @@ import {
  */
 @final
 export class FundCreatedEvent extends NetEvent {
-    constructor(fundId: u256, creator: Address, unlockTimestamp: u256, goalAmount: u256, beneficiary: Address) {
+    constructor(fundId: u256, creator: Address, name: string, unlockTimestamp: u256, goalAmount: u256, beneficiary: Address) {
         const data: BytesWriter = new BytesWriter(
-            U256_BYTE_LENGTH + ADDRESS_BYTE_LENGTH + U256_BYTE_LENGTH * 2 + ADDRESS_BYTE_LENGTH,
+            U256_BYTE_LENGTH + ADDRESS_BYTE_LENGTH + name.length + 4 + U256_BYTE_LENGTH * 2 + ADDRESS_BYTE_LENGTH,
         );
         data.writeU256(fundId);
         data.writeAddress(creator);
+        data.writeStringWithLength(name);
         data.writeU256(unlockTimestamp);
         data.writeU256(goalAmount);
         data.writeAddress(beneficiary);
