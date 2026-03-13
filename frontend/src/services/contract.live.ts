@@ -227,6 +227,7 @@ interface JarMeta { name: string; description: string }
 const SEED_JAR_NAMES: Record<string, JarMeta> = {
   '1': { name: "Emma's College Fund", description: '' },
   '2': { name: "Dad's Retirement Stack", description: '' },
+  '3': { name: 'Community Skatepark Build', description: '' },
 };
 
 function getMetadataCache(): Record<string, JarMeta> {
