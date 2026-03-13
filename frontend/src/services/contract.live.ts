@@ -309,6 +309,21 @@ async function getSenderAddress(): Promise<Address> {
 }
 
 /**
+ * Check that OPWallet is installed and the user is logged in.
+ * Call this before any write operation to give a clear error early.
+ */
+async function ensureWalletConnected(): Promise<void> {
+  const opnet = (window as unknown as Record<string, unknown>).opnet as OPWalletAPI | undefined;
+  if (!opnet?.web3) {
+    throw new Error('OPWallet not detected. Install the OPWallet Chrome extension to make transactions.');
+  }
+  const accounts = await opnet.requestAccounts();
+  if (!accounts || accounts.length === 0) {
+    throw new Error('Wallet not connected. Please unlock OPWallet and try again.');
+  }
+}
+
+/**
  * Get a contract instance with sender set (for write simulations).
  * Falls back to no-sender if address construction fails.
  */
@@ -583,6 +598,7 @@ export async function createVault(
   _description: string = '',
   _isPublic: boolean = true,
 ): Promise<string> {
+  await ensureWalletConnected();
   const contract = await getWriteManagerContract();
 
   // Resolve beneficiary: dead address for "no beneficiary"
@@ -626,6 +642,7 @@ export async function createVault(
  * Uses simulation path — contribute has no sender access check.
  */
 export async function contribute(fundId: string, satoshis: bigint): Promise<void> {
+  await ensureWalletConnected();
   const contract = await getWriteManagerContract();
 
   const result = await contract.contribute(parseFundId(fundId), satoshis);
@@ -638,6 +655,7 @@ export async function contribute(fundId: string, satoshis: bigint): Promise<void
  * Uses simulation with sender first, falls back to direct OPWallet call.
  */
 export async function withdraw(fundId: string): Promise<bigint> {
+  await ensureWalletConnected();
   try {
     // Try simulation path (needs correct sender for access check)
     const contract = await getWriteManagerContract();
@@ -657,6 +675,7 @@ export async function withdraw(fundId: string): Promise<bigint> {
  * Uses simulation with sender first, falls back to direct OPWallet call.
  */
 export async function refund(fundId: string): Promise<bigint> {
+  await ensureWalletConnected();
   try {
     const contract = await getWriteManagerContract();
     const result = await contract.refund(parseFundId(fundId));
@@ -674,6 +693,7 @@ export async function refund(fundId: string): Promise<bigint> {
  * Uses simulation with sender first, falls back to direct OPWallet call.
  */
 export async function closeFund(fundId: string): Promise<void> {
+  await ensureWalletConnected();
   try {
     const contract = await getWriteManagerContract();
     const result = await contract.closeFund(parseFundId(fundId));
@@ -689,6 +709,7 @@ export async function closeFund(fundId: string): Promise<void> {
  * Uses simulation with sender first, falls back to direct OPWallet call.
  */
 export async function deleteFund(fundId: string): Promise<void> {
+  await ensureWalletConnected();
   try {
     const contract = await getWriteManagerContract();
     const result = await contract.deleteFund(parseFundId(fundId));

@@ -88,10 +88,17 @@ export function Dashboard() {
           console.warn('Creator fund tracking failed, skipping My Jars:', err);
         }
 
+        // Load all vaults (used for contributions AND pending jar dedup)
+        const allVaults = await getAllVaults();
+
         // In live mode, prepend pending jars (skip confirmed)
+        // Check both creator-tracked vaults AND all on-chain vaults for dedup
         const mode = await getResolvedMode();
         if (mode === 'live') {
-          const confirmedNames = new Set(vaultResults.map((v) => v.vault.name));
+          const confirmedNames = new Set([
+            ...vaultResults.map((v) => v.vault.name),
+            ...allVaults.map((v) => v.name),
+          ]);
           const pending = getPendingJars().filter((p) => !confirmedNames.has(p.name));
           const pendingVaults: MyVault[] = pending.map((p) => ({
             vault: pendingToVault(p),
@@ -103,9 +110,6 @@ export function Dashboard() {
         }
 
         setMyVaults(vaultResults);
-
-        // Load contributions for this wallet
-        const allVaults = await getAllVaults();
         const contribResults: MyContribution[] = [];
         for (const vault of allVaults) {
           const amount = await getContribution(vault.id, contributorAddr);
