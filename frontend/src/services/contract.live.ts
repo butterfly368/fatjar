@@ -223,9 +223,11 @@ interface JarMeta { name: string; description: string }
 
 // Seed jar names — calldata contains these but no indexer exists yet.
 // Fallback for browsers without localStorage cache.
-// Seed names removed — names are cached from createVault calls.
-// Jars without cached metadata show as "Jar #N".
-const SEED_JAR_NAMES: Record<string, JarMeta> = {};
+// Seed names for jars already on testnet (names are event-only, not in contract state)
+const SEED_JAR_NAMES: Record<string, JarMeta> = {
+  '1': { name: "Emma's College Fund", description: '' },
+  '2': { name: "Dad's Retirement Stack", description: '' },
+};
 
 function getMetadataCache(): Record<string, JarMeta> {
   try {

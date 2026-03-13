@@ -5,8 +5,6 @@ import { useWallet } from '../../hooks/useWallet';
 import {
   getAllVaults,
   getFundDetails,
-  getCreatorFundCount,
-  getCreatorFundByIndex,
   getContribution,
   getContributionTokens,
   getResolvedMode,
@@ -20,10 +18,9 @@ import { Button } from '../../components/ui/Button';
 import './Dashboard.css';
 
 // Seeded addresses that match mock data — used as fallback when wallet is 'bc1q...demo'
-const SEED_CREATOR_ADDRESS = 'bc1q...creator1';
 const SEED_CONTRIBUTOR_ADDRESS = 'bc1q...alpha1';
 
-interface MyVault {
+interface DashboardVault {
   vault: Vault;
   mode: string;
   status: VaultStatus;
@@ -46,11 +43,9 @@ function getContributionStatus(vault: Vault): 'active' | 'goal-met' | 'refundabl
   return 'active';
 }
 
-
-
 export function Dashboard() {
   const { connected, connect, address } = useWallet();
-  const [myVaults, setMyVaults] = useState<MyVault[]>([]);
+  const [allVaults, setAllVaults] = useState<DashboardVault[]>([]);
   const [myContributions, setMyContributions] = useState<MyContribution[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -61,33 +56,29 @@ export function Dashboard() {
     setTimeout(() => setToast(null), type === 'error' ? 8000 : 6000);
   }
 
-  // Use connected wallet address, fall back to seeded address for demo
   const walletAddress = address ?? 'bc1q...demo';
-  const creatorAddr = walletAddress === 'bc1q...demo' ? SEED_CREATOR_ADDRESS : walletAddress;
   const contributorAddr = walletAddress === 'bc1q...demo' ? SEED_CONTRIBUTOR_ADDRESS : walletAddress;
 
   useEffect(() => {
     async function load() {
       setLoading(true);
       try {
-        // Load vaults created by the wallet address
-        const creatorCount = await getCreatorFundCount(creatorAddr);
-        const vaultResults: MyVault[] = [];
-        for (let i = 0; i < creatorCount; i++) {
-          const fundId = await getCreatorFundByIndex(creatorAddr, i);
-          const vault = await getFundDetails(fundId);
-          vaultResults.push({
+        // Load ALL on-chain vaults (reliable path — avoids buggy creator tracking)
+        const vaults = await getAllVaults();
+        const vaultResults: DashboardVault[] = vaults
+          .filter((v) => v.isPublic)
+          .map((vault) => ({
             vault,
             mode: getVaultModeLabel(getVaultMode(vault)),
             status: getVaultStatus(vault),
-          });
-        }
-        // In live mode, prepend pending jars (skip any already confirmed on-chain)
+          }));
+
+        // In live mode, prepend pending jars (skip confirmed)
         const mode = await getResolvedMode();
         if (mode === 'live') {
           const confirmedNames = new Set(vaultResults.map((v) => v.vault.name));
           const pending = getPendingJars().filter((p) => !confirmedNames.has(p.name));
-          const pendingVaults: MyVault[] = pending.map((p) => ({
+          const pendingVaults: DashboardVault[] = pending.map((p) => ({
             vault: pendingToVault(p),
             mode: getVaultModeLabel(getVaultMode(pendingToVault(p))),
             status: 'active' as VaultStatus,
@@ -96,12 +87,11 @@ export function Dashboard() {
           vaultResults.unshift(...pendingVaults);
         }
 
-        setMyVaults(vaultResults);
+        setAllVaults(vaultResults);
 
         // Load contributions for this wallet address
-        const allVaults = await getAllVaults();
         const contribResults: MyContribution[] = [];
-        for (const vault of allVaults) {
+        for (const vault of vaults) {
           const amount = await getContribution(vault.id, contributorAddr);
           if (amount > 0n) {
             const tokensEarned = await getContributionTokens(vault.id, contributorAddr);
@@ -122,7 +112,7 @@ export function Dashboard() {
     }
 
     load();
-  }, [creatorAddr, contributorAddr]);
+  }, [contributorAddr]);
 
   async function handleWithdraw(fundId: string) {
     setActionLoading(fundId);
@@ -130,7 +120,7 @@ export function Dashboard() {
       await withdraw(fundId);
       showToast('success', 'Withdrawal submitted! BTC will arrive once the transaction confirms.');
       const vault = await getFundDetails(fundId);
-      setMyVaults((prev) =>
+      setAllVaults((prev) =>
         prev.map((v) =>
           v.vault.id === fundId
             ? { ...v, vault, status: getVaultStatus(vault) }
@@ -182,8 +172,8 @@ export function Dashboard() {
     );
   }
 
-  // Empty state — no vaults (including pending) and no contributions
-  if (myVaults.length === 0 && myContributions.length === 0) {
+  // Empty state
+  if (allVaults.length === 0 && myContributions.length === 0) {
     return (
       <div className="dashboard">
         <div className="dashboard-header">
@@ -212,18 +202,19 @@ export function Dashboard() {
       <div className="dashboard-header">
         <h1 className="dashboard-title">Dashboard</h1>
         <span className="dashboard-subtitle">
-          {myVaults.length} jar{myVaults.length !== 1 ? 's' : ''} created
-          {' / '}
-          {myContributions.length} contribution{myContributions.length !== 1 ? 's' : ''}
+          {allVaults.length} jar{allVaults.length !== 1 ? 's' : ''} on-chain
+          {myContributions.length > 0 && (
+            <>{' / '}{myContributions.length} contribution{myContributions.length !== 1 ? 's' : ''}</>
+          )}
         </span>
       </div>
 
-      {/* My Vaults Section */}
-      {myVaults.length > 0 && (
+      {/* All Jars Section */}
+      {allVaults.length > 0 && (
         <section className="dashboard-section">
-          <h2 className="dashboard-section-title">My Jars</h2>
+          <h2 className="dashboard-section-title">All Jars</h2>
           <div className="dashboard-cards">
-            {myVaults.map(({ vault, mode, status, isPending }) => (
+            {allVaults.map(({ vault, mode, status, isPending }) => (
               <div className={`dashboard-card${isPending ? ' dashboard-card--pending' : ''}`} key={vault.id}>
                 <div className="dashboard-card-top">
                   {isPending ? (
