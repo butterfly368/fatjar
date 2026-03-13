@@ -1187,3 +1187,102 @@ Design system compliance:
 - `docs/audit-notes.md` — marked fixed items, updated checklist
 
 **Status:** 5 audit issues fixed (H1, M3 partial, L2, L3, CEI improvement). Remaining issues documented for mainnet roadmap.
+
+---
+
+## Session 25 — 2026-03-13 — Fact-Check & Rewrite WhySection Claims
+
+**Goal:** Verify all claims in the competition submission and WhySection copy against primary sources. Rewrite with accurate, attributed data.
+
+**What we did:**
+
+1. **Fact-checked every claim** in the Insight & Opportunity sections against web sources:
+   - PayPal 86M: verified but was misattributed (US consumer behavior, not PayPal usage) — reworded
+   - MoneyFellows 8.5M: verified (TechCrunch, TechNext24)
+   - "$2T in Bitcoin": outdated — BTC market cap is ~$1.4T (March 2026). Fixed.
+   - "<0.5% in DeFi": approximately correct ($7B TVL / $1.4T = 0.5%). Rounded to "<1%" for safety.
+   - "$6T inherited by 2045": sourced to VanEck/Matthew Sigel, not consensus. Added attribution.
+   - WeTrust/Bloinx/Pigzbe: all essentially dead. Risky to cite as "demand was real."
+   - "No government can freeze it": softened to "No middleman can freeze it."
+
+2. **Replaced dead ETH projects** with PoolTogether — actually successful (88K wallets, $17.8M deposited, $4.5M in prizes). Clean pivot: "works on Ethereum, nobody built on Bitcoin."
+
+3. **Replaced Venmo** (bill splitting, wrong psychology) with **stokvels** (11M members in South Africa, $2.7B/year) — literal group savings circles, exact FatJar behavior.
+
+4. **Added 529 college fund stat** ($525B across 17M US accounts) — proves "save for children" motivation, directly maps to Trust Fund jar type.
+
+5. **Broadened framing** from "save together" to "pool money" — covers all four jar type motivations:
+   - PayPal 86M → group goals (All-or-Nothing / Fund a Dream)
+   - Stokvels/MoneyFellows → savings circles (Open Jar)
+   - 529 plans → children's futures (Trust Fund)
+   - Title changed: "People Already Save Together" → "People Already Pool Money"
+
+6. **Fixed TypeScript build error** — `CallResult<Record<string, unknown>>` didn't satisfy `ContractDecodedObjectResult` constraint. Changed to `CallResult` (default generic). Build passes.
+
+**Commits:**
+- `2ea49a1` — Update WhySection with verified claims and broader proof points
+- `1c10121` — Fix TypeScript build error in CallResult generic type
+
+**Files modified:**
+- `frontend/src/pages/Home/WhySection.tsx` — full rewrite of Insight + Opportunity copy
+- `frontend/src/services/contract.live.ts` — CallResult type fix
+
+**Vercel:** Previous 3 deploys were failing (TS build error from Session 24's M3 fix). Fixed in `1c10121`. Deploy should succeed now.
+
+**Claim verification summary:**
+
+| Claim | Source | Status |
+|---|---|---|
+| PayPal 86M pooling events/yr | PayPal press release, Nov 2024 | Verified, reworded attribution |
+| MoneyFellows 8.5M users | TechCrunch, TechNext24 | Verified |
+| Stokvels 11M members, $2.7B/yr | Ipsos, FNB, UN | Verified |
+| 529 plans $525B, 17M accounts | ICI, BestColleges | Verified |
+| PoolTogether 88K wallets, $17.8M | DefiLlama, CryptoAdventure | Verified |
+| Bitcoin $1.4T market cap | CoinMarketCap | Verified (was $2T, outdated) |
+| Bitcoin DeFi <1% | DefiLlama ($7B TVL) | Verified |
+| VanEck $6T inheritance by 2045 | VanEck/Matthew Sigel via BofA | Verified, attributed |
+
+---
+
+## Session 26 — 2026-03-13 — Live Testing & Bug Fixes
+
+**Goal:** Test live contribution flow, fix bugs found during testing.
+
+**What we did:**
+
+1. **Debugged "Invalid receiver" error** — User tried to contribute without being logged in to OPWallet. During simulation, `Blockchain.tx.sender` resolved to `Address.zero()`, which was passed to `OP20._mint()` → "Invalid receiver" at OP20.ts:915. Root cause: no wallet = no sender = zero address in simulation.
+
+2. **Fixed Dashboard off-by-one (7ddceaf)** — Contract stores creator fund indices starting at 1. Dashboard loop iterated 0..count-1, so index 0 returned ghost fund (skipped), and the last real fund was never queried. Changed to 1..count. This was the root cause of "My Jars" not showing for non-deployer accounts.
+
+3. **Fixed Dashboard pending jar dedup (b4d3ea1)** — Pending jar dedup only checked creator-tracked vault names. When creator tracking failed (off-by-one), confirmed jars stayed stuck as "Confirming on-chain..." Now checks all on-chain vault names via `getAllVaults()`.
+
+4. **Fixed wallet connection check (b997069)** — Initial approach used `requestAccounts()` in service layer, which triggered OPWallet popup even when checking. Moved check to UI level: FundDetail uses `useWallet().connected` before calling contribute in live mode. Shows toast "Wallet not connected" without triggering wallet popup. Service layer only checks extension exists.
+
+5. **Added metadata cache fallback (d3ecc67)** — Saves creator wallet address in localStorage during jar creation. Dashboard uses this as fallback when `getCreatorFundCount` fails due to address resolution mismatch (bech32 vs u256 hex). Defense-in-depth alongside the off-by-one fix.
+
+6. **Verified FJAR token flow** — Contributed to 3 jars from Account 2. Tokens minted on-chain (716.131 FJAR visible in OPWallet after importing token contract). Bonding curve working correctly.
+
+**Commits:**
+- `b4d3ea1` — fix: wallet connection check before writes, dashboard pending jar dedup
+- `d3ecc67` — fix: dashboard My Jars fallback via metadata cache
+- `7ddceaf` — fix: dashboard creator fund index is 1-based, not 0-based
+- `b997069` — fix: check wallet connection at UI level, not via requestAccounts
+
+**Files modified:**
+- `frontend/src/services/contract.live.ts` — ensureWalletInstalled (no popup), metadata cache with creatorAddress, getMyCreatedFundIds export
+- `frontend/src/services/contract.ts` — getMyCreatedFundIds facade
+- `frontend/src/pages/Dashboard/Dashboard.tsx` — 1-indexed loop, allVaults dedup, metadata fallback
+- `frontend/src/pages/FundDetail/FundDetail.tsx` — useWallet check before contribute in live mode
+
+**On-chain state (OPNet testnet):**
+- 4 jars confirmed (3 from Account 1, 1 from Account 2)
+- Account 1: ~1,200 FJAR (deployer, created seed jars)
+- Account 2: ~716 FJAR (contributed to 3 jars)
+- Token contract: `opt1sqzfndaxuj5kxt38d3funqnf09p2tlxryqg0d4jtq`
+- Manager contract: `opt1sqz2xxvr8dsa0qcxk62870sf67ycy7805nyhn456m`
+
+**Key learnings:**
+- OPWallet `requestAccounts()` is a connection REQUEST, not a passive check — triggers popup
+- OP20._mint rejects Address.zero() with "Invalid receiver" — misleading when root cause is no wallet
+- Contract creator fund indices are 1-based (same as fundIds) — easy off-by-one trap
+- OPWallet doesn't auto-discover tokens; users must manually import via contract address
